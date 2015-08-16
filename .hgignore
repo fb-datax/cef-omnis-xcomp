@@ -1,3 +1,9 @@
 syntax: regexp
-^proj/cef-omnis-xcomp.opensdf
-^proj/cef-omnis-xcomp.sdf
+^cef-omnis-xcomp.opensdf
+^cef-omnis-xcomp.sdf
+^cef/cef.dir
+^cef/Debug
+^cef/Release
+^xcomp/Debug
+^xcomp/Release
+
