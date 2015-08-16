@@ -1,0 +1,3 @@
+syntax: regexp
+^proj/cef-omnis-xcomp.opensdf
+^proj/cef-omnis-xcomp.sdf

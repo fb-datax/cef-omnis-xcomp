@@ -1,0 +1,319 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGUID>{2C192B4D-3D72-43E6-8FE4-6A8F8145928E}</ProjectGUID>
+    <Keyword>Win32Proj</Keyword>
+    <Platform>Win32</Platform>
+    <ProjectName>cef</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">cef.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">cef</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">cef.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">cef</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(CEF_BINARY_PATH);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>Debug/</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4100;4127;4244;4512;4701;4702;4996;4481;4355;4510;4610</DisableSpecificWarnings>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>__STDC_CONSTANT_MACROS;__STDC_FORMAT_MACROS;WIN32;_WIN32;_WINDOWS;UNICODE;_UNICODE;WINVER=0x0602;_WIN32_WINNT=0x602;NOMINMAX;WIN32_LEAN_AND_MEAN;_HAS_EXCEPTIONS=0;CEF_USE_ATL;CMAKE_INTDIR="Debug";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>__STDC_CONSTANT_MACROS;__STDC_FORMAT_MACROS;WIN32;_WIN32;_WINDOWS;UNICODE;_UNICODE;WINVER=0x0602;_WIN32_WINNT=0x602;NOMINMAX;WIN32_LEAN_AND_MEAN;_HAS_EXCEPTIONS=0;CEF_USE_ATL;CMAKE_INTDIR=\"Debug\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(CEF_BINARY_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>$(CEF_BINARY_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PostBuildEvent>
+      <Message>Adding manifest...															</Message>
+      <Command>setlocal
+mt.exe -nologo -manifest "$(ProjectDir)\cef.exe.manifest" "$(ProjectDir)\compatibility.manifest" -outputresource:"$(ProjectDir)\Debug\cef.exe";#1
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=d3dcompiler_43.dll
+echo Copying %FILE%
+cmake -E copy_if_different $(CEF_BINARY_PATH)\Debug\%FILE% $(ProjectDir)\Debug\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=d3dcompiler_47.dll
+echo Copying %FILE%
+cmake -E copy_if_different $(CEF_BINARY_PATH)\Debug\%FILE% $(ProjectDir)\Debug\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=ffmpegsumo.dll
+echo Copying %FILE%
+cmake -E copy_if_different $(CEF_BINARY_PATH)\Debug\%FILE% $(ProjectDir)\Debug\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=libcef.dll
+echo Copying %FILE%
+cmake -E copy_if_different $(CEF_BINARY_PATH)\Debug\%FILE% $(ProjectDir)\Debug\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=libEGL.dll
+echo Copying %FILE%
+cmake -E copy_if_different $(CEF_BINARY_PATH)\Debug\%FILE% $(ProjectDir)\Debug\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=libGLESv2.dll
+echo Copying %FILE%
+cmake -E copy_if_different $(CEF_BINARY_PATH)\Debug\%FILE% $(ProjectDir)\Debug\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=natives_blob.bin
+echo Copying %FILE%
+cmake -E copy_if_different $(CEF_BINARY_PATH)\Debug\%FILE% $(ProjectDir)\Debug\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=snapshot_blob.bin
+echo Copying %FILE%
+cmake -E copy_if_different $(CEF_BINARY_PATH)\Debug\%FILE% $(ProjectDir)\Debug\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=wow_helper.exe
+echo Copying %FILE%
+cmake -E copy_if_different $(CEF_BINARY_PATH)\Debug\%FILE% $(ProjectDir)\Debug\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=cef.pak
+echo Copying %FILE%
+cmake -E copy_if_different $(CEF_BINARY_PATH)\Resources\%FILE% $(ProjectDir)\Debug\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=cef_100_percent.pak
+echo Copying %FILE%
+cmake -E copy_if_different $(CEF_BINARY_PATH)\Resources\%FILE% $(ProjectDir)\Debug\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=cef_200_percent.pak
+echo Copying %FILE%
+cmake -E copy_if_different $(CEF_BINARY_PATH)\Resources\%FILE% $(ProjectDir)\Debug\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=devtools_resources.pak
+echo Copying %FILE%
+cmake -E copy_if_different $(CEF_BINARY_PATH)\Resources\%FILE% $(ProjectDir)\Debug\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=icudtl.dat
+echo Copying %FILE%
+cmake -E copy_if_different $(CEF_BINARY_PATH)\Resources\%FILE% $(ProjectDir)\Debug\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=locales
+echo Copying %FILE%
+cmake -E copy_directory $(CEF_BINARY_PATH)\Resources\%FILE% $(ProjectDir)\Debug\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;$(CEF_BINARY_PATH)\Debug\libcef.lib;$(CEF_BINARY_PATH)\libcef_dll\Debug\libcef_dll_wrapper.lib;comctl32.lib;rpcrt4.lib;shlwapi.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/John/Documents/freelancing/TCM/cef_binary_3.2357.1289.gc27da0e_windows32/cef/Debug/cef.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/John/Documents/freelancing/TCM/cef_binary_3.2357.1289.gc27da0e_windows32/cef/Debug/cef.pdb</ProgramDataBaseFile>
+      <SubSystem>Windows</SubSystem>
+      <Version>
+      </Version>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(CEF_BINARY_PATH);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>Release/</AssemblerListingLocation>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4100;4127;4244;4512;4701;4702;4996;4481;4355;4510;4610</DisableSpecificWarnings>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <StringPooling>true</StringPooling>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>NDEBUG;_NDEBUG;__STDC_CONSTANT_MACROS;__STDC_FORMAT_MACROS;WIN32;_WIN32;_WINDOWS;UNICODE;_UNICODE;WINVER=0x0602;_WIN32_WINNT=0x602;NOMINMAX;WIN32_LEAN_AND_MEAN;_HAS_EXCEPTIONS=0;CEF_USE_ATL;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;_NDEBUG;__STDC_CONSTANT_MACROS;__STDC_FORMAT_MACROS;WIN32;_WIN32;_WINDOWS;UNICODE;_UNICODE;WINVER=0x0602;_WIN32_WINNT=0x602;NOMINMAX;WIN32_LEAN_AND_MEAN;_HAS_EXCEPTIONS=0;CEF_USE_ATL;CMAKE_INTDIR=\"Release\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(CEF_BINARY_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>$(CEF_BINARY_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PostBuildEvent>
+      <Message>Adding manifest...															</Message>
+      <Command>setlocal
+mt.exe -nologo -manifest "$(ProjectDir)\cef.exe.manifest" "$(ProjectDir)\compatibility.manifest" -outputresource:"$(ProjectDir)\Release\cef.exe";#1
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=d3dcompiler_43.dll
+echo Copying %FILE%
+cmake -E copy_if_different $(CEF_BINARY_PATH)\Release\%FILE% $(ProjectDir)\Release\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=d3dcompiler_47.dll
+echo Copying %FILE%
+cmake -E copy_if_different $(CEF_BINARY_PATH)\Release\%FILE% $(ProjectDir)\Release\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=ffmpegsumo.dll
+echo Copying %FILE%
+cmake -E copy_if_different $(CEF_BINARY_PATH)\Release\%FILE% $(ProjectDir)\Release\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=libcef.dll
+echo Copying %FILE%
+cmake -E copy_if_different $(CEF_BINARY_PATH)\Release\%FILE% $(ProjectDir)\Release\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=libEGL.dll
+echo Copying %FILE%
+cmake -E copy_if_different $(CEF_BINARY_PATH)\Release\%FILE% $(ProjectDir)\Release\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=libGLESv2.dll
+echo Copying %FILE%
+cmake -E copy_if_different $(CEF_BINARY_PATH)\Release\%FILE% $(ProjectDir)\Release\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=natives_blob.bin
+echo Copying %FILE%
+cmake -E copy_if_different $(CEF_BINARY_PATH)\Release\%FILE% $(ProjectDir)\Release\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=snapshot_blob.bin
+echo Copying %FILE%
+cmake -E copy_if_different $(CEF_BINARY_PATH)\Release\%FILE% $(ProjectDir)\Release\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=wow_helper.exe
+echo Copying %FILE%
+cmake -E copy_if_different $(CEF_BINARY_PATH)\Release\%FILE% $(ProjectDir)\Release\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=cef.pak
+echo Copying %FILE%
+cmake -E copy_if_different $(CEF_BINARY_PATH)\Resources\%FILE% $(ProjectDir)\Release\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=cef_100_percent.pak
+echo Copying %FILE%
+cmake -E copy_if_different $(CEF_BINARY_PATH)\Resources\%FILE% $(ProjectDir)\Release\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=cef_200_percent.pak
+echo Copying %FILE%
+cmake -E copy_if_different $(CEF_BINARY_PATH)\Resources\%FILE% $(ProjectDir)\Release\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=devtools_resources.pak
+echo Copying %FILE%
+cmake -E copy_if_different $(CEF_BINARY_PATH)\Resources\%FILE% $(ProjectDir)\Release\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=icudtl.dat
+echo Copying %FILE%
+cmake -E copy_if_different $(CEF_BINARY_PATH)\Resources\%FILE% $(ProjectDir)\Release\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+set FILE=locales
+echo Copying %FILE%
+cmake -E copy_directory $(CEF_BINARY_PATH)\Resources\%FILE% $(ProjectDir)\Release\%FILE%
+if %errorlevel% neq 0 goto :cmEnd
+
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;$(CEF_BINARY_PATH)\Release\libcef.lib;$(CEF_BINARY_PATH)\libcef_dll\Release\libcef_dll_wrapper.lib;comctl32.lib;rpcrt4.lib;shlwapi.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/John/Documents/freelancing/TCM/cef_binary_3.2357.1289.gc27da0e_windows32/cef/Release/cef.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/John/Documents/freelancing/TCM/cef_binary_3.2357.1289.gc27da0e_windows32/cef/Release/cef.pdb</ProgramDataBaseFile>
+      <SubSystem>Windows</SubSystem>
+      <Version>
+      </Version>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="simple_app.h" />
+    <ClInclude Include="simple_handler.h" />
+    <ClInclude Include="resource.h" />
+    <ClCompile Include="simple_app.cc" />
+    <ClCompile Include="simple_handler.cc" />
+    <ResourceCompile Include="cef.rc" />
+    <ClCompile Include="cef_win.cc" />
+    <ClCompile Include="simple_handler_win.cc" />
+    <None Include="cef.exe.manifest" />
+    <None Include="res\cef.ico" />
+    <None Include="res\small.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="C:/Users/John/Documents/freelancing/TCM/cef_binary_3.2357.1289.gc27da0e_windows32/ZERO_CHECK.vcxproj">
+      <Project>AFA1461A-47EE-47FE-96DF-19C61804F772</Project>
+    </ProjectReference>
+    <ProjectReference Include="C:/Users/John/Documents/freelancing/TCM/cef_binary_3.2357.1289.gc27da0e_windows32/libcef_dll/libcef_dll_wrapper.vcxproj">
+      <Project>15D1DFA2-B016-452B-A5C8-134FBDF48AC5</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xcomp", "xcomp\xcomp.vcxproj", "{F6F7674E-22DC-47A4-A75B-EA0D766D6C72}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cef", "cef\cef.vcxproj", "{2C192B4D-3D72-43E6-8FE4-6A8F8145928E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F6F7674E-22DC-47A4-A75B-EA0D766D6C72}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F6F7674E-22DC-47A4-A75B-EA0D766D6C72}.Debug|Win32.Build.0 = Debug|Win32
+		{F6F7674E-22DC-47A4-A75B-EA0D766D6C72}.Release|Win32.ActiveCfg = Release|Win32
+		{F6F7674E-22DC-47A4-A75B-EA0D766D6C72}.Release|Win32.Build.0 = Release|Win32
+		{2C192B4D-3D72-43E6-8FE4-6A8F8145928E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2C192B4D-3D72-43E6-8FE4-6A8F8145928E}.Debug|Win32.Build.0 = Debug|Win32
+		{2C192B4D-3D72-43E6-8FE4-6A8F8145928E}.Release|Win32.ActiveCfg = Release|Win32
+		{2C192B4D-3D72-43E6-8FE4-6A8F8145928E}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
