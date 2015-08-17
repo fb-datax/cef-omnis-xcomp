@@ -51,7 +51,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(CEF_BINARY_PATH);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CEF_ROOT);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>Debug/</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <CompileAs>CompileAsCpp</CompileAs>
@@ -89,63 +89,63 @@ mt.exe -nologo -manifest "$(ProjectDir)\cef.exe.manifest" "$(ProjectDir)\compati
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=d3dcompiler_43.dll
 echo Copying %FILE%
-cmake -E copy_if_different $(CEF_BINARY_PATH)\Debug\%FILE% $(ProjectDir)\Debug\%FILE%
+cmake -E copy_if_different $(CEF_ROOT)\Debug\%FILE% $(ProjectDir)\Debug\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=d3dcompiler_47.dll
 echo Copying %FILE%
-cmake -E copy_if_different $(CEF_BINARY_PATH)\Debug\%FILE% $(ProjectDir)\Debug\%FILE%
+cmake -E copy_if_different $(CEF_ROOT)\Debug\%FILE% $(ProjectDir)\Debug\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=ffmpegsumo.dll
 echo Copying %FILE%
-cmake -E copy_if_different $(CEF_BINARY_PATH)\Debug\%FILE% $(ProjectDir)\Debug\%FILE%
+cmake -E copy_if_different $(CEF_ROOT)\Debug\%FILE% $(ProjectDir)\Debug\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=libcef.dll
 echo Copying %FILE%
-cmake -E copy_if_different $(CEF_BINARY_PATH)\Debug\%FILE% $(ProjectDir)\Debug\%FILE%
+cmake -E copy_if_different $(CEF_ROOT)\Debug\%FILE% $(ProjectDir)\Debug\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=libEGL.dll
 echo Copying %FILE%
-cmake -E copy_if_different $(CEF_BINARY_PATH)\Debug\%FILE% $(ProjectDir)\Debug\%FILE%
+cmake -E copy_if_different $(CEF_ROOT)\Debug\%FILE% $(ProjectDir)\Debug\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=libGLESv2.dll
 echo Copying %FILE%
-cmake -E copy_if_different $(CEF_BINARY_PATH)\Debug\%FILE% $(ProjectDir)\Debug\%FILE%
+cmake -E copy_if_different $(CEF_ROOT)\Debug\%FILE% $(ProjectDir)\Debug\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=natives_blob.bin
 echo Copying %FILE%
-cmake -E copy_if_different $(CEF_BINARY_PATH)\Debug\%FILE% $(ProjectDir)\Debug\%FILE%
+cmake -E copy_if_different $(CEF_ROOT)\Debug\%FILE% $(ProjectDir)\Debug\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=snapshot_blob.bin
 echo Copying %FILE%
-cmake -E copy_if_different $(CEF_BINARY_PATH)\Debug\%FILE% $(ProjectDir)\Debug\%FILE%
+cmake -E copy_if_different $(CEF_ROOT)\Debug\%FILE% $(ProjectDir)\Debug\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=wow_helper.exe
 echo Copying %FILE%
-cmake -E copy_if_different $(CEF_BINARY_PATH)\Debug\%FILE% $(ProjectDir)\Debug\%FILE%
+cmake -E copy_if_different $(CEF_ROOT)\Debug\%FILE% $(ProjectDir)\Debug\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=cef.pak
 echo Copying %FILE%
-cmake -E copy_if_different $(CEF_BINARY_PATH)\Resources\%FILE% $(ProjectDir)\Debug\%FILE%
+cmake -E copy_if_different $(CEF_ROOT)\Resources\%FILE% $(ProjectDir)\Debug\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=cef_100_percent.pak
 echo Copying %FILE%
-cmake -E copy_if_different $(CEF_BINARY_PATH)\Resources\%FILE% $(ProjectDir)\Debug\%FILE%
+cmake -E copy_if_different $(CEF_ROOT)\Resources\%FILE% $(ProjectDir)\Debug\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=cef_200_percent.pak
 echo Copying %FILE%
-cmake -E copy_if_different $(CEF_BINARY_PATH)\Resources\%FILE% $(ProjectDir)\Debug\%FILE%
+cmake -E copy_if_different $(CEF_ROOT)\Resources\%FILE% $(ProjectDir)\Debug\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=devtools_resources.pak
 echo Copying %FILE%
-cmake -E copy_if_different $(CEF_BINARY_PATH)\Resources\%FILE% $(ProjectDir)\Debug\%FILE%
+cmake -E copy_if_different $(CEF_ROOT)\Resources\%FILE% $(ProjectDir)\Debug\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=icudtl.dat
 echo Copying %FILE%
-cmake -E copy_if_different $(CEF_BINARY_PATH)\Resources\%FILE% $(ProjectDir)\Debug\%FILE%
+cmake -E copy_if_different $(CEF_ROOT)\Resources\%FILE% $(ProjectDir)\Debug\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=locales
 echo Copying %FILE%
-cmake -E copy_directory $(CEF_BINARY_PATH)\Resources\%FILE% $(ProjectDir)\Debug\%FILE%
+cmake -E copy_directory $(CEF_ROOT)\Resources\%FILE% $(ProjectDir)\Debug\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 
 :cmEnd
@@ -156,7 +156,7 @@ exit /b %1
 if %errorlevel% neq 0 goto :VCEnd</Command>
     </PostBuildEvent>
     <Link>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;$(CEF_BINARY_PATH)\Debug\libcef.lib;$(CEF_BINARY_PATH)\libcef_dll\Debug\libcef_dll_wrapper.lib;comctl32.lib;rpcrt4.lib;shlwapi.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;$(CEF_ROOT)\Debug\libcef.lib;$(CEF_ROOT)\libcef_dll\Debug\libcef_dll_wrapper.lib;comctl32.lib;rpcrt4.lib;shlwapi.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -172,7 +172,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(CEF_BINARY_PATH);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CEF_ROOT);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>Release/</AssemblerListingLocation>
       <CompileAs>CompileAsCpp</CompileAs>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -211,63 +211,63 @@ mt.exe -nologo -manifest "$(ProjectDir)\cef.exe.manifest" "$(ProjectDir)\compati
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=d3dcompiler_43.dll
 echo Copying %FILE%
-cmake -E copy_if_different $(CEF_BINARY_PATH)\Release\%FILE% $(ProjectDir)\Release\%FILE%
+cmake -E copy_if_different $(CEF_ROOT)\Release\%FILE% $(ProjectDir)\Release\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=d3dcompiler_47.dll
 echo Copying %FILE%
-cmake -E copy_if_different $(CEF_BINARY_PATH)\Release\%FILE% $(ProjectDir)\Release\%FILE%
+cmake -E copy_if_different $(CEF_ROOT)\Release\%FILE% $(ProjectDir)\Release\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=ffmpegsumo.dll
 echo Copying %FILE%
-cmake -E copy_if_different $(CEF_BINARY_PATH)\Release\%FILE% $(ProjectDir)\Release\%FILE%
+cmake -E copy_if_different $(CEF_ROOT)\Release\%FILE% $(ProjectDir)\Release\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=libcef.dll
 echo Copying %FILE%
-cmake -E copy_if_different $(CEF_BINARY_PATH)\Release\%FILE% $(ProjectDir)\Release\%FILE%
+cmake -E copy_if_different $(CEF_ROOT)\Release\%FILE% $(ProjectDir)\Release\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=libEGL.dll
 echo Copying %FILE%
-cmake -E copy_if_different $(CEF_BINARY_PATH)\Release\%FILE% $(ProjectDir)\Release\%FILE%
+cmake -E copy_if_different $(CEF_ROOT)\Release\%FILE% $(ProjectDir)\Release\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=libGLESv2.dll
 echo Copying %FILE%
-cmake -E copy_if_different $(CEF_BINARY_PATH)\Release\%FILE% $(ProjectDir)\Release\%FILE%
+cmake -E copy_if_different $(CEF_ROOT)\Release\%FILE% $(ProjectDir)\Release\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=natives_blob.bin
 echo Copying %FILE%
-cmake -E copy_if_different $(CEF_BINARY_PATH)\Release\%FILE% $(ProjectDir)\Release\%FILE%
+cmake -E copy_if_different $(CEF_ROOT)\Release\%FILE% $(ProjectDir)\Release\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=snapshot_blob.bin
 echo Copying %FILE%
-cmake -E copy_if_different $(CEF_BINARY_PATH)\Release\%FILE% $(ProjectDir)\Release\%FILE%
+cmake -E copy_if_different $(CEF_ROOT)\Release\%FILE% $(ProjectDir)\Release\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=wow_helper.exe
 echo Copying %FILE%
-cmake -E copy_if_different $(CEF_BINARY_PATH)\Release\%FILE% $(ProjectDir)\Release\%FILE%
+cmake -E copy_if_different $(CEF_ROOT)\Release\%FILE% $(ProjectDir)\Release\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=cef.pak
 echo Copying %FILE%
-cmake -E copy_if_different $(CEF_BINARY_PATH)\Resources\%FILE% $(ProjectDir)\Release\%FILE%
+cmake -E copy_if_different $(CEF_ROOT)\Resources\%FILE% $(ProjectDir)\Release\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=cef_100_percent.pak
 echo Copying %FILE%
-cmake -E copy_if_different $(CEF_BINARY_PATH)\Resources\%FILE% $(ProjectDir)\Release\%FILE%
+cmake -E copy_if_different $(CEF_ROOT)\Resources\%FILE% $(ProjectDir)\Release\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=cef_200_percent.pak
 echo Copying %FILE%
-cmake -E copy_if_different $(CEF_BINARY_PATH)\Resources\%FILE% $(ProjectDir)\Release\%FILE%
+cmake -E copy_if_different $(CEF_ROOT)\Resources\%FILE% $(ProjectDir)\Release\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=devtools_resources.pak
 echo Copying %FILE%
-cmake -E copy_if_different $(CEF_BINARY_PATH)\Resources\%FILE% $(ProjectDir)\Release\%FILE%
+cmake -E copy_if_different $(CEF_ROOT)\Resources\%FILE% $(ProjectDir)\Release\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=icudtl.dat
 echo Copying %FILE%
-cmake -E copy_if_different $(CEF_BINARY_PATH)\Resources\%FILE% $(ProjectDir)\Release\%FILE%
+cmake -E copy_if_different $(CEF_ROOT)\Resources\%FILE% $(ProjectDir)\Release\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 set FILE=locales
 echo Copying %FILE%
-cmake -E copy_directory $(CEF_BINARY_PATH)\Resources\%FILE% $(ProjectDir)\Release\%FILE%
+cmake -E copy_directory $(CEF_ROOT)\Resources\%FILE% $(ProjectDir)\Release\%FILE%
 if %errorlevel% neq 0 goto :cmEnd
 
 :cmEnd
@@ -278,7 +278,7 @@ exit /b %1
 if %errorlevel% neq 0 goto :VCEnd</Command>
     </PostBuildEvent>
     <Link>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;$(CEF_BINARY_PATH)\Release\libcef.lib;$(CEF_BINARY_PATH)\libcef_dll\Release\libcef_dll_wrapper.lib;comctl32.lib;rpcrt4.lib;shlwapi.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;$(CEF_ROOT)\Release\libcef.lib;$(CEF_ROOT)\libcef_dll\Release\libcef_dll_wrapper.lib;comctl32.lib;rpcrt4.lib;shlwapi.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>

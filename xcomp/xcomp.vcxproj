@@ -134,7 +134,7 @@
     <ClCompile>
       <Optimization>MinSpace</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>$(CEF_BINARY_PATH);include;$(OMNIS_LIB_PATH)\COMPLIB;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CEF_ROOT);include;$(OMNIS_SDK_ROOT)\COMPLIB;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;NO_STRICT;WIN32;_WINDOWS;iswin32;isXCOMPLIB;_CRT_SECURE_NO_DEPRECATE;_CRT_NON_CONFORMING_SWPRINTFS;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -152,7 +152,7 @@
       <AdditionalDependencies>omnis.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)CEFWebLib.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(CEF_BINARY_PATH)\Release;$(CEF_BINARY_PATH)\out\Release\lib;$(CEF_BINARY_PATH)\libcef_dll\Release;$(OMNIS_LIB_PATH)\complib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(CEF_ROOT)\Release;$(CEF_ROOT)\out\Release\lib;$(CEF_ROOT)\libcef_dll\Release;$(OMNIS_SDK_ROOT)\complib</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>libc.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -172,7 +172,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(CEF_BINARY_PATH);include;$(OMNIS_LIB_PATH)\COMPLIB;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CEF_ROOT);include;$(OMNIS_SDK_ROOT)\COMPLIB;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;NO_STRICT;WIN32;_WINDOWS;iswin32;isXCOMPLIB;_CRT_SECURE_NO_DEPRECATE;_CRT_NON_CONFORMING_SWPRINTFS;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -191,7 +191,7 @@
       <AdditionalDependencies>omnis.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)CEFWebLib.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(CEF_BINARY_PATH)\Debug;$(CEF_BINARY_PATH)\out\Debug\lib;$(CEF_BINARY_PATH)\libcef_dll\Debug;$(OMNIS_LIB_PATH)\complib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(CEF_ROOT)\Debug;$(CEF_ROOT)\out\Debug\lib;$(CEF_ROOT)\libcef_dll\Debug;$(OMNIS_SDK_ROOT)\complib</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
       <ModuleDefinitionFile>resource\$(ProjectName).def</ModuleDefinitionFile>
@@ -205,8 +205,8 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y "$(TargetDir)$(TargetName)$(TargetExt)" "$(OMNIS_XCOMP_PATH)"
-xcopy /y "$(TargetDir)$(TargetName).pdb" "$(OMNIS_XCOMP_PATH)"
+      <Command>xcopy /y "$(TargetDir)$(TargetName)$(TargetExt)" "$(OMNIS_XCOMP_ROOT)"
+xcopy /y "$(TargetDir)$(TargetName).pdb" "$(OMNIS_XCOMP_ROOT)"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
