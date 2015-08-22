@@ -1,4 +1,4 @@
-LIBRARY         WEBLIB
+LIBRARY         CEFWEBLIB
 EXPORTS
     GenericWndProc  @1
  
