@@ -8,4 +8,4 @@ syntax: regexp
 ^xcomp/Release
 ^build/
 ^xcomp - CE/
-
+^.*\.ipch$
