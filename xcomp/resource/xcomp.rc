@@ -1,8 +1,0 @@
-1 BITMAP DISCARDABLE "logoball.bmp"
-
-STRINGTABLE DISCARDABLE
-BEGIN
-   1000 "Chromium Embedded Framework"
-   2000 "Chromium Embedded Control"
-   31000 "CEFWndProc"
-END
