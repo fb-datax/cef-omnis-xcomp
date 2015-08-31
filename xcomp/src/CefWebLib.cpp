@@ -5,59 +5,9 @@
 ///
 ///
 
-#include <extcomp.he>
-#include <extfval.he>
-#include <hwnd.he>
-#include <gdi.he>
-
 #include "CefWebLib.h"
+#include "CefInstance.h"
 
-// MethodIds
-const qlong 
-	// -------Obj Methods ------------	
-	ofnavigateToUrl = 1000,
-	ofHistoryGoBack = 1001,
-	ofHistoryGoForward = 1002,
-	ofInitWebView = 1003,
-	ofFocus = 1004,
-	ofUnFocus = 1005,
-	ofShutDownWebView = 1006,
-	ofCancelDownload = 1007,
-	ofStartDownload = 1008,
-	
-	ofGetCompData = 1009,
-	ofSetCompData = 1010,
-	ofSendActionToComp = 1014,
-
-	// -------Obj Event Methods ------------	
-	evDoCloseModule = 1100,
-	
-	evDoShowMessage = 1102,
-	
-	
-	// -------Obj Event der Web View Listener ------------	
-	evOnConsoleMessageAdded = 1110,
-	evOnDocumentReady = 1111,
-	evOnFrameLoadingFailed = 1112,
-	evOnTitleChange = 1113,
-	evOnAdressBarChanged = 1114,
-	evOnOpenNewWindow = 1115,
-	evOnDownloadRequest = 1116,
-	evOnDownloadUpdate = 1117,
-	evOnDownloadFinish = 1118,
-	evOnJsInitFailed = 1120,
-	evOnCustomCompAction = 1121,
-	evOnCompInit = 1122,
-	
-	
-
-	// -------Static Methods ------------	
-
-	// -------Properties	------------	
-	pBasePath	= 4000,
-	pUserPath	= 4001
-	
-;
 
 // Function parameters
 ECOparam browserParams[111] =
@@ -231,25 +181,6 @@ ECOparam browserParams[111] =
 	// Nächstes ab (pos 110)
 };
 
-
-// This is how we define functions
-ECOmethodEvent browserObjfunctions[15] = 
-{
-//	methodid 				resourceid,		return datatype,	paramcnt		parameters		flags,	flags2
-	ofnavigateToUrl,		7000,			fftInteger, 		1, 				&browserParams[2], 	0, 		0,
-	ofHistoryGoBack,		7001,			fftInteger, 		0, 				&browserParams[0], 	0, 		0,
-	ofHistoryGoForward,		7002,			fftInteger, 		0, 				&browserParams[0], 	0, 		0,
-	ofInitWebView,			7003,			fftInteger, 		0, 				&browserParams[0], 	0, 		0,
-	ofFocus,				7004,			fftInteger, 		0, 				&browserParams[0], 	0, 		0,
-	ofUnFocus,				7005,			fftInteger, 		0, 				&browserParams[0], 	0, 		0,
-	ofShutDownWebView,		7006,			fftInteger, 		0, 				&browserParams[0], 	0, 		0,
-	ofCancelDownload,		7007,			fftInteger, 		1, 				&browserParams[27],	0, 		0,
-	ofStartDownload,		7008,			fftInteger, 		2, 				&browserParams[28],	0, 		0,
-	ofGetCompData,			7009,			fftCharacter, 		1, 				&browserParams[81],	0, 		0,
-	ofSetCompData,			7010,			fftInteger, 		2, 				&browserParams[82],	0, 		0,
-	ofSendActionToComp,		7014,			fftInteger, 		11,				&browserParams[88],	0, 		0	
-};
-
 ECOmethodEvent browserEvents[16] = 
 {
 	// 	event id			resourceid,     return datatype,	paramcnt		parameters			flags,		flags2
@@ -280,6 +211,23 @@ ECOproperty browserProperties[6] =
 //  propid				resourceid,	datatype,		propflags	propFlags2, enumStart, 	enumEnd
 	pBasePath,			4000, 		fftCharacter, 	0,			0, 			0, 			0,
 	pUserPath,			4001, 		fftCharacter, 	0,			0, 			0, 			0
+};
+
+// the methods defined in CefWebLib.rc:
+ECOmethodEvent browserObjfunctions[15] = {
+//	methodid 				resourceid,		return datatype,	paramcnt		parameters		flags,	flags2
+	ofnavigateToUrl,		7000,			fftInteger, 		1, 				&browserParams[2], 	0, 		0,
+	ofHistoryGoBack,		7001,			fftInteger, 		0, 				&browserParams[0], 	0, 		0,
+	ofHistoryGoForward,		7002,			fftInteger, 		0, 				&browserParams[0], 	0, 		0,
+	ofInitWebView,			7003,			fftInteger, 		0, 				&browserParams[0], 	0, 		0,
+	ofFocus,				7004,			fftInteger, 		0, 				&browserParams[0], 	0, 		0,
+	ofUnFocus,				7005,			fftInteger, 		0, 				&browserParams[0], 	0, 		0,
+	ofShutDownWebView,		7006,			fftInteger, 		0, 				&browserParams[0], 	0, 		0,
+	ofCancelDownload,		7007,			fftInteger, 		1, 				&browserParams[27],	0, 		0,
+	ofStartDownload,		7008,			fftInteger, 		2, 				&browserParams[28],	0, 		0,
+	ofGetCompData,			7009,			fftCharacter, 		1, 				&browserParams[81],	0, 		0,
+	ofSetCompData,			7010,			fftInteger, 		2, 				&browserParams[82],	0, 		0,
+	ofSendActionToComp,		7014,			fftInteger, 		11,				&browserParams[88],	0, 		0	
 };
 
 // Fuer all Web Views verwendete WebSession
@@ -314,10 +262,12 @@ extern "C" qlong OMNISWNDPROC GenericWndProc(HWND hwnd, LPARAM Msg,WPARAM wParam
 				webBrowserCounter++;
 				// ######## WebLib::WebBrowser* object = new WebLib::WebBrowser( hwnd, mWebSession );
 				// ######## ECOinsertObject( eci, hwnd, (void*)object );
+				CefInstance *instance = new CefInstance(hwnd);
+				ECOinsertObject(eci, hwnd, static_cast<void*>(instance));
 				return qtrue;
 			}
 			return qfalse;
-		}    
+		}
 		
 		// Destruct the object 
 		case ECM_OBJDESTRUCT:					
@@ -326,6 +276,9 @@ extern "C" qlong OMNISWNDPROC GenericWndProc(HWND hwnd, LPARAM Msg,WPARAM wParam
 				// First find the object in the libraries chain of objects, 
 				// this call if ok also removes the object from the chain.
 				webBrowserCounter--;
+				CefInstance *instance = static_cast<CefInstance*>(ECOremoveObject(eci, hwnd));
+				if(instance)
+					delete instance;
 				/* ######## WebLib::WebBrowser* object = (WebLib::WebBrowser*)ECOremoveObject( eci, hwnd );
 				if ( NULL!=object )
 				{
@@ -344,31 +297,22 @@ extern "C" qlong OMNISWNDPROC GenericWndProc(HWND hwnd, LPARAM Msg,WPARAM wParam
 			return qfalse;
 		}
 
-		// Anfrage nach Methodennamen 
 		case ECM_GETMETHODNAME:
-		{
-			if ( eci->mCompId==COMP_BROWSER) {
-				return ECOreturnMethods( gInstLib, eci, &browserObjfunctions[0], cIBrowserMethod_Count);
-			}else {
-				return ECOreturnMethods( gInstLib, eci, &browserObjfunctions[0], cIBrowserMethod_Count);	
-			}
-		}
+			// query method names
+			return ECOreturnMethods(gInstLib, eci, &browserObjfunctions[0], cIBrowserMethod_Count);
 		
-		// Anfrage nach Static Methodennamen 
 		case ECM_GETSTATICOBJECT:
-		{
-			if ( eci->mCompId==COMP_BROWSER) {
-				return ECOreturnMethods( gInstLib, eci, &browserStaticFunctions[0], cSBrowserMethod_Count );
-			}else {
-				return ECOreturnMethods( gInstLib, eci, &browserStaticFunctions[0], cSBrowserMethod_Count );
-			}
-		}
+			// query static method names 
+			return ECOreturnMethods(gInstLib, eci, &browserStaticFunctions[0], cSBrowserMethod_Count);
 
-		// Aufruf einer Methode -> An Objekt weitergeben
 		case ECM_METHODCALL:
 		{
-			if ( eci->mCompId==COMP_BROWSER) {
+			// call an object method
+			if(eci->mCompId == COMP_BROWSER) {
 				qlong funcId =	ECOgetId(eci);
+				CefInstance *instance = static_cast<CefInstance*>(ECOfindObject(eci, hwnd));
+				if(instance && instance->IsHwnd(hwnd))
+					instance->CallMethod(eci);
 				/* ######## WebLib::WebBrowser* object = (WebLib::WebBrowser*)ECOfindObject( eci, hwnd );
 				if (object && object->hwnd() == hwnd)  
 				{
@@ -503,6 +447,14 @@ extern "C" qlong OMNISWNDPROC GenericWndProc(HWND hwnd, LPARAM Msg,WPARAM wParam
 			}*/
 			return qtrue;
 		}
+
+		default:
+			if(Msg == CefInstance::PIPE_MESSAGES_AVAILABLE) {
+				CefInstance *instance = static_cast<CefInstance*>(ECOfindObject(eci, hwnd));
+				if(instance)
+					instance->PopMessages();
+				return qtrue;
+			}
 	 }
 
 	 // As a final result this must ALWAYS be called. It handles all other messages that this component

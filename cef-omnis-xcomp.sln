@@ -2,6 +2,9 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xcomp", "xcomp\xcomp.vcxproj", "{9D8689FD-2959-4A0A-8CBE-1818D599D0B0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2C192B4D-3D72-43E6-8FE4-6A8F8145928E} = {2C192B4D-3D72-43E6-8FE4-6A8F8145928E}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cef", "cef\cef.vcxproj", "{2C192B4D-3D72-43E6-8FE4-6A8F8145928E}"
 EndProject

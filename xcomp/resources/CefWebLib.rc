@@ -4,11 +4,11 @@
 STRINGTABLE DISCARDABLE 
 BEGIN
 	
-	// Name of the CompLib
+	// Name of the library
 	1000					"CEF-Web-Library"
 
-	// Namen der Controls
-	2000					"WebView"
+	// Names of the controls
+	2000					"CefWebView"
 		 
 	////////// BROWSER ///////////////////
 
@@ -16,9 +16,9 @@ BEGIN
 	4000					"$basePath:Basepath for Plugins, ..."
 	4001					"$userPath:path for User settings,..."
 	
-	// Namen der Static Methoden 
+	// Static methods
 	
-	// Namen der Obj Methoden 
+	// Object methods
 	7000					"$navigateToUrl:$navigateToUrl(cURL)"
 	7001					"$historyBack:$historyBack()"
 	7002					"$historyForward:$historyForward()"
@@ -53,13 +53,13 @@ BEGIN
 	7514					"CompCustAction:CompCustAction"
 	7515					"CompInit:CompInit"
 
-	// Beschreibung der Parameter 
+	// Parameters
 	8000					"cURL:URL die geladen werden soll"
 	8001					"cBasePath:basispfad fuer Einstellungen, Session, Cache, Plugins,..."
 	8002					"cWhat:art des Events"
 	8004					"cURL:URL 2 die geladen werden soll"
 
-	// Event Parsameter ohne Woert 
+	// Event parameters
 	8100					"consoleMessage:Console Msg"
 	8101					"url:Url"
 	8102					"scheme:Scheme"
@@ -192,7 +192,7 @@ BEGIN
 
 	8390					"compId:compId"
 
-	// Name der EintiegsMethode
+	// Entry method name
 	31000					"GenericWndProc"
 END
 

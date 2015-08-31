@@ -16,3 +16,5 @@ Chromium Embedded Framework (CEF3) running inside O$ 4.3.X
   * `CEF_ROOT` =  `c:\path\to\cef_binary_3.2454.1304.ge979611_windows32` or similar
   * `OMNIS_XCOMP_ROOT` = `C:\Program Files (x86)\TigerLogic\OS4321\xcomp` or similar
   * `OMNIS_SDK_ROOT` = `C:\path\to\EXTCOMP_Source_Win32_4.3.2` or similar
+
+Note: Visual Studio must be run as administrator before opening `cef-omnis-xcomp.sln`. This is so that the post-build events can install into `OMNIS_XCOMP_ROOT`.

@@ -67,7 +67,7 @@
       <Optimization>Disabled</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <AdditionalIncludeDirectories>$(OMNIS_SDK_ROOT)\COMPLIB;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;iswin32;isXCOMPLIB;NO_STRICT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>TARGET_NAME="$(TargetName)";NDEBUG;WIN32;_WINDOWS;iswin32;isXCOMPLIB;NO_STRICT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -118,7 +118,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(OMNIS_SDK_ROOT)\COMPLIB;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;iswin32;isXCOMPLIB;NO_STRICT;IS_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>TARGET_NAME="$(TargetName)";_DEBUG;WIN32;_WINDOWS;iswin32;isXCOMPLIB;NO_STRICT;IS_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeaderOutputFile>../build/debug/CefWebLib.pch</PrecompiledHeaderOutputFile>
@@ -165,12 +165,16 @@
     <ResourceCompile Include="resources\$(TargetName).rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\CefInstance.cpp" />
     <ClCompile Include="src\OmnisTools.cpp" />
     <ClCompile Include="src\CefWebLib.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\CefInstance.h" />
+    <ClInclude Include="src\MessageQueue.h" />
     <ClInclude Include="src\OmnisTools.h" />
     <ClInclude Include="src\CefWebLib.h" />
+    <ClInclude Include="src\Win32Error.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
