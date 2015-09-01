@@ -158,12 +158,15 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="browser_app.h" />
     <ClInclude Include="message_pipe.h" />
-    <ClInclude Include="simple_app.h" />
+    <ClInclude Include="other_app.h" />
+    <ClInclude Include="renderer_app.h" />
     <ClInclude Include="simple_handler.h" />
     <ClInclude Include="resource.h" />
+    <ClCompile Include="browser_app.cc" />
     <ClCompile Include="message_pipe.cpp" />
-    <ClCompile Include="simple_app.cc" />
+    <ClCompile Include="renderer_app.cc" />
     <ClCompile Include="simple_handler.cc" />
     <ResourceCompile Include="cef.rc" />
     <ClCompile Include="cef_win.cc" />

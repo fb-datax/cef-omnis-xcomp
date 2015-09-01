@@ -34,10 +34,25 @@ SimpleHandler* SimpleHandler::GetInstance() {
 }
 
 void SimpleHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
-  CEF_REQUIRE_UI_THREAD();
+	CEF_REQUIRE_UI_THREAD();
 
-  // Add to the list of existing browsers.
-  browser_list_.push_back(browser);
+	// Add to the list of existing browsers.
+	browser_list_.push_back(browser);
+	
+	MessageBox(NULL, L"OnAfterCreated", L"Stop", MB_OK);
+	CefRefPtr<CefProcessMessage> message =
+		CefProcessMessage::Create("ready");
+	browser->SendProcessMessage(PID_RENDERER, message);
+}
+
+bool SimpleHandler::OnProcessMessageReceived( CefRefPtr<CefBrowser> browser,
+											  CefProcessId source_process,
+											  CefRefPtr<CefProcessMessage> message) {
+	CEF_REQUIRE_UI_THREAD();
+	std::wstring msg = L"OnProcessMessageReceived (browser): ";
+	msg += message->GetName();
+	MessageBox(NULL, msg.c_str(), L"Stop", MB_OK);
+	return false;
 }
 
 bool SimpleHandler::DoClose(CefRefPtr<CefBrowser> browser) {
