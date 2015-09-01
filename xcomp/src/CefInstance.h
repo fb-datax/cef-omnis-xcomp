@@ -32,6 +32,10 @@ protected:
 	void ReadComplete(DWORD bytes_read);
 	void GrowReadBuffer();
 	void WriteMessage(std::wstring name, std::wstring argument);
+	
+	void InitWebView();
+	void ShutDownWebView();
+	void NavigateToUrl(std::string url);
 
 	HWND hwnd_;
 	HANDLE listner_thread_;

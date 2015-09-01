@@ -64,6 +64,11 @@ class RendererApp : public CefApp,
 
  private:
 
+	enum CommandName {
+		execute
+	};
+	std::map<std::string, CommandName> command_name_map_;
+
 	// Include the default reference counting implementation.
 	IMPLEMENT_REFCOUNTING(RendererApp);
 };

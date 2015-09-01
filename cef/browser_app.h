@@ -21,11 +21,6 @@ class BrowserApp : public CefApp,
  private:
 	HWND hwnd_;
 
-	enum CommandName {
-		ready
-	};
-	std::map<std::string, CommandName> command_name_map_;
-
 	// Include the default reference counting implementation.
 	IMPLEMENT_REFCOUNTING(BrowserApp);
 };

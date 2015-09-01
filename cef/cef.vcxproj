@@ -162,15 +162,14 @@
     <ClInclude Include="message_pipe.h" />
     <ClInclude Include="other_app.h" />
     <ClInclude Include="renderer_app.h" />
-    <ClInclude Include="simple_handler.h" />
+    <ClInclude Include="client_handler.h" />
     <ClInclude Include="resource.h" />
     <ClCompile Include="browser_app.cc" />
     <ClCompile Include="message_pipe.cpp" />
     <ClCompile Include="renderer_app.cc" />
-    <ClCompile Include="simple_handler.cc" />
+    <ClCompile Include="client_handler.cc" />
     <ResourceCompile Include="cef.rc" />
     <ClCompile Include="cef_win.cc" />
-    <ClCompile Include="simple_handler_win.cc" />
     <None Include="cef.exe.manifest" />
     <None Include="res\cef.ico" />
     <None Include="res\small.ico" />

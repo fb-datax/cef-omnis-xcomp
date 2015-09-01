@@ -16,8 +16,8 @@ CefInstance::CefInstance(HWND hwnd) :
 	// for efficient execution of commands from the pipe, we populate a map.
 	command_name_map_["ready"] = ready;
 
-	// create a custom windows event for signalling from the
-	// pipe listener thread to the main thread.
+	// create a custom windows event for signalling from the pipe listener 
+	// thread to the main thread.
 	if(!PIPE_MESSAGES_AVAILABLE) {
 		PIPE_MESSAGES_AVAILABLE = RegisterWindowMessage("Pipe messages available");
 		if(!PIPE_MESSAGES_AVAILABLE)
@@ -31,7 +31,7 @@ CefInstance::CefInstance(HWND hwnd) :
 	ss << "\\\\.\\pipe\\" TARGET_NAME "_" << hwnd;
 	pipe_name_ = ss.str();
 
-	read_buffer_.resize(1024); // will be dynamically resized.
+	read_buffer_.resize(1024); // will be dynamically resized if necessary.
 
 	read_lpo_ = (LPOVERLAPPED) GlobalAlloc(GPTR, sizeof(OVERLAPPED)); 
 	if(read_lpo_ == NULL)
@@ -59,13 +59,10 @@ CefInstance::CefInstance(HWND hwnd) :
     pSa_->nLength = sizeof(*pSa_);
     pSa_->lpSecurityDescriptor = pSd;
     pSa_->bInheritHandle = FALSE;
+}
 
+void CefInstance::InitWebView() {
 	if(!CreatePipe())
-		throw Win32Error();
-
-	// start the pipe listener thread.
-	listner_thread_ = CreateThread(NULL, 0, CefInstance::StartPipeListenerThread, this, 0, NULL);
-	if(!listner_thread_)
 		throw Win32Error();
 
 	// find the full CefWebLib executable path based on the path of the CefWebLib dll.
@@ -83,8 +80,8 @@ CefInstance::CefInstance(HWND hwnd) :
 	// spawn the CEF exe with command line args
 	std::stringstream cmd_line;
 	cmd_line << '"' << exe_path << "\""
-		<< " --parent-hwnd=" << std::dec << (int) hwnd
-		<< " --url=" // ####
+		<< " --parent-hwnd=" << std::dec << (int) hwnd_
+		<< " --url=about:blank" // ####
 		<< " --pipe-name=" << pipe_name_;
 	STARTUPINFO startup_info;
 	ZeroMemory(&startup_info, sizeof(startup_info));
@@ -95,6 +92,28 @@ CefInstance::CefInstance(HWND hwnd) :
 		throw Win32Error();
     CloseHandle(process_info.hProcess);
     CloseHandle(process_info.hThread);
+
+	// wait for the CEF exe to connect to the pipe.
+	read_lpo_->Offset = 0;
+	read_lpo_->OffsetHigh = 0;
+	if(!ConnectNamedPipe(pipe_, read_lpo_)) {
+		DWORD err = GetLastError();
+		if(err == ERROR_IO_PENDING) {
+			if(WaitForSingleObject(read_lpo_->hEvent, INFINITE) != WAIT_OBJECT_0)
+				throw Win32Error();
+		} else if(err != ERROR_PIPE_CONNECTED)
+			throw Win32Error();
+	} else
+		throw std::exception(); // should never happen for overlapped calls.
+
+	// start the pipe listener thread.
+	listner_thread_ = CreateThread(NULL, 0, CefInstance::StartPipeListenerThread, this, 0, NULL);
+	if(!listner_thread_)
+		throw Win32Error();
+}
+
+void CefInstance::ShutDownWebView() {
+	//MessageBox(NULL, "ShutDownWebView", "Stop", MB_OK);
 }
 
 CefInstance::~CefInstance() {
@@ -138,7 +157,6 @@ DWORD CefInstance::RunPipeListenerThread() {
 				switch(WaitForSingleObject(read_lpo_->hEvent, INFINITE)) {
 					case WAIT_OBJECT_0: {
 						attempt = 1;
-						DWORD cbBytesRead;
 						if(GetOverlappedResult(pipe_, read_lpo_, &bytes_read, FALSE)) {
 							read_offset_ += bytes_read / sizeof(std::wstring::value_type);
 							if(read_offset_ >= read_buffer_.size())
@@ -187,7 +205,7 @@ void CefInstance::ReadComplete(DWORD bytes_read) {
 		GrowReadBuffer();
 	// perform a quick-and dirty conversion of wstring to string for 
 	// non-unicode xcomp.
-	std::string message(read_buffer_.begin(), read_buffer_.end()); //begin() + read_offset_);
+	std::string message(read_buffer_.begin(), read_buffer_.begin() + read_offset_);
 	read_offset_ = 0;
 
 	// add a message to the queue and signal the main thread.
@@ -259,16 +277,16 @@ qbool CefInstance::CallMethod(EXTCompInfo *eci) {
 
 	switch(ECOgetId(eci)) {
 		case ofInitWebView: {
+			InitWebView();
 			rtnCode = qtrue;
 			hasRtnVal = qtrue;
-			// ### rtnVal.setLong(WebBrowser::initWebView());
 			break;
 		}
 
 		case ofShutDownWebView: {
+			ShutDownWebView();
 			rtnCode = qtrue;
 			hasRtnVal = qtrue;
-			// ### rtnVal.setLong(WebBrowser::shutDownWebView());
 			break;
 		}
 
@@ -278,8 +296,7 @@ qbool CefInstance::CallMethod(EXTCompInfo *eci) {
 				rtnCode = qtrue;
 				hasRtnVal = qtrue;	
 				EXTfldval fval( (qfldval)paramInfo->mData);
-				std::string url = OmnisTools::getStringFromEXTFldVal(fval);
-				// ### rtnVal.setLong(WebBrowser::navigateToUrl(url));
+				NavigateToUrl(OmnisTools::getStringFromEXTFldVal(fval));
 			}
 			break;
 		}
@@ -428,6 +445,14 @@ qbool CefInstance::CallMethod(EXTCompInfo *eci) {
 	return rtnCode;
 }
 
+void CefInstance::NavigateToUrl(std::string url) {
+	std::wstring arg = L"window.location.href='";
+	arg += std::wstring(url.begin(), url.end());
+	arg += L"';";
+	WriteMessage(L"execute", arg);
+	//WriteMessage(L"execute", L"alert('ExecuteJavaScript works!');");
+}
+
 void CefInstance::PopMessages() {
 	MessageQueue::Message *message;
 	while(message = message_queue_->pop()) {
@@ -443,7 +468,7 @@ void CefInstance::PopMessages() {
 		std::string command = m->value_.c_str();
 		switch(command_name_map_[command]) {
 			case ready:
-				WriteMessage(L"ping", L"test");
+				//WriteMessage(L"ping", L"test");
 				break;
 		}
 	}

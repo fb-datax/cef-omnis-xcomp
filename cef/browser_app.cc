@@ -6,7 +6,7 @@
 
 #include <string>
 
-#include "simple_handler.h"
+#include "client_handler.h"
 #include "include/cef_browser.h"
 #include "include/cef_command_line.h"
 #include "include/cef_runnable.h"
@@ -23,7 +23,7 @@ void BrowserApp::OnContextInitialized() {
 	// Information used when creating the native window.
 	CefWindowInfo window_info;
 
-	MessageBox(NULL, L"Stop", L"Stop", MB_OK);
+	//MessageBox(NULL, L"Stop", L"Stop", MB_OK);
 
 	#if defined(OS_WIN)
 	// On Windows we need to specify certain flags that will be passed to
@@ -60,8 +60,8 @@ void BrowserApp::OnContextInitialized() {
 	// Check if a "--pipe-name=" value was provided.
 	std::string pipe_name = command_line->GetSwitchValue("pipe-name");
 
-	// SimpleHandler implements browser-level callbacks.
-	CefRefPtr<SimpleHandler> handler(new SimpleHandler(pipe_name));
+	// ClientHandler implements browser-level callbacks.
+	CefRefPtr<ClientHandler> handler(new ClientHandler(pipe_name));
 
 	// Create the first browser window.
 	CefBrowserHost::CreateBrowser(window_info, handler.get(), url,
