@@ -32,11 +32,18 @@ CefInstance::CefInstance(HWND hwnd) :
 	pipe_name_ = ss.str();
 
 	read_buffer_.resize(1024); // will be dynamically resized.
-	lpo_ = (LPOVERLAPPED) GlobalAlloc(GPTR, sizeof(OVERLAPPED)); 
-	if(lpo_ == NULL)
+
+	read_lpo_ = (LPOVERLAPPED) GlobalAlloc(GPTR, sizeof(OVERLAPPED)); 
+	if(read_lpo_ == NULL)
 		throw std::bad_alloc();
-	ZeroMemory(lpo_, sizeof(OVERLAPPED));
-	lpo_->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	ZeroMemory(read_lpo_, sizeof(OVERLAPPED));
+	read_lpo_->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+
+	write_lpo_ = (LPOVERLAPPED) GlobalAlloc(GPTR, sizeof(OVERLAPPED)); 
+	if(write_lpo_ == NULL)
+		throw std::bad_alloc();
+	ZeroMemory(write_lpo_, sizeof(OVERLAPPED));
+	write_lpo_->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	
 	PSECURITY_DESCRIPTOR pSd = NULL;
 	PCSTR szSDDL = 
@@ -92,9 +99,13 @@ CefInstance::CefInstance(HWND hwnd) :
 
 CefInstance::~CefInstance() {
 	ClosePipe();
-	if(lpo_) {
-		CloseHandle(lpo_->hEvent);
-		GlobalFree(lpo_);
+	if(read_lpo_) {
+		CloseHandle(read_lpo_->hEvent);
+		GlobalFree(read_lpo_);
+	}
+	if(write_lpo_) {
+		CloseHandle(write_lpo_->hEvent);
+		GlobalFree(write_lpo_);
 	}
     if(pSa_) {
         if(pSa_->lpSecurityDescriptor)
@@ -113,14 +124,40 @@ DWORD CefInstance::RunPipeListenerThread() {
 	while(true) {
 		// make a blocking read from the named pipe.
 		DWORD bytes_read;
+		read_lpo_->Offset = 0;
+		read_lpo_->OffsetHigh = 0;
 		if(!ReadFile( 
 			pipe_, 
 			(LPVOID) &read_buffer_[read_offset_], 
 			(read_buffer_.size() - read_offset_) * sizeof(std::wstring::value_type),
 			&bytes_read,
-			NULL)) {
+			read_lpo_)) {
 			DWORD err = GetLastError();
-			if(err == ERROR_MORE_DATA) {
+			if(err == ERROR_IO_PENDING) {
+				// wait for the read to complete.
+				switch(WaitForSingleObject(read_lpo_->hEvent, INFINITE)) {
+					case WAIT_OBJECT_0: {
+						attempt = 1;
+						DWORD cbBytesRead;
+						if(GetOverlappedResult(pipe_, read_lpo_, &bytes_read, FALSE)) {
+							read_offset_ += bytes_read / sizeof(std::wstring::value_type);
+							if(read_offset_ >= read_buffer_.size())
+								GrowReadBuffer();
+							ReadComplete(bytes_read);
+						} else {
+							DWORD err = GetLastError();
+							if(err == ERROR_MORE_DATA) {
+								GrowReadBuffer();
+							} else {
+								throw Win32Error(err);
+							}
+						}
+						continue;
+					}
+					default:
+						throw Win32Error();
+				}
+			} else if(err == ERROR_MORE_DATA) {
 				GrowReadBuffer();
 			} else if(err == ERROR_PIPE_LISTENING) {
 				// there's no client yet.
@@ -136,22 +173,26 @@ DWORD CefInstance::RunPipeListenerThread() {
 			} else
 				throw Win32Error();
 		} else {
-			// the read has completed successfully.
+			// the read completed immediately.
 			attempt = 1;
-			read_offset_ += bytes_read / sizeof(std::wstring::value_type);
-			if(read_offset_ >= read_buffer_.size())
-				GrowReadBuffer();
-			// perform a quick-and dirty conversion of wstring to string for 
-			// non-unicode xcomp.
-			std::string message(read_buffer_.begin(), read_buffer_.end()); //begin() + read_offset_);
-			read_offset_ = 0;
-
-			// add a message to the queue and signal the main thread.
-			message_queue_->push(new MessageQueue::Message(message));
-			PostMessage(hwnd_, PIPE_MESSAGES_AVAILABLE, 0, 0);
+			ReadComplete(bytes_read);
 		}
 	}
 	return 0;
+}
+
+void CefInstance::ReadComplete(DWORD bytes_read) {
+	read_offset_ += bytes_read / sizeof(std::wstring::value_type);
+	if(read_offset_ >= read_buffer_.size())
+		GrowReadBuffer();
+	// perform a quick-and dirty conversion of wstring to string for 
+	// non-unicode xcomp.
+	std::string message(read_buffer_.begin(), read_buffer_.end()); //begin() + read_offset_);
+	read_offset_ = 0;
+
+	// add a message to the queue and signal the main thread.
+	message_queue_->push(new MessageQueue::Message(message));
+	PostMessage(hwnd_, PIPE_MESSAGES_AVAILABLE, 0, 0);
 }
 
 void CefInstance::GrowReadBuffer() {
@@ -170,12 +211,20 @@ void CefInstance::WriteMessage(std::wstring name, std::wstring argument) {
 	write_buffer.append(1, L'\0'); // null terminator.
 	int bytes = write_buffer.size() * sizeof(std::wstring::value_type);
 	DWORD written;
+	write_lpo_->Offset = 0;
+	write_lpo_->OffsetHigh = 0;
 	if(!WriteFile(
 		pipe_, 
 		write_buffer.data(), 
 		bytes,
-		&written, NULL))
-		throw Win32Error();
+		&written, write_lpo_)) {
+		DWORD err = GetLastError();
+		if(err == ERROR_IO_PENDING) {
+			if(WaitForSingleObject(write_lpo_->hEvent, INFINITE) != WAIT_OBJECT_0)
+				throw Win32Error();
+		} else
+			throw Win32Error();
+	}
 }
 
 bool CefInstance::CreatePipe() {

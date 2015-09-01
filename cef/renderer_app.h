@@ -8,7 +8,7 @@
 #include "include/cef_app.h"
 
 class RendererApp : public CefApp,
-                  public CefRenderProcessHandler {
+					public CefRenderProcessHandler {
   public:
 	RendererApp();
 
@@ -20,13 +20,13 @@ class RendererApp : public CefApp,
 	// CefRenderProcessHandler methods:
 	virtual void OnBrowserCreated(CefRefPtr<CefBrowser> browser) OVERRIDE;
 	virtual void OnBrowserDestroyed(CefRefPtr<CefBrowser> browser) OVERRIDE {
-		MessageBox(NULL, L"OnBrowserDestroyed", L"Stop", MB_OK);
+		//MessageBox(NULL, L"OnBrowserDestroyed", L"Stop", MB_OK);
 	}	
 	virtual void OnRenderThreadCreated(CefRefPtr<CefListValue> extra_info) OVERRIDE {
-		MessageBox(NULL, L"OnRenderThreadCreated", L"Stop", MB_OK);
+		//MessageBox(NULL, L"OnRenderThreadCreated", L"Stop", MB_OK);
 	}
 	virtual void OnWebKitInitialized() OVERRIDE {
-		MessageBox(NULL, L"OnWebKitInitialized", L"Stop", MB_OK);
+		//MessageBox(NULL, L"OnWebKitInitialized", L"Stop", MB_OK);
 	}
 	virtual bool OnBeforeNavigation(CefRefPtr<CefBrowser> browser,
 									CefRefPtr<CefFrame> frame,
@@ -39,12 +39,12 @@ class RendererApp : public CefApp,
 	virtual void OnContextCreated(CefRefPtr<CefBrowser> browser,
 								CefRefPtr<CefFrame> frame,
 								CefRefPtr<CefV8Context> context) OVERRIDE { 
-		MessageBox(NULL, L"OnContextCreated", L"Stop", MB_OK);
+		//MessageBox(NULL, L"OnContextCreated", L"Stop", MB_OK);
 	}
 	virtual void OnContextReleased(CefRefPtr<CefBrowser> browser,
 								CefRefPtr<CefFrame> frame,
 								CefRefPtr<CefV8Context> context) OVERRIDE { 
-		MessageBox(NULL, L"OnContextReleased", L"Stop", MB_OK);
+		//MessageBox(NULL, L"OnContextReleased", L"Stop", MB_OK);
 	}
 	virtual void OnUncaughtException(CefRefPtr<CefBrowser> browser,
 									CefRefPtr<CefFrame> frame,

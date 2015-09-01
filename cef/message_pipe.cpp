@@ -284,7 +284,7 @@ void MessagePipe::QueueWrite(const CefString &name, const CefString &message, bo
 	std::wstring *write_buffer = new std::wstring(name);
 	write_buffer->append(L":");
 	write_buffer->append(message);
-	write_buffer->append(1, L'\0'); // null terminator.
+	//write_buffer->append(1, L'\0'); // null terminator.
 	write_lpo->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	int bytes = write_buffer->size() * sizeof(std::wstring::value_type);
 	DWORD written;

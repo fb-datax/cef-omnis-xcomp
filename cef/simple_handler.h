@@ -6,6 +6,7 @@
 #define CEF_TESTS_CEF_SIMPLE_HANDLER_H_
 
 #include "include/cef_client.h"
+#include "message_pipe.h"
 
 #include <list>
 
@@ -14,7 +15,7 @@ class SimpleHandler : public CefClient,
                       public CefLifeSpanHandler,
                       public CefLoadHandler {
  public:
-  SimpleHandler();
+  SimpleHandler(const std::string &pipe_name);
   ~SimpleHandler();
 
   // Provide access to the single global instance of this object.
@@ -56,14 +57,38 @@ class SimpleHandler : public CefClient,
   bool IsClosing() const { return is_closing_; }
 
  private:
-  // List of existing browser windows. Only accessed on the CEF UI thread.
-  typedef std::list<CefRefPtr<CefBrowser> > BrowserList;
-  BrowserList browser_list_;
+	 
+	class MainMessagePipeClient : public MessagePipeClient, public MessagePipe::PipeOperationHandler {
+	public:
+		MainMessagePipeClient(CefString main_pipe_name) : 
+		  MessagePipeClient(main_pipe_name, this) {
+		}
+		virtual void OnConnectCompleted() OVERRIDE {
+			//MessageBox(NULL, L"Connect", L"Stop", MB_OK);
+			QueueRead();
+		}
+		virtual void OnConnectFailed(DWORD err) OVERRIDE {
+			throw std::runtime_error("Connect main pipe");
+		}
+		virtual void OnReadCompleted(std::wstring &buffer) OVERRIDE {
+			MessageBox(NULL, buffer.c_str(), L"OnReadCompleted", MB_OK);
+		}
+		virtual void OnWriteCompleted(std::wstring &buffer) OVERRIDE { }
+	};
 
-  bool is_closing_;
+	void PostPipeMessage(const CefString &name, const CefString &message);
 
-  // Include the default reference counting implementation.
-  IMPLEMENT_REFCOUNTING(SimpleHandler);
+	CefRefPtr<MainMessagePipeClient> message_pipe_;
+	std::string pipe_name_;
+
+	// List of existing browser windows. Only accessed on the CEF UI thread.
+	typedef std::list<CefRefPtr<CefBrowser> > BrowserList;
+	BrowserList browser_list_;
+
+	bool is_closing_;
+
+	// Include the default reference counting implementation.
+	IMPLEMENT_REFCOUNTING(SimpleHandler);
 };
 
 #endif  // CEF_TESTS_CEF_SIMPLE_HANDLER_H_

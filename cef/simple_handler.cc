@@ -18,10 +18,17 @@ SimpleHandler* g_instance = NULL;
 
 }  // namespace
 
-SimpleHandler::SimpleHandler()
-    : is_closing_(false) {
-  DCHECK(!g_instance);
-  g_instance = this;
+SimpleHandler::SimpleHandler(const std::string &pipe_name) : 
+	is_closing_(false),
+	pipe_name_(pipe_name) {
+	DCHECK(!g_instance);
+	g_instance = this;
+
+	if (!pipe_name.empty()) {
+		// Connect as a client of the named pipe.
+		message_pipe_ = new MainMessagePipeClient(pipe_name_);
+		message_pipe_->QueueConnect();
+	}
 }
 
 SimpleHandler::~SimpleHandler() {
@@ -40,6 +47,7 @@ void SimpleHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
 	browser_list_.push_back(browser);
 	
 	MessageBox(NULL, L"OnAfterCreated", L"Stop", MB_OK);
+	PostPipeMessage(L"ready", L"");
 	CefRefPtr<CefProcessMessage> message =
 		CefProcessMessage::Create("ready");
 	browser->SendProcessMessage(PID_RENDERER, message);
@@ -123,4 +131,15 @@ void SimpleHandler::CloseAllBrowsers(bool force_close) {
   BrowserList::const_iterator it = browser_list_.begin();
   for (; it != browser_list_.end(); ++it)
     (*it)->GetHost()->CloseBrowser(force_close);
+}
+
+void SimpleHandler::PostPipeMessage(const CefString &name, const CefString &message) {
+	CEF_REQUIRE_UI_THREAD();
+	/*if(!CefCurrentlyOn(TID_UI)) {
+		// Execute on the UI thread.
+		CefPostTask(TID_UI, NewCefRunnableMethod(this, &BrowserApp::PostPipeMessage, name, message));
+		return;
+	}*/
+	if(message_pipe_.get())
+		message_pipe_->QueueWrite(name, message);
 }

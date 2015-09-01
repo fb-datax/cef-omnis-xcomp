@@ -35,7 +35,7 @@ protected:
 
 	HWND hwnd_;
 	HANDLE listner_thread_;
-	LPOVERLAPPED lpo_;
+	LPOVERLAPPED read_lpo_, write_lpo_;
 	HANDLE pipe_;
 	PSECURITY_ATTRIBUTES pSa_;
 	std::string pipe_name_;

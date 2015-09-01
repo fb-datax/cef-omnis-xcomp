@@ -23,16 +23,13 @@ void BrowserApp::OnContextInitialized() {
 	// Information used when creating the native window.
 	CefWindowInfo window_info;
 
-	//MessageBox(NULL, L"Stop", L"Stop", MB_OK);
+	MessageBox(NULL, L"Stop", L"Stop", MB_OK);
 
 	#if defined(OS_WIN)
 	// On Windows we need to specify certain flags that will be passed to
 	// CreateWindowEx().
 	window_info.SetAsPopup(NULL, "cef");
 	#endif
-
-	// SimpleHandler implements browser-level callbacks.
-	CefRefPtr<SimpleHandler> handler(new SimpleHandler());
 
 	// Specify CEF browser settings here.
 	CefBrowserSettings browser_settings;
@@ -61,25 +58,12 @@ void BrowserApp::OnContextInitialized() {
 	}
 
 	// Check if a "--pipe-name=" value was provided.
-	pipe_name_ = command_line->GetSwitchValue("pipe-name");
-	if (!pipe_name_.empty()) {
-		// Connect as a client of the named pipe.
-		message_pipe_ = new MainMessagePipeClient(pipe_name_);
-		message_pipe_->QueueConnect();
-	}
+	std::string pipe_name = command_line->GetSwitchValue("pipe-name");
+
+	// SimpleHandler implements browser-level callbacks.
+	CefRefPtr<SimpleHandler> handler(new SimpleHandler(pipe_name));
 
 	// Create the first browser window.
 	CefBrowserHost::CreateBrowser(window_info, handler.get(), url,
 								  browser_settings, NULL);
-}
-
-void BrowserApp::PostPipeMessage(const CefString &name, const CefString &message) {
-	CEF_REQUIRE_UI_THREAD();
-	/*if(!CefCurrentlyOn(TID_UI)) {
-		// Execute on the UI thread.
-		CefPostTask(TID_UI, NewCefRunnableMethod(this, &BrowserApp::PostPipeMessage, name, message));
-		return;
-	}*/
-	if(message_pipe_.get())
-		message_pipe_->QueueWrite(name, message);
 }
