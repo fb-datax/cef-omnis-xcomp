@@ -29,6 +29,7 @@ protected:
 	DWORD RunPipeListenerThread();
 	bool CreatePipe();
 	void ClosePipe();
+	void ReadComplete(DWORD bytes_read);
 	void GrowReadBuffer();
 	void WriteMessage(std::wstring name, std::wstring argument);
 

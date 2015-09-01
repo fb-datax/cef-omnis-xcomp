@@ -143,7 +143,8 @@ DWORD CefInstance::RunPipeListenerThread() {
 				GrowReadBuffer();
 			// perform a quick-and dirty conversion of wstring to string for 
 			// non-unicode xcomp.
-			std::string message(read_buffer_.begin(), read_buffer_.end());
+			std::string message(read_buffer_.begin(), read_buffer_.end()); //begin() + read_offset_);
+			read_offset_ = 0;
 
 			// add a message to the queue and signal the main thread.
 			message_queue_->push(new MessageQueue::Message(message));
@@ -182,7 +183,7 @@ bool CefInstance::CreatePipe() {
 		throw std::runtime_error("Pipe is already connected");
 
 	pipe_ = CreateNamedPipe(pipe_name_.c_str(), 
-		PIPE_ACCESS_DUPLEX,
+		PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
 		PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_REJECT_REMOTE_CLIENTS,
 		1, 0, 0, 
 		NMPWAIT_USE_DEFAULT_WAIT, 
