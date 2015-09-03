@@ -42,7 +42,7 @@ void BrowserApp::OnContextInitialized() {
 		CefCommandLine::GetGlobalCommandLine();
 	url = command_line->GetSwitchValue("url");
 	if (url.empty())
-	url = "http://www.google.com";
+		url = "http://www.google.com";
 
 	// Check if a "--parent-hwnd=" value was provided.
 	std::string hwnd_s = command_line->GetSwitchValue("parent-hwnd");

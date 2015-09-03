@@ -41,11 +41,12 @@
 #include <iterator>
 #include <map>
 #include <vector>
-
+#include <atlbase.h>
+#include <atlconv.h>
 
 // Set an existing EXTfldval object from a std::string
 #ifdef isunicode
-qchar* OmnisTools::getQCharFromString(const std::string readString, qlong &retLength) {
+qchar* OmnisTools::GetQCharFromString(const std::string readString, qlong &retLength) {
 	qlong length = readString.size();
 	
 	// Cast-away constness of c_str() pointer 
@@ -64,9 +65,9 @@ qchar* OmnisTools::getQCharFromString(const std::string readString, qlong &retLe
 }
 
 // Set an existing EXTfldval object from a std::string
-void OmnisTools::getEXTFldValFromString(EXTfldval& fVal, const std::string readString) {
+void OmnisTools::GetEXTFldValFromString(EXTfldval& fVal, const std::string readString) {
 	qlong length;
-	qchar* omnisString = getQCharFromString(readString, length);
+	qchar* omnisString = GetQCharFromString(readString, length);
 	
 	fVal.setChar(omnisString, length); // Set value of character field, but exclude the last character since it will be the null terminator from the C String
 	
@@ -75,7 +76,7 @@ void OmnisTools::getEXTFldValFromString(EXTfldval& fVal, const std::string readS
 }
 #else
 // Get a dynamically allocated qchar* array from a std::string
-qchar* OmnisTools::getQCharFromString(const std::string readString, qlong &retLength) {
+qchar* OmnisTools::GetQCharFromString(const std::string readString, qlong &retLength) {
 
 	// Get a dynamically allocated qchar* array from a std::string
 	qlong length = retLength = readString.size();
@@ -88,7 +89,7 @@ qchar* OmnisTools::getQCharFromString(const std::string readString, qlong &retLe
 	return qcharData;
 }
 
-void OmnisTools::getEXTFldValFromString(EXTfldval& fVal, const std::string readString) {
+void OmnisTools::GetEXTFldValFromString(EXTfldval& fVal, const std::string readString) {
 	
 	qlong length = readString.size();
 	qoschar* cString = const_cast<qoschar*>(readString.c_str());
@@ -104,19 +105,19 @@ void OmnisTools::getEXTFldValFromString(EXTfldval& fVal, const std::string readS
 #endif
 
 // Set an existing EXTfldval object from a std::wstring
-void OmnisTools::getEXTFldValFromChar(EXTfldval& fVal, const char* readChar) {
+void OmnisTools::GetEXTFldValFromChar(EXTfldval& fVal, const char* readChar) {
     std::string readString;
     if (readChar)
         readString = readChar;
     else
         readString = "";
     
-    getEXTFldValFromString(fVal, readString);
+    GetEXTFldValFromString(fVal, readString);
 }
 
 // Get a std::string from an EXTfldval object
 #ifdef isunicode
-std::string OmnisTools::getStringFromEXTFldVal(EXTfldval& fVal) {
+std::string OmnisTools::GetStringFromEXTFldVal(EXTfldval& fVal) {
 	std::string retString;
 	
 	// Get a qchar* string
@@ -141,7 +142,7 @@ std::string OmnisTools::getStringFromEXTFldVal(EXTfldval& fVal) {
 	return retString;
 }
 #else
-std::string OmnisTools::getStringFromEXTFldVal(EXTfldval& fVal) {
+std::string OmnisTools::GetStringFromEXTFldVal(EXTfldval& fVal) {
 	std::string retString;
 	
 	// Get a qchar* string
@@ -168,7 +169,7 @@ std::string OmnisTools::getStringFromEXTFldVal(EXTfldval& fVal) {
 // Get a std::string from an EXTfldval object
 Awesomium::WebString OmnisTools::getWebStringFromEXTFldVal(EXTfldval& fVal) {
 	std::string retString;
-	std::string input = getStringFromEXTFldVal(fVal);
+	std::string input = GetStringFromEXTFldVal(fVal);
     Awesomium::WebString webString = getWebStringFromStr(input);	
 	return webString;
 }
@@ -217,7 +218,7 @@ std::string OmnisTools::getStringFromWebString(const Awesomium::WebString& value
 */
 
 // Return a C++ int from an EXTfldval
-int OmnisTools::getIntFromEXTFldVal(EXTfldval& fVal) {
+int OmnisTools::GetIntFromEXTFldVal(EXTfldval& fVal) {
 	qlong omnInt = fVal.getLong();
 	
 	if (omnInt < INT_MIN || omnInt > INT_MAX) {
@@ -227,7 +228,7 @@ int OmnisTools::getIntFromEXTFldVal(EXTfldval& fVal) {
 }
 
 
-void OmnisTools::getEXTFldValFromBool(EXTfldval& fVal, bool b) {
+void OmnisTools::GetEXTFldValFromBool(EXTfldval& fVal, bool b) {
 	qshort omBool;
 	if (b==true) 
         omBool = 2;
@@ -239,12 +240,12 @@ void OmnisTools::getEXTFldValFromBool(EXTfldval& fVal, bool b) {
 
 
 // Get an EXTfldval for a C++ int
-void OmnisTools::getEXTFldValFromInt(EXTfldval& fVal, int i) {
+void OmnisTools::GetEXTFldValFromInt(EXTfldval& fVal, int i) {
 	fVal.setLong(static_cast<qlong>(i));
 }
 
 // Get an EXTfldval for a C++ int
-void OmnisTools::getEXTFldValFromInt64(EXTfldval& fVal, __int64 i) {
+void OmnisTools::GetEXTFldValFromInt64(EXTfldval& fVal, __int64 i) {
 	if (i < INT_MIN || i > INT_MAX) {
         i = 0; // zero out any numbers that exceed
 	}
@@ -254,7 +255,7 @@ void OmnisTools::getEXTFldValFromInt64(EXTfldval& fVal, __int64 i) {
 
 // Get a str255 object for a character constant (No string if it doesn't correspond to the conditions)
 #ifdef isunicode
-str255 OmnisTools::initStr255(const char* in) {
+str255 OmnisTools::InitStr255(const char* in) {
     str255 theString;
     qshort length = strlen(in);
     if (length > 0 && length <= 255) {
@@ -263,15 +264,21 @@ str255 OmnisTools::initStr255(const char* in) {
     return theString;
 } 
 #else
-str255 OmnisTools::initStr255(const char* in) {    
+str255 OmnisTools::InitStr255(const char* in) {    
     return str255(in);
 } 
 #endif
 
-void OmnisTools::logToTrace(const char* msg)
-{
+void OmnisTools::TraceLog(const std::string &msg) {
 	#if defined(IS_DEBUG)
-		str255 logString = initStr255(msg);
+		str255 logString = InitStr255(msg.c_str());
+		ECOaddTraceLine(&logString);
+	#endif
+}
+
+void OmnisTools::TraceLog(const std::wstring &msg) {
+	#if defined(IS_DEBUG)		
+		str255 logString = InitStr255(CW2A(msg.c_str()));
 		ECOaddTraceLine(&logString);
 	#endif
 }

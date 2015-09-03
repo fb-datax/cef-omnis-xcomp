@@ -26,7 +26,7 @@ public:
 			mutex_ = NULL;
 		}
 	}
-	bool push(Message *message) {
+	bool Push(Message *message) {
 		if(WaitForSingleObject(mutex_, INFINITE) == WAIT_OBJECT_0) {
 			queue_.push(message);
 			if(!ReleaseMutex(mutex_))
@@ -36,7 +36,7 @@ public:
 		// the mutex wait was abandoned.
 		return false;
 	}
-	Message *pop() {
+	Message *Pop() {
 		Message *result = NULL;
 		if(WaitForSingleObject(mutex_, INFINITE) == WAIT_OBJECT_0) {
 			if(!queue_.empty()) {

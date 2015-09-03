@@ -3,18 +3,23 @@
 #include "OmnisTools.h"
 #include <sstream>
 #include <sddl.h>
+#include <atlbase.h>
+#include <atlconv.h>
+
+using namespace OmnisTools;
 
 UINT CefInstance::PIPE_MESSAGES_AVAILABLE = 0;
 
 CefInstance::CefInstance(HWND hwnd) :
 	hwnd_(hwnd),
-	listner_thread_(INVALID_HANDLE_VALUE),
+	listener_thread_(INVALID_HANDLE_VALUE),
+	job_(NULL),
 	pipe_(INVALID_HANDLE_VALUE),
 	read_offset_(0),
+	cef_ready_(false),
 	message_queue_(new MessageQueue())
 {
-	// for efficient execution of commands from the pipe, we populate a map.
-	command_name_map_["ready"] = ready;
+	InitCommandNameMap();
 
 	// create a custom windows event for signalling from the pipe listener 
 	// thread to the main thread.
@@ -62,6 +67,9 @@ CefInstance::CefInstance(HWND hwnd) :
 }
 
 void CefInstance::InitWebView() {
+	if(listener_thread_ != INVALID_HANDLE_VALUE || pipe_ != INVALID_HANDLE_VALUE || job_)
+		throw std::runtime_error("WebView already initialized.");
+
 	if(!CreatePipe())
 		throw Win32Error();
 
@@ -81,14 +89,28 @@ void CefInstance::InitWebView() {
 	std::stringstream cmd_line;
 	cmd_line << '"' << exe_path << "\""
 		<< " --parent-hwnd=" << std::dec << (int) hwnd_
-		<< " --url=about:blank" // ####
+		<< " --disable-web-security"
+		<< " --allow-file-access-from-files"
+		<< " --allow-universal-access-from-files"
+		<< " --url=about:blank"
 		<< " --pipe-name=" << pipe_name_;
+	job_ = CreateJobObject(NULL, NULL);
+	if(!job_)
+		throw Win32Error();
+	// create a job so that CEF will be killed if Omnis is killed unexpectedly.
+	// normally ShutDownWebView will be called and the browser will be closed gracefully.
+	JOBOBJECT_EXTENDED_LIMIT_INFORMATION jeli = { 0 };
+	jeli.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+	if(!SetInformationJobObject(job_, JobObjectExtendedLimitInformation, &jeli, sizeof(jeli)))
+		throw Win32Error();
 	STARTUPINFO startup_info;
 	ZeroMemory(&startup_info, sizeof(startup_info));
     startup_info.cb = sizeof(startup_info);
 	PROCESS_INFORMATION process_info;
     ZeroMemory(&process_info, sizeof(process_info));
 	if(!CreateProcess(exe_path.c_str(), &cmd_line.str()[0], NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &startup_info, &process_info))
+		throw Win32Error();
+	if(!AssignProcessToJobObject(job_, process_info.hProcess))
 		throw Win32Error();
     CloseHandle(process_info.hProcess);
     CloseHandle(process_info.hThread);
@@ -106,18 +128,36 @@ void CefInstance::InitWebView() {
 	} else
 		throw std::exception(); // should never happen for overlapped calls.
 
+	// wait for the first "ready" message from CEF.
+	//ReadMessage();
+	//std::auto_ptr<MessageQueue::Message> message(message_queue_->Pop());
+	//if(message->value_ != "ready:")
+	//	throw std::runtime_error("Expecting ready message");
+
 	// start the pipe listener thread.
-	listner_thread_ = CreateThread(NULL, 0, CefInstance::StartPipeListenerThread, this, 0, NULL);
-	if(!listner_thread_)
+	listener_thread_ = CreateThread(NULL, 0, CefInstance::StartPipeListenerThread, this, 0, NULL);
+	if(!listener_thread_)
 		throw Win32Error();
 }
 
 void CefInstance::ShutDownWebView() {
-	//MessageBox(NULL, "ShutDownWebView", "Stop", MB_OK);
+	// shutting down. we tell CEF to close all browsers, close the pipe and wait for
+	// the listener thread to exit.
+	if(listener_thread_ == INVALID_HANDLE_VALUE || pipe_ == INVALID_HANDLE_VALUE)
+		throw std::runtime_error("WebView not initialized.");
+	WriteMessage(L"exit", L"");
+	ClosePipe();
+	if(WaitForSingleObject(listener_thread_, 5000) != WAIT_OBJECT_0)
+		throw Win32Error();
+	CloseHandle(listener_thread_);
+	listener_thread_ = NULL;
+	if(job_) {
+		CloseHandle(job_);
+		job_ = NULL;
+	}
 }
 
 CefInstance::~CefInstance() {
-	ClosePipe();
 	if(read_lpo_) {
 		CloseHandle(read_lpo_->hEvent);
 		GlobalFree(read_lpo_);
@@ -139,6 +179,14 @@ DWORD WINAPI CefInstance::StartPipeListenerThread(LPVOID pVoid) {
 }
 
 DWORD CefInstance::RunPipeListenerThread() {
+	while(true)
+		ReadMessage();
+	return 0;
+}
+
+void CefInstance::ReadMessage() {
+	// make a synchronous read from the pipe and push the resulting message to
+	// the queue.
 	int attempt = 1;
 	while(true) {
 		// make a blocking read from the named pipe.
@@ -161,11 +209,14 @@ DWORD CefInstance::RunPipeListenerThread() {
 							read_offset_ += bytes_read / sizeof(std::wstring::value_type);
 							if(read_offset_ >= read_buffer_.size())
 								GrowReadBuffer();
-							ReadComplete(bytes_read);
+							return ReadComplete(bytes_read);
 						} else {
 							DWORD err = GetLastError();
 							if(err == ERROR_MORE_DATA) {
 								GrowReadBuffer();
+							} else if(err == ERROR_BROKEN_PIPE) {
+								// the main thread closed the pipe. we're done.
+								ExitThread(0);
 							} else {
 								throw Win32Error(err);
 							}
@@ -186,17 +237,16 @@ DWORD CefInstance::RunPipeListenerThread() {
 				// wait for the client to connect.
 				Sleep(100);
 			} else if(err == ERROR_BROKEN_PIPE || err == ERROR_INVALID_HANDLE) {
-				// the pipe was closed.
-				throw Win32Error(err);
+				// the pipe was closed. we're done.
+				ExitThread(0);
 			} else
 				throw Win32Error();
 		} else {
 			// the read completed immediately.
 			attempt = 1;
-			ReadComplete(bytes_read);
+			return ReadComplete(bytes_read);
 		}
 	}
-	return 0;
 }
 
 void CefInstance::ReadComplete(DWORD bytes_read) {
@@ -209,7 +259,7 @@ void CefInstance::ReadComplete(DWORD bytes_read) {
 	read_offset_ = 0;
 
 	// add a message to the queue and signal the main thread.
-	message_queue_->push(new MessageQueue::Message(message));
+	message_queue_->Push(new MessageQueue::Message(message));
 	PostMessage(hwnd_, PIPE_MESSAGES_AVAILABLE, 0, 0);
 }
 
@@ -220,20 +270,31 @@ void CefInstance::GrowReadBuffer() {
 	read_offset_ = sz;
 }
 
-void CefInstance::WriteMessage(std::wstring name, std::wstring argument) {
+void CefInstance::WriteMessage(const std::wstring &name, const std::wstring &argument) {
+	std::wstring message(name);
+	message.append(L":");
+	message.append(argument);
+	message.append(1, L'\0'); // null terminator.
+	WriteMessage(message);
+}
+
+void CefInstance::WriteMessage(const std::wstring &message) {
+	if(!cef_ready_) {
+		std::wstringstream ss;
+		ss << L"writing " << message << L" when cef not ready.";
+		TraceLog(ss.str());
+		messages_to_write_.push_back(message);
+		return;
+	}
 	if(pipe_ == INVALID_HANDLE_VALUE)
 		throw std::runtime_error("Pipe is closed.");
-	std::wstring write_buffer(name);
-	write_buffer.append(L":");
-	write_buffer.append(argument);
-	write_buffer.append(1, L'\0'); // null terminator.
-	int bytes = write_buffer.size() * sizeof(std::wstring::value_type);
+	int bytes = message.size() * sizeof(std::wstring::value_type);
 	DWORD written;
 	write_lpo_->Offset = 0;
 	write_lpo_->OffsetHigh = 0;
 	if(!WriteFile(
 		pipe_, 
-		write_buffer.data(), 
+		message.data(), 
 		bytes,
 		&written, write_lpo_)) {
 		DWORD err = GetLastError();
@@ -256,12 +317,8 @@ bool CefInstance::CreatePipe() {
 		NMPWAIT_USE_DEFAULT_WAIT, 
 		pSa_);
 	if(pipe_ == INVALID_HANDLE_VALUE) {
-		//if(pipe_handler_)
-		//	pipe_handler_->OnConnectFailed(GetLastError());
 		return false;
 	}
-	//if(pipe_handler_)
-	//	pipe_handler_->OnConnectCompleted();
 	return true;
 }
 
@@ -296,7 +353,11 @@ qbool CefInstance::CallMethod(EXTCompInfo *eci) {
 				rtnCode = qtrue;
 				hasRtnVal = qtrue;	
 				EXTfldval fval( (qfldval)paramInfo->mData);
-				NavigateToUrl(OmnisTools::getStringFromEXTFldVal(fval));
+				std::string url_a = OmnisTools::GetStringFromEXTFldVal(fval);
+				std::wstring url = CA2W(url_a.c_str());
+				std::wstringstream code;
+				code << "window.location.href='" << url << "';";
+				ExecuteJavaScript(code.str());
 			}
 			break;
 		}
@@ -307,7 +368,7 @@ qbool CefInstance::CallMethod(EXTCompInfo *eci) {
 				rtnCode = qtrue;
 				hasRtnVal = qtrue;	
 				EXTfldval fval( (qfldval)paramInfo->mData);
-				int downloadId = OmnisTools::getIntFromEXTFldVal(fval);
+				int downloadId = OmnisTools::GetIntFromEXTFldVal(fval);
 				// ### rtnVal.setLong(WebBrowser::cancelDownload(downloadId));
 			}
 			break;
@@ -321,10 +382,10 @@ qbool CefInstance::CallMethod(EXTCompInfo *eci) {
 			hasRtnVal = qtrue;	
 			
 			EXTfldval fvalDownloadId((qfldval)pDownloadId->mData);
-			int downloadId = OmnisTools::getIntFromEXTFldVal(fvalDownloadId);
+			int downloadId = OmnisTools::GetIntFromEXTFldVal(fvalDownloadId);
 
 			EXTfldval fvalPath((qfldval)pPathParam->mData);
-			std::string path = OmnisTools::getStringFromEXTFldVal(fvalPath);
+			std::string path = OmnisTools::GetStringFromEXTFldVal(fvalPath);
 
 
 			// ### rtnVal.setLong(WebBrowser::startDownload(downloadId,path));
@@ -335,14 +396,14 @@ qbool CefInstance::CallMethod(EXTCompInfo *eci) {
 		case ofHistoryGoBack: {
 			rtnCode = qtrue;
 			hasRtnVal = qtrue;
-			// ### rtnVal.setLong(WebBrowser::historyBack());
+			ExecuteJavaScript(L"window.history.back();");
 			break;
 		}
 
 		case ofHistoryGoForward: {
 			rtnCode = qtrue;
 			hasRtnVal = qtrue;
-			// ### rtnVal.setLong(WebBrowser::historyForward());
+			ExecuteJavaScript(L"window.history.forward();");
 			break;
 		}
 		case ofFocus: {
@@ -364,9 +425,9 @@ qbool CefInstance::CallMethod(EXTCompInfo *eci) {
 				hasRtnVal = qtrue;	
 				
 				EXTfldval fval( (qfldval)paramInfo->mData);
-				std::string url = OmnisTools::getStringFromEXTFldVal(fval);
+				std::string url = OmnisTools::GetStringFromEXTFldVal(fval);
 				// ### std::string result = WebBrowser::getDataFromComp(url);
-				// ### OmnisTools::getEXTFldValFromString(rtnVal,result);
+				// ### OmnisTools::GetEXTFldValFromString(rtnVal,result);
 			}
 			break;
 		}
@@ -377,8 +438,8 @@ qbool CefInstance::CallMethod(EXTCompInfo *eci) {
 			if (pCompId) {
 				EXTfldval fvalComp((qfldval)pCompId->mData);
 				EXTfldval fvalData((qfldval)pData->mData);
-				std::string comp = OmnisTools::getStringFromEXTFldVal(fvalComp);
-				std::string data = OmnisTools::getStringFromEXTFldVal(fvalData);
+				std::string comp = OmnisTools::GetStringFromEXTFldVal(fvalComp);
+				std::string data = OmnisTools::GetStringFromEXTFldVal(fvalData);
 				// ### rtnVal.setLong(WebBrowser::setDataForComp(comp,data));
 				rtnCode = qtrue;
 				hasRtnVal = qtrue;	
@@ -391,47 +452,47 @@ qbool CefInstance::CallMethod(EXTCompInfo *eci) {
 			if (pCompId) {
 				EXTParamInfo* pCompId = ECOfindParamNum(eci,1);
 				EXTfldval fvalCompId ((qfldval)pCompId->mData);
-				std::string compId = OmnisTools::getStringFromEXTFldVal(fvalCompId);
+				std::string compId = OmnisTools::GetStringFromEXTFldVal(fvalCompId);
 
 				EXTParamInfo* pType = ECOfindParamNum(eci,2);
 				EXTfldval fvalType ((qfldval)pType->mData);
-				std::string type = OmnisTools::getStringFromEXTFldVal(fvalType);
+				std::string type = OmnisTools::GetStringFromEXTFldVal(fvalType);
 
 				EXTParamInfo* pParam1 = ECOfindParamNum(eci,3);
 				EXTfldval fvalParam1 ((qfldval)pParam1->mData);
-				std::string param1 = OmnisTools::getStringFromEXTFldVal(fvalParam1);
+				std::string param1 = OmnisTools::GetStringFromEXTFldVal(fvalParam1);
 
 				EXTParamInfo* pParam2 = ECOfindParamNum(eci,4);
 				EXTfldval fvalParam2 ((qfldval)pParam2->mData);
-				std::string param2 = OmnisTools::getStringFromEXTFldVal(fvalParam2);
+				std::string param2 = OmnisTools::GetStringFromEXTFldVal(fvalParam2);
 
 				EXTParamInfo* pParam3 = ECOfindParamNum(eci,5);
 				EXTfldval fvalParam3 ((qfldval)pParam3->mData);
-				std::string param3 = OmnisTools::getStringFromEXTFldVal(fvalParam3);
+				std::string param3 = OmnisTools::GetStringFromEXTFldVal(fvalParam3);
 
 				EXTParamInfo* pParam4 = ECOfindParamNum(eci,6);
 				EXTfldval fvalParam4 ((qfldval)pParam4->mData);
-				std::string param4 = OmnisTools::getStringFromEXTFldVal(fvalParam4);
+				std::string param4 = OmnisTools::GetStringFromEXTFldVal(fvalParam4);
 
 				EXTParamInfo* pParam5 = ECOfindParamNum(eci,7);
 				EXTfldval fvalParam5 ((qfldval)pParam5->mData);
-				std::string param5 = OmnisTools::getStringFromEXTFldVal(fvalParam5);
+				std::string param5 = OmnisTools::GetStringFromEXTFldVal(fvalParam5);
 
 				EXTParamInfo* pParam6 = ECOfindParamNum(eci,8);
 				EXTfldval fvalParam6 ((qfldval)pParam6->mData);
-				std::string param6 = OmnisTools::getStringFromEXTFldVal(fvalParam6);
+				std::string param6 = OmnisTools::GetStringFromEXTFldVal(fvalParam6);
 
 				EXTParamInfo* pParam7 = ECOfindParamNum(eci,9);
 				EXTfldval fvalParam7 ((qfldval)pParam7->mData);
-				std::string param7 = OmnisTools::getStringFromEXTFldVal(fvalParam7);
+				std::string param7 = OmnisTools::GetStringFromEXTFldVal(fvalParam7);
 
 				EXTParamInfo* pParam8 = ECOfindParamNum(eci,10);
 				EXTfldval fvalParam8 ((qfldval)pParam8->mData);
-				std::string param8 = OmnisTools::getStringFromEXTFldVal(fvalParam8);
+				std::string param8 = OmnisTools::GetStringFromEXTFldVal(fvalParam8);
 
 				EXTParamInfo* pParam9 = ECOfindParamNum(eci,11);
 				EXTfldval fvalParam9 ((qfldval)pParam9->mData);
-				std::string param9 = OmnisTools::getStringFromEXTFldVal(fvalParam9);
+				std::string param9 = OmnisTools::GetStringFromEXTFldVal(fvalParam9);
 				
 				// ### rtnVal.setLong(WebBrowser::sendActionToComp(compId,type,param1,param2,param3,param4,param5,param6,param7,param8,param9));
 				rtnCode = qtrue;
@@ -445,17 +506,14 @@ qbool CefInstance::CallMethod(EXTCompInfo *eci) {
 	return rtnCode;
 }
 
-void CefInstance::NavigateToUrl(std::string url) {
-	std::wstring arg = L"window.location.href='";
-	arg += std::wstring(url.begin(), url.end());
-	arg += L"';";
-	WriteMessage(L"execute", arg);
-	//WriteMessage(L"execute", L"alert('ExecuteJavaScript works!');");
+void CefInstance::InitCommandNameMap() {
+	command_name_map_["ready"] = ready;
+	command_name_map_["console"] = console;
 }
 
 void CefInstance::PopMessages() {
 	MessageQueue::Message *message;
-	while(message = message_queue_->pop()) {
+	while(message = message_queue_->Pop()) {
 		std::auto_ptr<MessageQueue::Message> m(message);
 
 		// split the message value on the first colon.
@@ -465,11 +523,30 @@ void CefInstance::PopMessages() {
 			m->value_[i] = 0;
 			arg = &m->value_[i+1];
 		}
-		std::string command = m->value_.c_str();
-		switch(command_name_map_[command]) {
-			case ready:
-				//WriteMessage(L"ping", L"test");
-				break;
+		std::string message_name = m->value_.c_str();
+		CommandNameMap::const_iterator command = command_name_map_.find(message_name);
+		if(command != command_name_map_.end()) {
+			switch(command->second) {
+				case ready: {
+					TraceLog("CEF ready.");
+					cef_ready_ = true;
+					std::vector<std::wstring>::const_iterator i;
+					for(i = messages_to_write_.begin(); i != messages_to_write_.end(); ++i)
+						WriteMessage(*i);
+					messages_to_write_.clear();
+					break;
+				}
+				case console:
+					// pass console messages directly to the Omnis trace log.
+					TraceLog(arg);
+					break;
+			}
+		} else {
+			std::stringstream ss;
+			ss << "Unknown CEF message: " << message_name;
+			if(!arg.empty())
+				ss << ":" << arg;
+			TraceLog(ss.str());
 		}
 	}
 }

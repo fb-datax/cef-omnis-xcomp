@@ -55,25 +55,22 @@
 namespace OmnisTools {
  
 	// EXTfldval helpers
-	std::string getStringFromEXTFldVal(EXTfldval&);
+	std::string GetStringFromEXTFldVal(EXTfldval&);
 	
-	//Awesomium::WebString getWebStringFromEXTFldVal(EXTfldval& fVal);
-	//Awesomium::WebString getWebStringFromStr(std::string& value);
-	//std::string getStringFromWebString(const Awesomium::WebString& value);
-	
-	int getIntFromEXTFldVal(EXTfldval& fVal);
+	int GetIntFromEXTFldVal(EXTfldval& fVal);
 
-	void getEXTFldValFromString(EXTfldval&, const std::string);
-    void getEXTFldValFromChar(EXTfldval&, const char*);
-	void getEXTFldValFromInt(EXTfldval& fVal, int);
-	void getEXTFldValFromInt64(EXTfldval& fVal, __int64);
-	void getEXTFldValFromBool(EXTfldval& fVal, bool b);
+	void GetEXTFldValFromString(EXTfldval&, const std::string);
+    void GetEXTFldValFromChar(EXTfldval&, const char*);
+	void GetEXTFldValFromInt(EXTfldval& fVal, int);
+	void GetEXTFldValFromInt64(EXTfldval& fVal, __int64);
+	void GetEXTFldValFromBool(EXTfldval& fVal, bool b);
 	
-	str255 initStr255(const char*);
+	str255 InitStr255(const char*);
 
 	// Allg Helpers
-	qchar* getQCharFromString( const std::string readString, qlong &retLength );
-	void logToTrace(const char* msg);
+	qchar* GetQCharFromString( const std::string readString, qlong &retLength );
+	void TraceLog(const std::string &msg);
+	void TraceLog(const std::wstring &msg);
 }
 
 #endif // OMNIS_TOOLS_HE_

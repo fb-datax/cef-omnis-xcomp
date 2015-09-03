@@ -14,7 +14,7 @@
 #include "include/base/cef_bind.h"
 
 RendererApp::RendererApp() {
-	command_name_map_["execute"] = execute;
+	InitCommandNameMap();
 }
 
 void RendererApp::OnBrowserCreated(CefRefPtr<CefBrowser> browser) {
@@ -28,22 +28,24 @@ void RendererApp::OnBrowserCreated(CefRefPtr<CefBrowser> browser) {
 bool RendererApp::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
 										   CefProcessId source_process,
 										   CefRefPtr<CefProcessMessage> message) {
-	std::wstring msg = L"OnProcessMessageReceived (renderer): ";
+	/*std::wstring msg = L"OnProcessMessageReceived (renderer): ";
 	msg += message->GetName();
-	//MessageBox(NULL, msg.c_str(), L"Stop", MB_OK);
-	switch(command_name_map_[message->GetName()]) {
-		case execute:
-			// execute the given javascript code.
-			CefRefPtr<CefListValue> args = message->GetArgumentList();
-			if(args->GetSize() == 1) {
-				CefString expression = args->GetString(0);
-				CefRefPtr<CefFrame> frame = browser->GetMainFrame();
-				//frame->ExecuteJavaScript("alert('ExecuteJavaScript works!');", frame->GetURL(), 0);
-				frame->ExecuteJavaScript(expression, frame->GetURL(), 0);
-				//frame->LoadURL("http://google.com");
-			} else
-				throw std::runtime_error("The execute command needs a single string argument.");
-			//MessageBox(NULL, L"execute", L"Stop", MB_OK);
+	MessageBox(NULL, msg.c_str(), L"Stop", MB_OK);*/
+	CommandNameMap::const_iterator command = command_name_map_.find(message->GetName());
+	if(command != command_name_map_.end()) {
+		switch(command->second) {
+			case execute: {
+				// execute the given javascript code.
+				CefRefPtr<CefListValue> args = message->GetArgumentList();
+				if(args->GetSize() == 1) {
+					CefString expression = args->GetString(0);
+					CefRefPtr<CefFrame> frame = browser->GetMainFrame();
+					frame->ExecuteJavaScript(expression, frame->GetURL(), 0);
+					//frame->LoadURL("http://google.com");
+				} else
+					throw std::runtime_error("The execute command needs a single string argument.");
+			}
+		}
 	}
 	return false;
 }

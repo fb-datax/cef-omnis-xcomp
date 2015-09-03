@@ -64,10 +64,15 @@ class RendererApp : public CefApp,
 
  private:
 
+	// the command name map allows for an efficient string switch statement.
 	enum CommandName {
 		execute
 	};
-	std::map<std::string, CommandName> command_name_map_;
+	typedef std::map<std::string, CommandName> CommandNameMap;
+	CommandNameMap command_name_map_;
+	void InitCommandNameMap() {
+		command_name_map_["execute"] = execute;
+	}
 
 	// Include the default reference counting implementation.
 	IMPLEMENT_REFCOUNTING(RendererApp);

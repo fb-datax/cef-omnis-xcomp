@@ -29,16 +29,21 @@ protected:
 	DWORD RunPipeListenerThread();
 	bool CreatePipe();
 	void ClosePipe();
+	void ReadMessage();
 	void ReadComplete(DWORD bytes_read);
 	void GrowReadBuffer();
-	void WriteMessage(std::wstring name, std::wstring argument);
+	void WriteMessage(const std::wstring &name, const std::wstring &argument);
+	void WriteMessage(const std::wstring &message);
 	
 	void InitWebView();
 	void ShutDownWebView();
-	void NavigateToUrl(std::string url);
+	void ExecuteJavaScript(std::wstring code) {
+		WriteMessage(L"execute", code);
+	}
 
 	HWND hwnd_;
-	HANDLE listner_thread_;
+	HANDLE listener_thread_;
+	HANDLE job_;
 	LPOVERLAPPED read_lpo_, write_lpo_;
 	HANDLE pipe_;
 	PSECURITY_ATTRIBUTES pSa_;
@@ -46,12 +51,18 @@ protected:
 	std::wstring read_buffer_;
 	std::string::size_type read_offset_;
 
+	bool cef_ready_;
+	std::vector<std::wstring> messages_to_write_;
 	std::auto_ptr<MessageQueue> message_queue_;
 	
+	// the command name map allows for an efficient string switch statement.
 	enum CommandName {
-		ready
+		ready,
+		console
 	};
-	std::map<std::string, CommandName> command_name_map_;
+	typedef std::map<std::string, CommandName> CommandNameMap;
+	CommandNameMap command_name_map_;
+	void InitCommandNameMap();
 };
 
 // Method ids

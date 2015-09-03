@@ -159,6 +159,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="browser_app.h" />
+    <ClInclude Include="devtools_handler.h" />
     <ClInclude Include="message_pipe.h" />
     <ClInclude Include="other_app.h" />
     <ClInclude Include="renderer_app.h" />
