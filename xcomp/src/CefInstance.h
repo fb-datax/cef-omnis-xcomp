@@ -41,6 +41,8 @@ protected:
 		WriteMessage(L"execute", code);
 	}
 
+	void ShowMsg(const std::string &arg);
+
 	HWND hwnd_;
 	HANDLE listener_thread_;
 	HANDLE job_;
@@ -58,7 +60,8 @@ protected:
 	// the command name map allows for an efficient string switch statement.
 	enum CommandName {
 		ready,
-		console
+		console,
+		showMsg
 	};
 	typedef std::map<std::string, CommandName> CommandNameMap;
 	CommandNameMap command_name_map_;

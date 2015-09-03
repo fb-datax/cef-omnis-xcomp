@@ -18,16 +18,14 @@ class RendererApp : public CefApp,
 	}
 
 	// CefRenderProcessHandler methods:
-	virtual void OnBrowserCreated(CefRefPtr<CefBrowser> browser) OVERRIDE;
+	virtual void OnBrowserCreated(CefRefPtr<CefBrowser> browser) OVERRIDE { }
 	virtual void OnBrowserDestroyed(CefRefPtr<CefBrowser> browser) OVERRIDE {
 		//MessageBox(NULL, L"OnBrowserDestroyed", L"Stop", MB_OK);
 	}	
 	virtual void OnRenderThreadCreated(CefRefPtr<CefListValue> extra_info) OVERRIDE {
 		//MessageBox(NULL, L"OnRenderThreadCreated", L"Stop", MB_OK);
 	}
-	virtual void OnWebKitInitialized() OVERRIDE {
-		//MessageBox(NULL, L"OnWebKitInitialized", L"Stop", MB_OK);
-	}
+	virtual void OnWebKitInitialized() OVERRIDE;
 	virtual bool OnBeforeNavigation(CefRefPtr<CefBrowser> browser,
 									CefRefPtr<CefFrame> frame,
 									CefRefPtr<CefRequest> request,
@@ -66,12 +64,14 @@ class RendererApp : public CefApp,
 
 	// the command name map allows for an efficient string switch statement.
 	enum CommandName {
-		execute
+		execute,
+		navigate
 	};
 	typedef std::map<std::string, CommandName> CommandNameMap;
 	CommandNameMap command_name_map_;
 	void InitCommandNameMap() {
 		command_name_map_["execute"] = execute;
+		command_name_map_["navigate"] = navigate;
 	}
 
 	// Include the default reference counting implementation.

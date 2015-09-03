@@ -24,96 +24,12 @@ ClientHandler* g_instance = NULL;
 
 }  // namespace
 
-// static
-LRESULT CALLBACK ClientHandler::RootWndProc(HWND hWnd, UINT message,
-                                            WPARAM wParam, LPARAM lParam) {
-  /*REQUIRE_MAIN_THREAD();
-
-  // Callback for the main window
-  switch (message) {
-    case WM_COMMAND:
-      if (self->OnCommand(LOWORD(wParam)))
-        return 0;
-      break;
-
-    case WM_PAINT:
-      self->OnPaint();
-      return 0;
-
-    case WM_SETFOCUS:
-      self->OnFocus();
-      return 0;
-
-    case WM_SIZE:
-      self->OnSize(wParam == SIZE_MINIMIZED);
-      break;
-
-    case WM_MOVING:
-    case WM_MOVE:
-      self->OnMove();
-      return 0;
-
-    case WM_ERASEBKGND:
-      if (self->OnEraseBkgnd())
-        break;
-      // Don't erase the background.
-      return 0;
-
-    case WM_ENTERMENULOOP:
-      if (!wParam) {
-        // Entering the menu loop for the application menu.
-        CefSetOSModalLoop(true);
-      }
-      break;
-
-    case WM_EXITMENULOOP:
-      if (!wParam) {
-        // Exiting the menu loop for the application menu.
-        CefSetOSModalLoop(false);
-      }
-      break;
-
-    case WM_CLOSE:
-      if (self->OnClose())
-        return 0;  // Cancel the close.
-      break;
-
-    case WM_NCHITTEST: {
-      LRESULT hit = DefWindowProc(hWnd, message, wParam, lParam);
-      if (hit == HTCLIENT) {
-        POINTS points = MAKEPOINTS(lParam);
-        POINT point = { points.x, points.y };
-        ::ScreenToClient(hWnd, &point);
-        if (::PtInRegion(self->draggable_region_, point.x, point.y)) {
-          // If cursor is inside a draggable region return HTCAPTION to allow
-          // dragging.
-          return HTCAPTION;
-        }
-      }
-      return hit;
-    }
-
-    case WM_NCDESTROY:
-      // Clear the reference to |self|.
-      SetUserDataPtr(hWnd, NULL);
-      self->hwnd_ = NULL;
-      self->OnDestroyed();
-      return 0;
-  }*/
-
-  return DefWindowProc(hWnd, message, wParam, lParam);
-}
-
-bool ClientHandler::devtools_class_registered_ = false;
-
 ClientHandler::ClientHandler(const std::string &pipe_name) : 
 	is_closing_(false),
 	pipe_name_(pipe_name) {
 	DCHECK(!g_instance);
 	g_instance = this;
-	
-	command_name_map_["execute"] = execute;
-	command_name_map_["exit"] = exit;
+	InitCommandNameMap();
 
 	if (!pipe_name_.empty()) {
 		// Connect as a client of the named pipe.
@@ -151,9 +67,19 @@ bool ClientHandler::OnProcessMessageReceived( CefRefPtr<CefBrowser> browser,
 											  CefProcessId source_process,
 											  CefRefPtr<CefProcessMessage> message) {
 	CEF_REQUIRE_UI_THREAD();
-	std::wstring msg = L"OnProcessMessageReceived (browser): ";
+	/*std::wstring msg = L"OnProcessMessageReceived (browser): ";
 	msg += message->GetName();
-	MessageBox(NULL, msg.c_str(), L"Stop", MB_OK);
+	MessageBox(NULL, msg.c_str(), L"Stop", MB_OK);*/
+	CommandNameMap::const_iterator command = command_name_map_.find(message->GetName());
+	if(command != command_name_map_.end()) {
+		switch(command->second) {
+			case sendOmnis:
+				CefRefPtr<CefListValue> args = message->GetArgumentList();
+				if(args->GetSize() == 2)
+					PostPipeMessage(args->GetString(0), args->GetString(1));
+				return true;
+		}
+	}
 	return false;
 }
 
@@ -284,20 +210,31 @@ void ClientHandler::OnLoadError(CefRefPtr<CefBrowser> browser,
   frame->LoadString(ss.str(), failedUrl);
 }
 
+void ClientHandler::InitCommandNameMap() {
+	command_name_map_["execute"] = execute;
+	command_name_map_["navigate"] = navigate;
+	command_name_map_["sendOmnis"] = sendOmnis;
+	command_name_map_["exit"] = exit;
+}
+
 void ClientHandler::OnReadCompleted(std::wstring &buffer) {
 	//MessageBox(NULL, buffer.c_str(), L"OnReadCompleted", MB_OK);
 	CefRefPtr<CefProcessMessage> message = ToProcessMessage(buffer);
-	switch(command_name_map_[message->GetName()]) {
-		case execute: {
-			// pass the message to the renderer process of each browser.
-			BrowserList::iterator bit = browser_list_.begin();
-			for (; bit != browser_list_.end(); ++bit)
-				(*bit)->SendProcessMessage(PID_RENDERER, message);
-			break;
-		}
-		case exit: {
-			CloseAllBrowsers(true);
-			break;
+	CommandNameMap::const_iterator command = command_name_map_.find(message->GetName());
+	if(command != command_name_map_.end()) {
+		switch(command->second) {
+			case execute:
+			case navigate: {
+				// pass the message to the renderer process of each browser.
+				BrowserList::iterator bit = browser_list_.begin();
+				for (; bit != browser_list_.end(); ++bit)
+					(*bit)->SendProcessMessage(PID_RENDERER, message);
+				break;
+			}
+			case exit: {
+				CloseAllBrowsers(true);
+				break;
+			}
 		}
 	}
 }
@@ -329,60 +266,16 @@ void ClientHandler::PostPipeMessage(const CefString &name, const CefString &mess
 		message_pipe_->QueueWrite(name, message);
 }
 
-void ClientHandler::RegisterDevToolsClass() {
-	/*if(!devtools_class_registered_) {
-		devtools_class_registered_ = true;		
-		WNDCLASSEX wcex;
-		wcex.cbSize = sizeof(WNDCLASSEX);
-
-		wcex.style         = CS_HREDRAW | CS_VREDRAW;
-		wcex.lpfnWndProc   = RootWndProc;
-		wcex.cbClsExtra    = 0;
-		wcex.cbWndExtra    = 0;
-		wcex.hInstance     = hInstance;
-		wcex.hIcon         = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_CEFCLIENT));
-		wcex.hCursor       = LoadCursor(NULL, IDC_ARROW);
-		wcex.hbrBackground = background_brush;
-		wcex.lpszMenuName  = MAKEINTRESOURCE(IDC_CEFCLIENT);
-		wcex.lpszClassName = window_class.c_str();
-		wcex.hIconSm       = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
-
-		RegisterClassEx(&wcex);
-	}*/
-}
-
 void ClientHandler::ShowDevTools(CefRefPtr<CefBrowser> browser,
                                  const CefPoint& inspect_element_at) {
 	CefWindowInfo window_info;
-	window_info.SetAsPopup(browser->GetHost()->GetWindowHandle(), "devtools");
+	//window_info.SetAsPopup(browser->GetHost()->GetWindowHandle(), "DevTools");
+	window_info.SetAsPopup(NULL, "DevTools");
 	CefRefPtr<CefClient> client = new DevToolsHandler();
 	CefBrowserSettings settings;
-	CefRefPtr<DevToolsHandler> handler = new DevToolsHandler();
-	//const std::wstring& window_class = L"IDC_DEVTOOLS";
-	//HINSTANCE hInstance = GetModuleHandle(NULL);
-	//RegisterRootClass(hInstance, window_class, background_brush);
-
-	//if(CefBrowserHost::CreateBrowser(window_info, handler, std::string(), settings, NULL))
-		browser->GetHost()->ShowDevTools(window_info, client, settings, inspect_element_at);
+	browser->GetHost()->ShowDevTools(window_info, client, settings, inspect_element_at);
 }
 
 void ClientHandler::CloseDevTools(CefRefPtr<CefBrowser> browser) {
   browser->GetHost()->CloseDevTools();
-}
-
-bool ClientHandler::CreatePopupWindow(
-		CefRefPtr<CefBrowser> browser,
-		bool is_devtools,
-		const CefPopupFeatures& popupFeatures,
-		CefWindowInfo& windowInfo,
-		CefRefPtr<CefClient>& client,
-		CefBrowserSettings& settings) {
-	// Note: This method will be called on multiple threads.
-
-	// The popup browser will be parented to a new native window.
-	// Don't show URL bar and navigation buttons on DevTools windows.
-	//MainContext::Get()->GetRootWindowManager()->CreateRootWindowAsPopup(
-	//	!is_devtools, is_osr(), popupFeatures, windowInfo, client, settings);
-
-	return true;
 }

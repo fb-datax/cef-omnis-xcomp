@@ -93,9 +93,13 @@ class ClientHandler : public CefClient,
 
 	enum CommandName {
 		execute,
+		navigate,
+		sendOmnis,
 		exit
 	};
-	std::map<std::string, CommandName> command_name_map_;
+	typedef std::map<std::string, CommandName> CommandNameMap;
+	CommandNameMap command_name_map_;
+	void InitCommandNameMap();
 
 	void PostPipeMessage(const CefString &name, const CefString &message);
 
@@ -107,26 +111,11 @@ class ClientHandler : public CefClient,
 	BrowserList browser_list_;
 
 	bool is_closing_;
-	static bool devtools_class_registered_;
-	static LRESULT CALLBACK RootWndProc(HWND hWnd, UINT message,
-                                        WPARAM wParam, LPARAM lParam);
 
 	void RegisterDevToolsClass();
 	void ShowDevTools(CefRefPtr<CefBrowser> browser,
 					const CefPoint& inspect_element_at);
 	void CloseDevTools(CefRefPtr<CefBrowser> browser);
-
-	// Create a new popup window using the specified information. |is_devtools|
-	// will be true if the window will be used for DevTools. Return true to
-	// proceed with popup browser creation or false to cancel the popup browser.
-	// May be called on any thead.
-	bool CreatePopupWindow(
-		CefRefPtr<CefBrowser> browser,
-		bool is_devtools,
-		const CefPopupFeatures& popupFeatures,
-		CefWindowInfo& windowInfo,
-		CefRefPtr<CefClient>& client,
-		CefBrowserSettings& settings);
 
 	// Include the default reference counting implementation.
 	IMPLEMENT_REFCOUNTING(ClientHandler);

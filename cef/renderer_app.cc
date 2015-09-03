@@ -17,12 +17,45 @@ RendererApp::RendererApp() {
 	InitCommandNameMap();
 }
 
-void RendererApp::OnBrowserCreated(CefRefPtr<CefBrowser> browser) {
-	//MessageBox(NULL, L"OnBrowserCreated", L"Stop", MB_OK);
-	/*CefRefPtr<CefProcessMessage> message =
-		CefProcessMessage::Create("ready");
-	browser->SendProcessMessage(PID_BROWSER, message);*/
-	return;
+class SendOmnisHandler : public CefV8Handler {
+public:
+	virtual bool Execute(const CefString& name,
+						CefRefPtr<CefV8Value> object,
+						const CefV8ValueList& arguments,
+						CefRefPtr<CefV8Value>& retval,
+						CefString& exception) OVERRIDE {
+	if(name == "sendOmnis" && arguments.size() == 2 && 
+			arguments[0]->IsString() && 
+			arguments[1]->IsString()) {
+		// send the message to the Omnis xcomp.
+		CefRefPtr<CefBrowser> browser = CefV8Context::GetCurrentContext()->GetBrowser();
+		CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create("sendOmnis");
+		message->GetArgumentList()->SetString(0, arguments[0]->GetStringValue());
+		message->GetArgumentList()->SetString(1, arguments[1]->GetStringValue());
+		browser->SendProcessMessage(PID_BROWSER, message);
+		return true;
+	}
+	return false;
+	}
+
+	// Provide the reference counting implementation for this class.
+	IMPLEMENT_REFCOUNTING(SendOmnisHandler);
+};
+
+void RendererApp::OnWebKitInitialized() {
+	// define the omnis extension.
+	std::string code =
+		"var omnis;"
+		"if(!omnis)"
+		"  omnis = {};"
+		"(function() {"
+		"  omnis.showMsg = function() {"
+		"    native function sendOmnis();"
+		"    var args = Array.prototype.slice.call(arguments);"
+		"    return sendOmnis('showMsg', JSON.stringify(args));"
+		"  };"
+		"})();";
+	CefRegisterExtension("v8/omnis", code, new SendOmnisHandler());
 }
 
 bool RendererApp::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
@@ -44,6 +77,15 @@ bool RendererApp::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
 					//frame->LoadURL("http://google.com");
 				} else
 					throw std::runtime_error("The execute command needs a single string argument.");
+			}
+			case navigate: {
+				// navigate to the given URL.
+				CefRefPtr<CefListValue> args = message->GetArgumentList();
+				if(args->GetSize() == 1) {
+					CefString url = args->GetString(0);
+					browser->GetMainFrame()->LoadURL(url);
+				} else
+					throw std::runtime_error("The navigate command needs a single string argument.");
 			}
 		}
 	}

@@ -5,7 +5,9 @@
 #include <sddl.h>
 #include <atlbase.h>
 #include <atlconv.h>
+#include "rapidjson\document.h"
 
+using namespace rapidjson;
 using namespace OmnisTools;
 
 UINT CefInstance::PIPE_MESSAGES_AVAILABLE = 0;
@@ -92,7 +94,7 @@ void CefInstance::InitWebView() {
 		<< " --disable-web-security"
 		<< " --allow-file-access-from-files"
 		<< " --allow-universal-access-from-files"
-		<< " --url=about:blank"
+		<< " --url=file:///" // this is needed to allow navigation to file urls.
 		<< " --pipe-name=" << pipe_name_;
 	job_ = CreateJobObject(NULL, NULL);
 	if(!job_)
@@ -154,6 +156,25 @@ void CefInstance::ShutDownWebView() {
 	if(job_) {
 		CloseHandle(job_);
 		job_ = NULL;
+	}
+}
+
+void CefInstance::ShowMsg(const std::string &arg) {
+	// the argument should be an array in JSON format.
+	Document doc;
+	doc.Parse(arg.c_str());
+	if(doc.IsArray()) {
+		std::auto_ptr<EXTCompInfo> eci(new EXTCompInfo());
+		eci->mParamFirst = 0;
+		for(int i=0; i<doc.Size(); ++i) {
+			if(doc[i].IsString()) {
+				EXTfldval val;
+				GetEXTFldValFromString(val, doc[i].GetString());
+				ECOaddParam(eci.get(), &val, 0, 0, 0, i+1, 0);
+			}
+		}
+		ECOsendCompEvent(hwnd_, eci.get(), evDoShowMessage, qtrue);
+		ECOmemoryDeletion(eci.get());
 	}
 }
 
@@ -355,9 +376,10 @@ qbool CefInstance::CallMethod(EXTCompInfo *eci) {
 				EXTfldval fval( (qfldval)paramInfo->mData);
 				std::string url_a = OmnisTools::GetStringFromEXTFldVal(fval);
 				std::wstring url = CA2W(url_a.c_str());
-				std::wstringstream code;
-				code << "window.location.href='" << url << "';";
-				ExecuteJavaScript(code.str());
+				WriteMessage(L"navigate", url);
+				//std::wstringstream code;
+				//code << "window.location.href='" << url << "';";
+				//ExecuteJavaScript(code.str());
 			}
 			break;
 		}
@@ -509,6 +531,7 @@ qbool CefInstance::CallMethod(EXTCompInfo *eci) {
 void CefInstance::InitCommandNameMap() {
 	command_name_map_["ready"] = ready;
 	command_name_map_["console"] = console;
+	command_name_map_["showMsg"] = showMsg;
 }
 
 void CefInstance::PopMessages() {
@@ -540,6 +563,10 @@ void CefInstance::PopMessages() {
 					// pass console messages directly to the Omnis trace log.
 					TraceLog(arg);
 					break;
+				case showMsg: {
+					ShowMsg(arg);
+					break;
+				}
 			}
 		} else {
 			std::stringstream ss;

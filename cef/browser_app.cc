@@ -34,6 +34,13 @@ void BrowserApp::OnContextInitialized() {
 	// Specify CEF browser settings here.
 	CefBrowserSettings browser_settings;
 
+	/*browser_settings.web_security = STATE_DISABLED;
+	browser_settings.universal_access_from_file_urls = STATE_ENABLED;
+	browser_settings.file_access_from_file_urls = STATE_ENABLED;
+	browser_settings.local_storage = STATE_ENABLED;
+	browser_settings.databases = STATE_ENABLED;
+	browser_settings.application_cache = STATE_DISABLED;*/
+
 	std::string url;
 
 	// Check if a "--url=" value was provided via the command-line. If so, use
