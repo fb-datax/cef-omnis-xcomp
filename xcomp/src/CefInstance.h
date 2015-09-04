@@ -22,7 +22,6 @@ public:
 	qbool CallMethod(EXTCompInfo *eci);
 	void PopMessages();
 	void Resize();
-	void Resize_();
 
 	static UINT PIPE_MESSAGES_AVAILABLE;
 
@@ -54,7 +53,6 @@ protected:
 	std::string pipe_name_;
 	std::wstring read_buffer_;
 	std::string::size_type read_offset_;
-	UINT_PTR resize_debounce_timer_;
 
 	bool cef_ready_;
 	std::vector<std::wstring> messages_to_write_;

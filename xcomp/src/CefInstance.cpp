@@ -19,8 +19,7 @@ CefInstance::CefInstance(HWND hwnd) :
 	pipe_(INVALID_HANDLE_VALUE),
 	read_offset_(0),
 	cef_ready_(false),
-	message_queue_(new MessageQueue()),
-	resize_debounce_timer_(NULL)
+	message_queue_(new MessageQueue())
 {
 	InitCommandNameMap();
 
@@ -579,24 +578,7 @@ void CefInstance::PopMessages() {
 	}
 }
 
-CefInstance *g_instance = NULL;
-void CALLBACK ResizeInstance(HWND hwnd, UINT msg, UINT_PTR id, DWORD time) {
-	KillTimer(hwnd, id);
-	if(g_instance)
-		g_instance->Resize_();
-}
-
 void CefInstance::Resize() {
-	if(pipe_ != INVALID_HANDLE_VALUE)
-		WriteMessage(L"resize");
-	return;
-	g_instance = this;
-	resize_debounce_timer_ = SetTimer(NULL, resize_debounce_timer_, 1000, (TIMERPROC) ResizeInstance);
-	//if(pipe_ != INVALID_HANDLE_VALUE)
-	//	WriteMessage(L"resize");
-}
-
-void CefInstance::Resize_() {
 	if(pipe_ != INVALID_HANDLE_VALUE)
 		WriteMessage(L"resize");
 }

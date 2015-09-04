@@ -232,8 +232,6 @@ ECOmethodEvent browserObjfunctions[15] = {
 
 int webBrowserCounter = 0;
 
-#define ID_DEBOUNCE_RESIZE_TIMER 101
-
 #define cSBrowserMethod_Count (0)
 #define cIBrowserMethod_Count (sizeof(browserObjfunctions)/sizeof(browserObjfunctions[0]))
 #define cIBrowserParams_Count (sizeof(browserStaticFunctions)/sizeof(browserStaticFunctions[0]))
@@ -395,30 +393,8 @@ extern "C" qlong OMNISWNDPROC GenericWndProc(HWND hwnd, LPARAM Msg,WPARAM wParam
 				CefInstance *instance = static_cast<CefInstance*>(ECOfindObject(eci, hwnd));
 				if(instance && instance->IsHwnd(hwnd))
 					instance->Resize();
-				//UINT_PTR t = SetTimer(hwnd, ID_DEBOUNCE_RESIZE_TIMER, 10, NULL);
-				//if(!t)
-				//	throw Win32Error();
-				/* ######## WebLib::WebBrowser* object = (WebLib::WebBrowser*)ECOfindObject( eci, hwnd );
-				if (object && object->hwnd() == hwnd)  // rmm4999
-				{
-					WNDinvalidateRect( hwnd, NULL );
-					return qtrue;
-				}*/
 			}
 			return qtrue;
-		}
-
-		case WM_TIMER:
-		{
-			switch(wParam) {
-				case ID_DEBOUNCE_RESIZE_TIMER: {
-					CefInstance *instance = static_cast<CefInstance*>(ECOfindObject(eci, hwnd));
-					if(instance && instance->IsHwnd(hwnd))
-						instance->Resize();
-					KillTimer(hwnd, ID_DEBOUNCE_RESIZE_TIMER);
-					return qtrue;
-				}
-			}
 		}
 
 		case WM_SIZE:
