@@ -7,7 +7,7 @@
 
 #include "CefWebLib.h"
 #include "CefInstance.h"
-
+#include "Win32Error.h"
 
 // Function parameters
 ECOparam browserParams[111] =
@@ -230,12 +230,9 @@ ECOmethodEvent browserObjfunctions[15] = {
 	ofSendActionToComp,		7014,			fftInteger, 		11,				&browserParams[88],	0, 		0	
 };
 
-// Fuer all Web Views verwendete WebSession
-//Awesomium::WebSession*	mWebSession;
-
-// counter, damit wenn keine mehr übrig sind, die web 
-// Views und der WebCore heruntergefahren werden koennen 
 int webBrowserCounter = 0;
+
+#define ID_DEBOUNCE_RESIZE_TIMER 101
 
 #define cSBrowserMethod_Count (0)
 #define cIBrowserMethod_Count (sizeof(browserObjfunctions)/sizeof(browserObjfunctions[0]))
@@ -279,18 +276,6 @@ extern "C" qlong OMNISWNDPROC GenericWndProc(HWND hwnd, LPARAM Msg,WPARAM wParam
 				CefInstance *instance = static_cast<CefInstance*>(ECOremoveObject(eci, hwnd));
 				if(instance)
 					delete instance;
-				/* ######## WebLib::WebBrowser* object = (WebLib::WebBrowser*)ECOremoveObject( eci, hwnd );
-				if ( NULL!=object )
-				{
-					// Now you can delete the object you previous allocated
-					// Note: The hwnd passed on ECM_OBJCONSTRUCT should not be deleted, as
-					// it was created and will be destroyed by OMNIS
-					delete object;
-				}*/
-				if (webBrowserCounter == 0){
-					//mWebSession->Release();
-					//mWebSession = 0;
-				}
 
 				return qtrue;
 			}
@@ -313,20 +298,11 @@ extern "C" qlong OMNISWNDPROC GenericWndProc(HWND hwnd, LPARAM Msg,WPARAM wParam
 				CefInstance *instance = static_cast<CefInstance*>(ECOfindObject(eci, hwnd));
 				if(instance && instance->IsHwnd(hwnd))
 					instance->CallMethod(eci);
-				/* ######## WebLib::WebBrowser* object = (WebLib::WebBrowser*)ECOfindObject( eci, hwnd );
-				if (object && object->hwnd() == hwnd)  
-				{
-					qlong result = object->methodCall(eci);
-					if (funcId == ofInitWebView) {
-						mWebSession = object->getWebSession();
-					}
-					return result;
-				}*/
 			}
 			return qfalse;
 		}
 		
-		// Anfrage wegen Eigenschaften
+		// query properties
 		case ECM_PROPERTYCANASSIGN:  		
 		case ECM_SETPROPERTY: 				
 		case ECM_GETPROPERTY:				
@@ -343,10 +319,11 @@ extern "C" qlong OMNISWNDPROC GenericWndProc(HWND hwnd, LPARAM Msg,WPARAM wParam
 		}
 		
 
-		// Anfrage nach Eigenschatenname
+		// query property names
 		case ECM_GETPROPNAME:
 		{
-			if ( eci->mCompId==COMP_BROWSER ) return ECOreturnProperties( gInstLib, eci, &browserProperties[0], cIBrowserProps_Count );
+			if(eci->mCompId == COMP_BROWSER)
+				return ECOreturnProperties(gInstLib, eci, &browserProperties[0], cIBrowserProps_Count);
 			return qfalse;	
 		}
 
@@ -354,29 +331,31 @@ extern "C" qlong OMNISWNDPROC GenericWndProc(HWND hwnd, LPARAM Msg,WPARAM wParam
 		// same way we register properties
 		case ECM_GETEVENTNAME:
 		{
-			if ( eci->mCompId==COMP_BROWSER ) return ECOreturnEvents( gInstLib, eci, &browserEvents[0], cIBrowserEvents_Count );
+			if(eci->mCompId == COMP_BROWSER)
+				return ECOreturnEvents(gInstLib, eci, &browserEvents[0], cIBrowserEvents_Count);
 			return qfalse;	
 		}
 		
-		// Anfrage nach Icon
+		// query icon
 		case ECM_GETCOMPICON:
 		{
-			if ( eci->mCompId==COMP_BROWSER ) return ECOreturnIcon( gInstLib, eci, COMP_BROWSER_ICN );
+			if(eci->mCompId == COMP_BROWSER) 
+				return ECOreturnIcon(gInstLib, eci, COMP_BROWSER_ICN);
 			return qfalse;
 		}
 
-		// Anfrage nach Id 
+		// query id
 		case ECM_GETCOMPID:
 		{
-			if ( wParam==1 )
-				return ECOreturnCompID( gInstLib, eci, COMP_BROWSER, cObjType_Basic );
-
+			if(wParam == 1)
+				return ECOreturnCompID(gInstLib, eci, COMP_BROWSER, cObjType_Basic);
 			return 0L;
 		}	
 
+		// return external flags
  		case ECM_CONNECT:
 		{
-			return EXT_FLAG_LOADED|EXT_FLAG_ALWAYS_USABLE|EXT_FLAG_REMAINLOADED; // Return external flags
+			return EXT_FLAG_LOADED | EXT_FLAG_ALWAYS_USABLE | EXT_FLAG_REMAINLOADED;
 		} 
 		case ECM_DISCONNECT:
 		{ 
@@ -384,12 +363,12 @@ extern "C" qlong OMNISWNDPROC GenericWndProc(HWND hwnd, LPARAM Msg,WPARAM wParam
 		}
 		case ECM_GETCOMPLIBINFO:
 		{
-  			return ECOreturnCompInfo( gInstLib, eci, LIB_RES_NAME, OBJECT_COUNT );
+  			return ECOreturnCompInfo(gInstLib, eci, LIB_RES_NAME, OBJECT_COUNT);
 		}
 
 		case ECM_GETVERSION:
 		{
-			return ECOreturnVersion(VERSION_MAJOR,VERSION_MINOR);
+			return ECOreturnVersion(VERSION_MAJOR, VERSION_MINOR);
 		} 
 		
 		//////////////////////// Window Messages  //////////////////////////////
@@ -397,7 +376,7 @@ extern "C" qlong OMNISWNDPROC GenericWndProc(HWND hwnd, LPARAM Msg,WPARAM wParam
 		// Anforderung zu Zeichnen 
 		case WM_PAINT:
 		{
-			if ( eci->mCompId==COMP_BROWSER) {
+			if(eci->mCompId == COMP_BROWSER) {
 				/* ######## WebLib::WebBrowser* object = (WebLib::WebBrowser*)ECOfindObject( eci, hwnd );
 				if (object && object->hwnd() == hwnd)  // rmm4999
 				{
@@ -412,7 +391,13 @@ extern "C" qlong OMNISWNDPROC GenericWndProc(HWND hwnd, LPARAM Msg,WPARAM wParam
 
 		case WM_WINDOWPOSCHANGED:
 		{
-			if ( eci->mCompId==COMP_BROWSER) {
+			if(eci->mCompId == COMP_BROWSER) {
+				CefInstance *instance = static_cast<CefInstance*>(ECOfindObject(eci, hwnd));
+				if(instance && instance->IsHwnd(hwnd))
+					instance->Resize();
+				//UINT_PTR t = SetTimer(hwnd, ID_DEBOUNCE_RESIZE_TIMER, 10, NULL);
+				//if(!t)
+				//	throw Win32Error();
 				/* ######## WebLib::WebBrowser* object = (WebLib::WebBrowser*)ECOfindObject( eci, hwnd );
 				if (object && object->hwnd() == hwnd)  // rmm4999
 				{
@@ -423,9 +408,24 @@ extern "C" qlong OMNISWNDPROC GenericWndProc(HWND hwnd, LPARAM Msg,WPARAM wParam
 			return qtrue;
 		}
 
+		case WM_TIMER:
+		{
+			switch(wParam) {
+				case ID_DEBOUNCE_RESIZE_TIMER: {
+					CefInstance *instance = static_cast<CefInstance*>(ECOfindObject(eci, hwnd));
+					if(instance && instance->IsHwnd(hwnd))
+						instance->Resize();
+					KillTimer(hwnd, ID_DEBOUNCE_RESIZE_TIMER);
+					return qtrue;
+				}
+			}
+		}
+
 		case WM_SIZE:
 		{
-			if ( eci->mCompId==COMP_BROWSER) {
+			if(eci->mCompId == COMP_BROWSER) {
+				RECT rect; GetClientRect(hwnd, &rect);
+				rect.left = 0;
 				/* ######## WebLib::WebBrowser* object = (WebLib::WebBrowser*)ECOfindObject( eci, hwnd );
 				if (object && object->hwnd() == hwnd)  // rmm4999
 				{
@@ -449,6 +449,7 @@ extern "C" qlong OMNISWNDPROC GenericWndProc(HWND hwnd, LPARAM Msg,WPARAM wParam
 		}
 
 		default:
+			// the pipe listener thread has signalled that there are messages in the queue.
 			if(Msg == CefInstance::PIPE_MESSAGES_AVAILABLE) {
 				CefInstance *instance = static_cast<CefInstance*>(ECOfindObject(eci, hwnd));
 				if(instance)

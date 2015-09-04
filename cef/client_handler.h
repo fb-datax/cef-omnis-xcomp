@@ -13,7 +13,7 @@ class ClientHandler : public CefClient,
                       public CefLoadHandler,
 					  public MessagePipe::PipeOperationHandler {
  public:
-	ClientHandler(const std::string &pipe_name);
+	ClientHandler(HWND hwnd, const std::string &pipe_name);
 	~ClientHandler();
 
 	// Provide access to the single global instance of this object.
@@ -95,6 +95,7 @@ class ClientHandler : public CefClient,
 		execute,
 		navigate,
 		sendOmnis,
+		resize,
 		exit
 	};
 	typedef std::map<std::string, CommandName> CommandNameMap;
@@ -103,6 +104,7 @@ class ClientHandler : public CefClient,
 
 	void PostPipeMessage(const CefString &name, const CefString &message);
 
+	HWND hwnd_;
 	CefRefPtr<MessagePipeClient> message_pipe_;
 	std::string pipe_name_;
 

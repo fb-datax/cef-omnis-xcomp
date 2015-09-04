@@ -19,7 +19,8 @@ CefInstance::CefInstance(HWND hwnd) :
 	pipe_(INVALID_HANDLE_VALUE),
 	read_offset_(0),
 	cef_ready_(false),
-	message_queue_(new MessageQueue())
+	message_queue_(new MessageQueue()),
+	resize_debounce_timer_(NULL)
 {
 	InitCommandNameMap();
 
@@ -274,9 +275,9 @@ void CefInstance::ReadComplete(DWORD bytes_read) {
 	read_offset_ += bytes_read / sizeof(std::wstring::value_type);
 	if(read_offset_ >= read_buffer_.size())
 		GrowReadBuffer();
-	// perform a quick-and dirty conversion of wstring to string for 
+	// convert the wstring message to to string for 
 	// non-unicode xcomp.
-	std::string message(read_buffer_.begin(), read_buffer_.begin() + read_offset_);
+	std::string message(CW2A(read_buffer_.c_str()));
 	read_offset_ = 0;
 
 	// add a message to the queue and signal the main thread.
@@ -295,20 +296,18 @@ void CefInstance::WriteMessage(const std::wstring &name, const std::wstring &arg
 	std::wstring message(name);
 	message.append(L":");
 	message.append(argument);
-	message.append(1, L'\0'); // null terminator.
 	WriteMessage(message);
 }
 
-void CefInstance::WriteMessage(const std::wstring &message) {
+void CefInstance::WriteMessage(std::wstring message) {
 	if(!cef_ready_) {
-		std::wstringstream ss;
-		ss << L"writing " << message << L" when cef not ready.";
-		TraceLog(ss.str());
+		// defer writing this message until CEF is ready.
 		messages_to_write_.push_back(message);
 		return;
 	}
 	if(pipe_ == INVALID_HANDLE_VALUE)
 		throw std::runtime_error("Pipe is closed.");
+	message.append(1, L'\0'); // null terminator.
 	int bytes = message.size() * sizeof(std::wstring::value_type);
 	DWORD written;
 	write_lpo_->Offset = 0;
@@ -544,7 +543,9 @@ void CefInstance::PopMessages() {
 		std::string arg;
 		if(i != std::string::npos) {
 			m->value_[i] = 0;
-			arg = &m->value_[i+1];
+			++i;
+			if(i < m->value_.size())
+				arg = &m->value_[i];
 		}
 		std::string message_name = m->value_.c_str();
 		CommandNameMap::const_iterator command = command_name_map_.find(message_name);
@@ -576,4 +577,26 @@ void CefInstance::PopMessages() {
 			TraceLog(ss.str());
 		}
 	}
+}
+
+CefInstance *g_instance = NULL;
+void CALLBACK ResizeInstance(HWND hwnd, UINT msg, UINT_PTR id, DWORD time) {
+	KillTimer(hwnd, id);
+	if(g_instance)
+		g_instance->Resize_();
+}
+
+void CefInstance::Resize() {
+	if(pipe_ != INVALID_HANDLE_VALUE)
+		WriteMessage(L"resize");
+	return;
+	g_instance = this;
+	resize_debounce_timer_ = SetTimer(NULL, resize_debounce_timer_, 1000, (TIMERPROC) ResizeInstance);
+	//if(pipe_ != INVALID_HANDLE_VALUE)
+	//	WriteMessage(L"resize");
+}
+
+void CefInstance::Resize_() {
+	if(pipe_ != INVALID_HANDLE_VALUE)
+		WriteMessage(L"resize");
 }

@@ -24,8 +24,9 @@ ClientHandler* g_instance = NULL;
 
 }  // namespace
 
-ClientHandler::ClientHandler(const std::string &pipe_name) : 
+ClientHandler::ClientHandler(HWND hwnd, const std::string &pipe_name) : 
 	is_closing_(false),
+	hwnd_(hwnd),
 	pipe_name_(pipe_name) {
 	DCHECK(!g_instance);
 	g_instance = this;
@@ -214,6 +215,7 @@ void ClientHandler::InitCommandNameMap() {
 	command_name_map_["execute"] = execute;
 	command_name_map_["navigate"] = navigate;
 	command_name_map_["sendOmnis"] = sendOmnis;
+	command_name_map_["resize"] = resize;
 	command_name_map_["exit"] = exit;
 }
 
@@ -229,6 +231,18 @@ void ClientHandler::OnReadCompleted(std::wstring &buffer) {
 				BrowserList::iterator bit = browser_list_.begin();
 				for (; bit != browser_list_.end(); ++bit)
 					(*bit)->SendProcessMessage(PID_RENDERER, message);
+				break;
+			}
+			case resize: {
+				RECT rect;
+				if(GetClientRect(hwnd_, &rect)) {
+					BrowserList::iterator bit = browser_list_.begin();
+					for (; bit != browser_list_.end(); ++bit) {
+						HWND h = (*bit)->GetHost()->GetWindowHandle();
+						SetWindowPos(h, NULL, 0, 0, rect.right, rect.bottom, 
+							SWP_ASYNCWINDOWPOS | SWP_NOACTIVATE | SWP_NOZORDER);
+					}
+				}
 				break;
 			}
 			case exit: {

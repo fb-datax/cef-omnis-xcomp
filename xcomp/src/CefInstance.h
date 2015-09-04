@@ -21,6 +21,8 @@ public:
 	bool IsHwnd(HWND hwnd) { return hwnd_ == hwnd; }
 	qbool CallMethod(EXTCompInfo *eci);
 	void PopMessages();
+	void Resize();
+	void Resize_();
 
 	static UINT PIPE_MESSAGES_AVAILABLE;
 
@@ -33,7 +35,7 @@ protected:
 	void ReadComplete(DWORD bytes_read);
 	void GrowReadBuffer();
 	void WriteMessage(const std::wstring &name, const std::wstring &argument);
-	void WriteMessage(const std::wstring &message);
+	void WriteMessage(std::wstring message);
 	
 	void InitWebView();
 	void ShutDownWebView();
@@ -52,6 +54,7 @@ protected:
 	std::string pipe_name_;
 	std::wstring read_buffer_;
 	std::string::size_type read_offset_;
+	UINT_PTR resize_debounce_timer_;
 
 	bool cef_ready_;
 	std::vector<std::wstring> messages_to_write_;
