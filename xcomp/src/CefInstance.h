@@ -22,8 +22,27 @@ public:
 	qbool CallMethod(EXTCompInfo *eci);
 	void PopMessages();
 	void Resize();
+	
+	void AddRef() { ++reference_count_; }
+	void SubRef() { if(!--reference_count_) delete this; }
 
 	static UINT PIPE_MESSAGES_AVAILABLE;
+
+	// RefPtr provides a reference-counted pointer to CefInstance.
+	struct RefPtr {
+		RefPtr(EXTCompInfo *eci, HWND hwnd) {
+			instance_ = static_cast<CefInstance*>(ECOfindObject(eci, hwnd));
+			if(!instance_)
+				throw std::runtime_error("Unknown HWND.");
+			instance_->AddRef();
+		}
+		~RefPtr() {
+			instance_->SubRef();
+		}
+		CefInstance *operator->() const { return instance_; }
+	private:
+		CefInstance *instance_;
+	};
 
 protected:
 	static DWORD WINAPI StartPipeListenerThread(LPVOID pVoid);
@@ -62,11 +81,15 @@ protected:
 	enum CommandName {
 		ready,
 		console,
-		showMsg
+		showMsg,
+		closeModule
 	};
 	typedef std::map<std::string, CommandName> CommandNameMap;
 	CommandNameMap command_name_map_;
 	void InitCommandNameMap();
+
+	// we need to be reference-counted to prevent early deletion.
+	int reference_count_;
 };
 
 // Method ids

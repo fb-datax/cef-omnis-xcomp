@@ -54,6 +54,10 @@ void RendererApp::OnWebKitInitialized() {
 		"    var args = Array.prototype.slice.call(arguments);"
 		"    return sendOmnis('showMsg', JSON.stringify(args));"
 		"  };"
+		"  omnis.closeModule = function() {"
+		"    native function sendOmnis();"
+		"    return sendOmnis('closeModule', '');"
+		"  };"
 		"})();";
 	CefRegisterExtension("v8/omnis", code, new SendOmnisHandler());
 }
@@ -61,9 +65,6 @@ void RendererApp::OnWebKitInitialized() {
 bool RendererApp::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
 										   CefProcessId source_process,
 										   CefRefPtr<CefProcessMessage> message) {
-	/*std::wstring msg = L"OnProcessMessageReceived (renderer): ";
-	msg += message->GetName();
-	MessageBox(NULL, msg.c_str(), L"Stop", MB_OK);*/
 	CommandNameMap::const_iterator command = command_name_map_.find(message->GetName());
 	if(command != command_name_map_.end()) {
 		switch(command->second) {
@@ -74,9 +75,9 @@ bool RendererApp::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
 					CefString expression = args->GetString(0);
 					CefRefPtr<CefFrame> frame = browser->GetMainFrame();
 					frame->ExecuteJavaScript(expression, frame->GetURL(), 0);
-					//frame->LoadURL("http://google.com");
 				} else
 					throw std::runtime_error("The execute command needs a single string argument.");
+				break;
 			}
 			case navigate: {
 				// navigate to the given URL.
@@ -86,6 +87,7 @@ bool RendererApp::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
 					browser->GetMainFrame()->LoadURL(url);
 				} else
 					throw std::runtime_error("The navigate command needs a single string argument.");
+				break;
 			}
 		}
 	}

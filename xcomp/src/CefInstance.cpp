@@ -19,7 +19,8 @@ CefInstance::CefInstance(HWND hwnd) :
 	pipe_(INVALID_HANDLE_VALUE),
 	read_offset_(0),
 	cef_ready_(false),
-	message_queue_(new MessageQueue())
+	message_queue_(new MessageQueue()),
+	reference_count_(0)
 {
 	InitCommandNameMap();
 
@@ -92,6 +93,7 @@ void CefInstance::InitWebView() {
 	cmd_line << '"' << exe_path << "\""
 		<< " --parent-hwnd=" << std::dec << (int) hwnd_
 		<< " --disable-web-security"
+		<< " --enable-experimental-web-platform-features"
 		<< " --allow-file-access-from-files"
 		<< " --allow-universal-access-from-files"
 		<< " --url=file:///" // this is needed to allow navigation to file urls.
@@ -530,6 +532,7 @@ void CefInstance::InitCommandNameMap() {
 	command_name_map_["ready"] = ready;
 	command_name_map_["console"] = console;
 	command_name_map_["showMsg"] = showMsg;
+	command_name_map_["closeModule"] = closeModule;
 }
 
 void CefInstance::PopMessages() {
@@ -565,6 +568,10 @@ void CefInstance::PopMessages() {
 					break;
 				case showMsg: {
 					ShowMsg(arg);
+					break;
+				}
+				case closeModule: {
+					ECOsendEvent(hwnd_, evDoCloseModule);
 					break;
 				}
 			}

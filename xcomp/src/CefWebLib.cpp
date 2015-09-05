@@ -258,6 +258,7 @@ extern "C" qlong OMNISWNDPROC GenericWndProc(HWND hwnd, LPARAM Msg,WPARAM wParam
 				// ######## WebLib::WebBrowser* object = new WebLib::WebBrowser( hwnd, mWebSession );
 				// ######## ECOinsertObject( eci, hwnd, (void*)object );
 				CefInstance *instance = new CefInstance(hwnd);
+				instance->AddRef();
 				ECOinsertObject(eci, hwnd, static_cast<void*>(instance));
 				return qtrue;
 			}
@@ -273,7 +274,7 @@ extern "C" qlong OMNISWNDPROC GenericWndProc(HWND hwnd, LPARAM Msg,WPARAM wParam
 				webBrowserCounter--;
 				CefInstance *instance = static_cast<CefInstance*>(ECOremoveObject(eci, hwnd));
 				if(instance)
-					delete instance;
+					instance->SubRef();
 
 				return qtrue;
 			}
@@ -293,8 +294,8 @@ extern "C" qlong OMNISWNDPROC GenericWndProc(HWND hwnd, LPARAM Msg,WPARAM wParam
 			// call an object method
 			if(eci->mCompId == COMP_BROWSER) {
 				qlong funcId =	ECOgetId(eci);
-				CefInstance *instance = static_cast<CefInstance*>(ECOfindObject(eci, hwnd));
-				if(instance && instance->IsHwnd(hwnd))
+				CefInstance::RefPtr instance(eci, hwnd);
+				if(instance->IsHwnd(hwnd))
 					instance->CallMethod(eci);
 			}
 			return qfalse;
@@ -427,9 +428,7 @@ extern "C" qlong OMNISWNDPROC GenericWndProc(HWND hwnd, LPARAM Msg,WPARAM wParam
 		default:
 			// the pipe listener thread has signalled that there are messages in the queue.
 			if(Msg == CefInstance::PIPE_MESSAGES_AVAILABLE) {
-				CefInstance *instance = static_cast<CefInstance*>(ECOfindObject(eci, hwnd));
-				if(instance)
-					instance->PopMessages();
+				CefInstance::RefPtr(eci, hwnd)->PopMessages();
 				return qtrue;
 			}
 	 }
