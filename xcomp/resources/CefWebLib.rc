@@ -43,7 +43,7 @@ BEGIN
 	7504					"DocumentReady:DocumentReady"
 	7505					"FrameLoadingFailed:FrameLoadingFailed"
 	7506					"TitleChanged:TitleChanged"
-	7507					"AdressBarChanged:AdressBarChanged"
+	7507					"AddressBarChanged:AddressBarChanged"
 	7508					"OpenNewWindow:OpenNewWindow"
 	7509					"DownloadRequest:DownloadRequest"
 	7510					"DownloadUpdate:DownloadUpdate"

@@ -12,6 +12,12 @@
 #include "include/cef_app.h"
 #include "include/wrapper/cef_closure_task.h"
 #include "include/wrapper/cef_helpers.h"
+#include "rapidjson/document.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
+
+typedef rapidjson::GenericStringBuffer<rapidjson::UTF16<>> JSONStringBuffer;
+typedef rapidjson::Writer<JSONStringBuffer, rapidjson::UTF16<>> JSONWriter;
 
 namespace {
 
@@ -33,7 +39,7 @@ ClientHandler::ClientHandler(HWND hwnd, const std::string &pipe_name) :
 	InitCommandNameMap();
 
 	if (!pipe_name_.empty()) {
-		// Connect as a client of the named pipe.
+		// connect as a client of the named pipe.
 		message_pipe_ = new MessagePipeClient(pipe_name_, this);
 		message_pipe_->QueueConnect();
 	}
@@ -53,24 +59,17 @@ ClientHandler* ClientHandler::GetInstance() {
 void ClientHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
 	CEF_REQUIRE_UI_THREAD();
 
-	// Add to the list of existing browsers.
+	// add to the list of existing browsers.
 	browser_list_.push_back(browser);
 	
-	//MessageBox(NULL, L"OnAfterCreated", L"Stop", MB_OK);
+	// notify the XCOMP that we're ready.
 	PostPipeMessage(L"ready", L"");
-	PostPipeMessage(L"OnAfterCreated", L"");
-	/*CefRefPtr<CefProcessMessage> message =
-		CefProcessMessage::Create("ready");
-	browser->SendProcessMessage(PID_RENDERER, message);*/
 }
 
 bool ClientHandler::OnProcessMessageReceived( CefRefPtr<CefBrowser> browser,
 											  CefProcessId source_process,
 											  CefRefPtr<CefProcessMessage> message) {
 	CEF_REQUIRE_UI_THREAD();
-	/*std::wstring msg = L"OnProcessMessageReceived (browser): ";
-	msg += message->GetName();
-	MessageBox(NULL, msg.c_str(), L"Stop", MB_OK);*/
 	CommandNameMap::const_iterator command = command_name_map_.find(message->GetName());
 	if(command != command_name_map_.end()) {
 		switch(command->second) {
@@ -143,16 +142,28 @@ void ClientHandler::OnTitleChange(CefRefPtr<CefBrowser> browser,
 void ClientHandler::OnStatusMessage(CefRefPtr<CefBrowser> browser,
 									const CefString& value) {
 	CEF_REQUIRE_UI_THREAD();
-	PostPipeMessage(L"status", value);
+	//PostPipeMessage(L"status", value);
 }
 bool ClientHandler::OnConsoleMessage(CefRefPtr<CefBrowser> browser,
 									const CefString& message,
 									const CefString& source,
 									int line) {
 	CEF_REQUIRE_UI_THREAD();
-	std::wstringstream ss;
-	ss << L"[" << source.c_str() << L":" << line << L"] " << message.c_str();
-	PostPipeMessage(L"console", ss.str());
+    JSONStringBuffer s;
+    JSONWriter writer(s);
+    writer.StartObject();
+	if(!message.empty()) {
+		writer.String(L"message");
+		writer.String(message.c_str());
+	}
+	if(!source.empty()) {
+		writer.String(L"source");
+		writer.String(source.c_str());
+	}
+	writer.String(L"line");
+	writer.Int(line);
+    writer.EndObject();
+	PostPipeMessage(L"console", s.GetString());
 	return false;
 }
 
@@ -196,19 +207,36 @@ void ClientHandler::OnLoadError(CefRefPtr<CefBrowser> browser,
                                 ErrorCode errorCode,
                                 const CefString& errorText,
                                 const CefString& failedUrl) {
-  CEF_REQUIRE_UI_THREAD();
+	CEF_REQUIRE_UI_THREAD();
 
-  // Don't display an error for downloaded files.
-  if (errorCode == ERR_ABORTED)
-    return;
+	// don't display an error for downloaded files.
+	if(errorCode == ERR_ABORTED)
+		return;
+  
+	// send JSON message to xcomp.
+	JSONStringBuffer s;
+	JSONWriter writer(s);
+	writer.StartObject();
+	if(!errorText.empty()) {
+		writer.String(L"errorText");
+		writer.String(errorText.c_str());
+	}
+	if(!failedUrl.empty()) {
+		writer.String(L"failedUrl");
+		writer.String(failedUrl.c_str());
+	}
+	writer.String(L"errorCode");
+	writer.Int(errorCode);
+	writer.EndObject();
+	PostPipeMessage(L"loadError", s.GetString());
 
-  // Display a load error message.
-  std::stringstream ss;
-  ss << "<html><body bgcolor=\"white\">"
-        "<h2>Failed to load URL " << std::string(failedUrl) <<
-        " with error " << std::string(errorText) << " (" << errorCode <<
-        ").</h2></body></html>";
-  frame->LoadString(ss.str(), failedUrl);
+	// Display a load error message.
+	std::stringstream ss;
+	ss << "<html><body bgcolor=\"white\">"
+		"<h2>Failed to load URL " << std::string(failedUrl) <<
+		" with error " << std::string(errorText) << " (" << errorCode <<
+		").</h2></body></html>";
+	frame->LoadString(ss.str(), failedUrl);
 }
 
 void ClientHandler::InitCommandNameMap() {

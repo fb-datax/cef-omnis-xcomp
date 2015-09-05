@@ -7,8 +7,9 @@
 #include <atlconv.h>
 #include "rapidjson\document.h"
 
-using namespace rapidjson;
 using namespace OmnisTools;
+
+typedef rapidjson::Document JSONDocument;
 
 UINT CefInstance::PIPE_MESSAGES_AVAILABLE = 0;
 
@@ -161,9 +162,9 @@ void CefInstance::ShutDownWebView() {
 	}
 }
 
-void CefInstance::ShowMsg(const std::string &arg) {
+void CefInstance::sendDoShowMessage(const std::string &arg) {
 	// the argument should be an array in JSON format.
-	Document doc;
+	JSONDocument doc;
 	doc.Parse(arg.c_str());
 	if(doc.IsArray()) {
 		std::auto_ptr<EXTCompInfo> eci(new EXTCompInfo());
@@ -177,7 +178,76 @@ void CefInstance::ShowMsg(const std::string &arg) {
 		}
 		ECOsendCompEvent(hwnd_, eci.get(), evDoShowMessage, qtrue);
 		ECOmemoryDeletion(eci.get());
-	}
+	} else
+		TraceLog(TARGET_NAME ": Bad showMsg message.");
+}
+
+void CefInstance::sendOnConsoleMessageAdded(const std::string &arg) {
+	// the argument should be an object in JSON format.
+	JSONDocument doc;
+	doc.Parse(arg.c_str());
+	if(!doc.HasParseError() && doc.IsObject()) {
+		std::auto_ptr<EXTCompInfo> eci(new EXTCompInfo());
+		eci->mParamFirst = 0;
+		EXTfldval message;
+		if(doc.HasMember("message"))
+			GetEXTFldValFromString(message, doc["message"].GetString());
+		else
+			GetEXTFldValFromString(message, "");
+		ECOaddParam(eci.get(), &message, 0, 0, 0, 1, 0);
+		EXTfldval line;
+		GetEXTFldValFromInt(line, doc["line"].GetInt());
+		ECOaddParam(eci.get(), &line, 0, 0, 0, 2, 0);
+		if(doc.HasMember("source")) {
+			EXTfldval source;
+			GetEXTFldValFromString(source, doc["source"].GetString());
+			ECOaddParam(eci.get(), &source, 0, 0, 0, 3, 0);
+		}
+		ECOsendCompEvent(hwnd_, eci.get(), evOnConsoleMessageAdded, qtrue); 
+		ECOmemoryDeletion(eci.get()); 
+	} else
+		TraceLog(TARGET_NAME ": Bad console message.");
+}
+
+void CefInstance::sendOnFrameLoadingFailed(const std::string &arg) {
+	// the argument should be an object in JSON format.
+	JSONDocument doc;
+	doc.Parse(arg.c_str());
+	if(!doc.HasParseError() && doc.IsObject()) {
+		std::auto_ptr<EXTCompInfo> eci(new EXTCompInfo());
+		eci->mParamFirst = 0;
+		EXTfldval error_code;
+		if(doc.HasMember("errorCode"))
+			GetEXTFldValFromInt(error_code, doc["errorCode"].GetInt());
+		else
+			GetEXTFldValFromInt(error_code, 0);
+		ECOaddParam(eci.get(), &error_code, 0, 0, 0, 1, 0);
+		EXTfldval error_text;
+		if(doc.HasMember("errorText"))
+			GetEXTFldValFromString(error_text, doc["errorText"].GetString());
+		else
+			GetEXTFldValFromString(error_text, "");
+		ECOaddParam(eci.get(), &error_text, 0, 0, 0, 2, 0);
+		EXTfldval failed_url;
+		if(doc.HasMember("failedUrl"))
+			GetEXTFldValFromString(failed_url, doc["failedUrl"].GetString());
+		else
+			GetEXTFldValFromString(failed_url, "");
+		ECOaddParam(eci.get(), &failed_url, 0, 0, 0, 3, 0);
+		ECOsendCompEvent(hwnd_, eci.get(), evOnFrameLoadingFailed, qtrue); 
+		ECOmemoryDeletion(eci.get()); 
+	} else
+		TraceLog(TARGET_NAME ": Bad loadError message.");
+}
+
+void CefInstance::sendOnAddressBarChanged(const std::string &arg) {
+	std::auto_ptr<EXTCompInfo> eci(new EXTCompInfo());
+	eci->mParamFirst = 0;
+	EXTfldval url;
+	GetEXTFldValFromString(url, arg.c_str());
+	ECOaddParam(eci.get(), &url, 0, 0, 0, 1, 0);
+	ECOsendCompEvent(hwnd_, eci.get(), evOnAddressBarChanged, qtrue); 
+	ECOmemoryDeletion(eci.get()); 
 }
 
 CefInstance::~CefInstance() {
@@ -531,6 +601,8 @@ qbool CefInstance::CallMethod(EXTCompInfo *eci) {
 void CefInstance::InitCommandNameMap() {
 	command_name_map_["ready"] = ready;
 	command_name_map_["console"] = console;
+	command_name_map_["address"] = address;
+	command_name_map_["loadError"] = loadError;
 	command_name_map_["showMsg"] = showMsg;
 	command_name_map_["closeModule"] = closeModule;
 }
@@ -562,12 +634,20 @@ void CefInstance::PopMessages() {
 					messages_to_write_.clear();
 					break;
 				}
-				case console:
-					// pass console messages directly to the Omnis trace log.
-					TraceLog(arg);
+				case console: {
+					sendOnConsoleMessageAdded(arg);
 					break;
+				}
+				case address: {
+					sendOnAddressBarChanged(arg);
+					break;
+				}
+				case loadError: {
+					sendOnFrameLoadingFailed(arg);
+					break;
+				}
 				case showMsg: {
-					ShowMsg(arg);
+					sendDoShowMessage(arg);
 					break;
 				}
 				case closeModule: {

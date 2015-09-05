@@ -40,7 +40,7 @@ ECOparam browserParams[111] =
 	// TitleChanged (pos 16)
 	8130, 	fftCharacter,	0, 		0,				//pNewTitle
 
-	// Adressbar-Changed (pos 17)
+	// Address bar-Changed (pos 17)
 	8140, 	fftCharacter,	0, 		0,				//pNewUrl
 
 	// ConsoleMessage (pos 18)
@@ -192,7 +192,7 @@ ECOmethodEvent browserEvents[16] =
 	evOnDocumentReady,		7504, 			0,					8, 				&browserParams[5],	0, 			0,
 	evOnFrameLoadingFailed,	7505, 			0,					3, 				&browserParams[13],	0, 			0,
 	evOnTitleChange,		7506, 			0,					1, 				&browserParams[16],	0, 			0,
-	evOnAdressBarChanged,	7507, 			0,					1, 				&browserParams[17],	0, 			0,
+	evOnAddressBarChanged,	7507, 			0,					1, 				&browserParams[17],	0, 			0,
 	evOnOpenNewWindow,		7508, 			0,					2, 				&browserParams[21],	0, 			0,
 	evOnDownloadRequest,	7509, 			0,					4, 				&browserParams[23],	0, 			0,
 	evOnDownloadUpdate,		7510, 			0,					4, 				&browserParams[30],	0, 			0,

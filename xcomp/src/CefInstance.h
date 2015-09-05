@@ -60,8 +60,11 @@ protected:
 	void ExecuteJavaScript(std::wstring code) {
 		WriteMessage(L"execute", code);
 	}
-
-	void ShowMsg(const std::string &arg);
+	
+	void sendDoShowMessage(const std::string &arg);
+	void sendOnConsoleMessageAdded(const std::string &arg);
+	void sendOnFrameLoadingFailed(const std::string &arg);
+	void sendOnAddressBarChanged(const std::string &arg);
 
 	HWND hwnd_;
 	HANDLE listener_thread_;
@@ -81,6 +84,8 @@ protected:
 	enum CommandName {
 		ready,
 		console,
+		address,
+		loadError,
 		showMsg,
 		closeModule
 	};
@@ -120,7 +125,7 @@ const qlong
 	evOnDocumentReady = 1111,
 	evOnFrameLoadingFailed = 1112,
 	evOnTitleChange = 1113,
-	evOnAdressBarChanged = 1114,
+	evOnAddressBarChanged = 1114,
 	evOnOpenNewWindow = 1115,
 	evOnDownloadRequest = 1116,
 	evOnDownloadUpdate = 1117,
