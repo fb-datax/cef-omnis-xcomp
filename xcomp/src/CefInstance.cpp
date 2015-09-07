@@ -664,6 +664,7 @@ void CefInstance::PopMessages() {
 					frame = GetParent(frame);
 					frame = GetParent(frame); // <-- this is the bordered window within Omnis
 					HWND omnis = GetParent(frame);
+					ECOsendEvent(hwnd_, evOnGotFocus);
 					
 					//SetWindowPos(frame, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
 					//SetWindowPos(frame, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);

@@ -134,7 +134,7 @@ const qlong
 	evOnJsInitFailed = 1120,
 	evOnCustomCompAction = 1121,
 	evOnCompInit = 1122,
-	
+	evOnGotFocus = 1123,
 	
 
 	// -------Static Methods ------------	

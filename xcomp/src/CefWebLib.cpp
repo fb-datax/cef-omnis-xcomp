@@ -199,7 +199,8 @@ ECOmethodEvent browserEvents[16] =
 	evOnDownloadFinish,		7511, 			0,					3, 				&browserParams[34],	0, 			0,
 	evOnJsInitFailed,		7513, 			0,					0, 				0,					0, 			0,
 	evOnCustomCompAction,	7514, 			0,					11,				&browserParams[98],	0, 			0,
-	evOnCompInit,			7515,			0, 					1,				&browserParams[109],0, 			0
+	evOnCompInit,			7515,			0, 					1,				&browserParams[109],0, 			0,
+	evOnGotFocus,			7516,			0, 					0,				0,                  0, 			0
 };
 
 // This is how we define functions

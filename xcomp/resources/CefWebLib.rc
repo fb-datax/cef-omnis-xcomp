@@ -52,6 +52,7 @@ BEGIN
 	7513					"JsInitFailed:JsInitFailed"
 	7514					"CompCustAction:CompCustAction"
 	7515					"CompInit:CompInit"
+	7516					"GotFocus:GotFocus"
 
 	// Parameters
 	8000					"cURL:URL die geladen werden soll"
