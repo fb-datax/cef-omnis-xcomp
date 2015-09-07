@@ -9,6 +9,7 @@
 class ClientHandler : public CefClient,
                       public CefContextMenuHandler,
                       public CefDisplayHandler,
+					  public CefFocusHandler,
                       public CefLifeSpanHandler,
                       public CefLoadHandler,
 					  public MessagePipe::PipeOperationHandler {
@@ -24,6 +25,9 @@ class ClientHandler : public CefClient,
 		return this;
 	}
 	virtual CefRefPtr<CefDisplayHandler> GetDisplayHandler() OVERRIDE {
+		return this;
+	}
+	virtual CefRefPtr<CefFocusHandler> GetFocusHandler() OVERRIDE {
 		return this;
 	}
 	virtual CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() OVERRIDE {
@@ -59,6 +63,25 @@ class ClientHandler : public CefClient,
 								const CefString& message,
 								const CefString& source,
 								int line) OVERRIDE;
+
+	// CefFocusHandler methods:
+	/*virtual void OnTakeFocus(CefRefPtr<CefBrowser> browser,
+							bool next) OVERRIDE {
+		MessageBox(NULL, L"OnTakeFocus", L"Stop", MB_OK);
+	}
+	virtual bool OnSetFocus(CefRefPtr<CefBrowser> browser,
+							FocusSource source) OVERRIDE {
+		MessageBox(NULL, L"OnSetFocus", L"Stop", MB_OK);
+		return false;
+	}*/
+	virtual void OnGotFocus(CefRefPtr<CefBrowser> browser) OVERRIDE {
+		//MessageBox(NULL, L"OnGotFocus", L"Stop", MB_OK);
+		//CEF_REQUIRE_UI_THREAD();
+		// notify the XCOMP that we're ready.
+		//PostPipeMessage(L"ready", L"");
+		//BringWindowToTop(hwnd_);
+		PostPipeMessage(L"gotFocus", L"");
+	}
 
 	// CefLifeSpanHandler methods:
 	virtual void OnAfterCreated(CefRefPtr<CefBrowser> browser) OVERRIDE;

@@ -87,7 +87,8 @@ protected:
 		address,
 		loadError,
 		showMsg,
-		closeModule
+		closeModule,
+		gotFocus
 	};
 	typedef std::map<std::string, CommandName> CommandNameMap;
 	CommandNameMap command_name_map_;

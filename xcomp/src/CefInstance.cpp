@@ -605,6 +605,7 @@ void CefInstance::InitCommandNameMap() {
 	command_name_map_["loadError"] = loadError;
 	command_name_map_["showMsg"] = showMsg;
 	command_name_map_["closeModule"] = closeModule;
+	command_name_map_["gotFocus"] = gotFocus;
 }
 
 void CefInstance::PopMessages() {
@@ -652,6 +653,49 @@ void CefInstance::PopMessages() {
 				}
 				case closeModule: {
 					ECOsendEvent(hwnd_, evDoCloseModule);
+					break;
+				}
+				case gotFocus: {
+					HWND frame = hwnd_;
+					//SetFocus(frame);
+					//SendMessage(frame, WM_PARENTNOTIFY, WM_LBUTTONDOWN, 0);
+					frame = GetParent(frame);
+					frame = GetParent(frame);
+					frame = GetParent(frame);
+					frame = GetParent(frame); // <-- this is the bordered window within Omnis
+					HWND omnis = GetParent(frame);
+					
+					//SetWindowPos(frame, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+					//SetWindowPos(frame, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+					
+					//PostMessage(frame, WM_LBUTTONDOWN, MK_LBUTTON, 0x00050005);
+					//PostMessage(frame, WM_LBUTTONUP, MK_LBUTTON, 0x00050005);
+
+					// ### How do we activate frame since it's a child of Omnis? ###
+					//SendMessage(frame, WM_PARENTNOTIFY, WM_LBUTTONDOWN, (1211 << 16) | 8);
+					//SendMessage(frame, WM_SYSKEYDOWN, 0x12, 0x20380001);
+
+					//SendMessage(frame, WM_MOUSEACTIVATE, (WPARAM) omnis, (513 << 16) | 2);
+					/*WINDOWPOS pos = {0};
+					pos.hwnd = frame;
+					pos.hwndInsertAfter = HWND_TOP;
+					pos.flags = SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE;
+					SendMessage(frame, WM_WINDOWPOSCHANGING, 0, (LPARAM) &pos);*/
+					//ECOsendEvent(frame, ECE_FORMTOTOP);
+					//HWND active = (HWND) SendMessage(omnis, WM_MDIGETACTIVE, 0, 0);
+					//SendMessage(active, WM_MDIACTIVATE, (WPARAM) frame, 0);
+					//SendMessage(omnis, WM_SETFOCUS, (WPARAM) frame, 0);
+					//SendMessage(omnis, WM_KILLFOCUS, (WPARAM) frame, 0);
+
+					//SetWindowPos(frame, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+					//SetActiveWindow(frame);
+					//SetForegroundWindow(frame);
+					//SetFocus(frame);
+					//SetWindowPos(frame, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+					//WNDsetWindowPos(frame, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+					//WNDbringWindowToTop(frame);
+					//WNDshowWindow(frame, SW_HIDE);
+					//WNDshowWindow(frame, SW_SHOW);
 					break;
 				}
 			}
