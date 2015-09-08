@@ -98,6 +98,7 @@
       <TargetMachine>MachineX86</TargetMachine>
       <DelayLoadDLLs>
       </DelayLoadDLLs>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PostBuildEvent>
       <Command>call $(ProjectDir)resources\postbuild_release.bat $(ProjectDir)</Command>
@@ -154,6 +155,7 @@
       <TargetMachine>MachineX86</TargetMachine>
       <DelayLoadDLLs>
       </DelayLoadDLLs>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PostBuildEvent>
       <Command>call $(ProjectDir)resources\postbuild_debug.bat $(ProjectDir)</Command>

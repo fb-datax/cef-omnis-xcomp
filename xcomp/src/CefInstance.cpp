@@ -113,7 +113,9 @@ void CefInstance::InitWebView() {
     startup_info.cb = sizeof(startup_info);
 	PROCESS_INFORMATION process_info;
     ZeroMemory(&process_info, sizeof(process_info));
-	if(!CreateProcess(exe_path.c_str(), &cmd_line.str()[0], NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &startup_info, &process_info))
+	if (!CreateProcess(exe_path.c_str(), &cmd_line.str()[0], NULL, NULL, FALSE, 
+		CREATE_NO_WINDOW | CREATE_BREAKAWAY_FROM_JOB, 
+		NULL, NULL, &startup_info, &process_info))
 		throw Win32Error();
 	if(!AssignProcessToJobObject(job_, process_info.hProcess))
 		throw Win32Error();
