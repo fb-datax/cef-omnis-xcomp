@@ -34,7 +34,7 @@ template<size_t count> void AddMethodEvent(std::vector<ECOmethodEvent> &evs, con
 	evs.push_back(event);
 }
 
-// return the events that we generate in Omnis.
+// return the events that we send to Omnis.
 // all literal numbers are string resource ids.
 qbool ReturnEvents(EXTCompInfo* eci) {
 	std::vector<ECOmethodEvent> events;
@@ -171,87 +171,99 @@ qbool ReturnEvents(EXTCompInfo* eci) {
 	return ECOreturnEvents(gInstLib, eci, &events[0], events.size());
 }
 
-
 qbool ReturnMethods(EXTCompInfo *eci) {
 	std::vector<ECOmethodEvent> events;
 	{
-		EventId id = {ofnavigateToUrl, 7000};
+		EventId id = { ofnavigateToUrl, 7000 };
 		ECOparam params[] = {
-			8000, 	fftCharacter,	0, 		0,				// pURL
+			8000, fftCharacter, 0, 0,				// pURL
 		};
 		AddMethodEvent(events, id, params);
 	}
 	{
-		EventId id = {ofHistoryGoBack, 7001};
+		EventId id = { ofHistoryGoBack, 7001 };
 		AddMethodEvent(events, id);
 	}
 	{
-		EventId id = {ofHistoryGoForward, 7002};
+		EventId id = { ofHistoryGoForward, 7002 };
 		AddMethodEvent(events, id);
 	}
 	{
-		EventId id = {ofInitWebView, 7003};
+		EventId id = { ofInitWebView, 7003 };
 		AddMethodEvent(events, id);
 	}
 	{
-		EventId id = {ofFocus, 7004};
+		EventId id = { ofFocus, 7004 };
 		AddMethodEvent(events, id);
 	}
 	{
-		EventId id = {ofUnFocus, 7005};
+		EventId id = { ofUnFocus, 7005 };
 		AddMethodEvent(events, id);
 	}
 	{
-		EventId id = {ofShutDownWebView, 7006};
+		EventId id = { ofShutDownWebView, 7006 };
 		AddMethodEvent(events, id);
 	}
 	{
-		EventId id = {ofCancelDownload, 7007};
+		EventId id = { ofCancelDownload, 7007 };
 		ECOparam params[] = {
-			8180,	fftInteger,			0,		0,			// pDownloadId
+			8180, fftInteger, 0, 0,			// pDownloadId
 		};
 		AddMethodEvent(events, id, params);
 	}
 	{
-		EventId id = {ofStartDownload, 7008};
+		EventId id = { ofStartDownload, 7008 };
 		ECOparam params[] = {
-			8190,	fftInteger,			0,		0,			// pDownloadId
-			8191,	fftCharacter,		0,		0,			// pFullPath
+			8190, fftInteger, 0, 0,			// pDownloadId
+			8191, fftCharacter, 0, 0,			// pFullPath
 		};
 		AddMethodEvent(events, id, params);
 	}
 	{
-		EventId id = {ofGetCompData, 7009};
+		EventId id = { ofGetCompData, 7009 };
 		ECOparam params[] = {
-			8300,	fftCharacter,		0,		0,			// pCompId
+			8300, fftCharacter, 0, 0,			// pCompId
 		};
 		AddMethodEvent(events, id, params);
 	}
 	{
-		EventId id = {ofSetCompData, 7010};
+		EventId id = { ofSetCompData, 7010 };
 		ECOparam params[] = {
-			8310,	fftCharacter,		0,		0,			// pCompId
-			8311,	fftCharacter,		0,		0,			// pData
+			8310, fftCharacter, 0, 0,			// pCompId
+			8311, fftCharacter, 0, 0,			// pData
 		};
 		AddMethodEvent(events, id, params);
 	}
 	{
-		EventId id = {ofSendActionToComp, 7014};
+		EventId id = { ofSendActionToComp, 7014 };
 		ECOparam params[] = {
-			8350,	fftCharacter,		0,		0,			// pCompId
-			8351,	fftCharacter,		0,		0,			// pType
-			8352,	fftCharacter,		0,		0,			// pParam2
-			8353,	fftCharacter,		0,		0,			// pParam2
-			8354,	fftCharacter,		0,		0,			// pParam3
-			8355,	fftCharacter,		0,		0,			// pParam4
-			8356,	fftCharacter,		0,		0,			// pParam5
-			8357,	fftCharacter,		0,		0,			// pParam6
-			8358,	fftCharacter,		0,		0,			// pParam7
-			8359,	fftCharacter,		0,		0,			// pParam8
-			8310,	fftCharacter,		0,		0,			// pParam9
+			8350, fftCharacter, 0, 0,			// pCompId
+			8351, fftCharacter, 0, 0,			// pType
+			8352, fftCharacter, 0, 0,			// pParam2
+			8353, fftCharacter, 0, 0,			// pParam2
+			8354, fftCharacter, 0, 0,			// pParam3
+			8355, fftCharacter, 0, 0,			// pParam4
+			8356, fftCharacter, 0, 0,			// pParam5
+			8357, fftCharacter, 0, 0,			// pParam6
+			8358, fftCharacter, 0, 0,			// pParam7
+			8359, fftCharacter, 0, 0,			// pParam8
+			8310, fftCharacter, 0, 0,			// pParam9
 		};
 		AddMethodEvent(events, id, params);
 	}
+	{
+		EventId id = { ofSendCustomEvent, 7015 };
+		ECOparam params[] = {
+			8400, fftCharacter, 0, 0,			// pName
+			8401, fftCharacter, 0, 0,			// pValue
+		};
+		AddMethodEvent(events, id, params);
+	}
+	return ECOreturnMethods(gInstLib, eci, &events[0], events.size());
+}
+
+qbool ReturnStaticMethods(EXTCompInfo *eci) {
+	std::vector<ECOmethodEvent> events;
 	return ECOreturnMethods(gInstLib, eci, &events[0], events.size());
 }
 
@@ -265,8 +277,6 @@ ECOproperty browserProperties[6] =
 	pBasePath,			4000, 		fftCharacter, 	0,			0, 			0, 			0,
 	pUserPath,			4001, 		fftCharacter, 	0,			0, 			0, 			0
 };
-
-int webBrowserCounter = 0;
 
 #define cSBrowserMethod_Count (0)
 #define cIBrowserParams_Count (sizeof(browserStaticFunctions)/sizeof(browserStaticFunctions[0]))
@@ -283,13 +293,9 @@ extern "C" qlong OMNISWNDPROC GenericWndProc(HWND hwnd, LPARAM Msg, WPARAM wPara
 		
 		//////////////////////// Omnis Messages  //////////////////////////////
 		
-		// Create a new Object 
-		case ECM_OBJCONSTRUCT:				
-		{
+		case ECM_OBJCONSTRUCT: {
+			// create a new CEF instance 
 			if ( eci->mCompId==COMP_BROWSER) {
-				webBrowserCounter++;
-				// ######## WebLib::WebBrowser* object = new WebLib::WebBrowser( hwnd, mWebSession );
-				// ######## ECOinsertObject( eci, hwnd, (void*)object );
 				CefInstance *instance = new CefInstance(hwnd);
 				instance->AddRef();
 				ECOinsertObject(eci, hwnd, static_cast<void*>(instance));
@@ -298,32 +304,28 @@ extern "C" qlong OMNISWNDPROC GenericWndProc(HWND hwnd, LPARAM Msg, WPARAM wPara
 			return qfalse;
 		}
 		
-		// Destruct the object 
-		case ECM_OBJDESTRUCT:					
-		{
-			if ( eci->mCompId==COMP_BROWSER) {
-				// First find the object in the libraries chain of objects, 
-				// this call if ok also removes the object from the chain.
-				webBrowserCounter--;
+		case ECM_OBJDESTRUCT: {
+			// destroy the CEF instance 
+			if(eci->mCompId == COMP_BROWSER) {
 				CefInstance *instance = static_cast<CefInstance*>(ECOremoveObject(eci, hwnd));
 				if(instance)
 					instance->SubRef();
-
 				return qtrue;
 			}
 			return qfalse;
 		}
 
-		case ECM_GETMETHODNAME:
+		case ECM_GETMETHODNAME: {
 			// query method names
 			return ReturnMethods(eci);
+		}
 		
-		case ECM_GETSTATICOBJECT:
+		case ECM_GETSTATICOBJECT: {
 			// query static method names 
-			return ECOreturnMethods(gInstLib, eci, &browserStaticFunctions[0], cSBrowserMethod_Count);
+			return ReturnStaticMethods(eci);
+		}
 
-		case ECM_METHODCALL:
-		{
+		case ECM_METHODCALL: {
 			// call an object method
 			if(eci->mCompId == COMP_BROWSER) {
 				qlong funcId =	ECOgetId(eci);
@@ -333,96 +335,84 @@ extern "C" qlong OMNISWNDPROC GenericWndProc(HWND hwnd, LPARAM Msg, WPARAM wPara
 			}
 			return qfalse;
 		}
+
+		case ECM_GETPROPNAME: {
+			// query properties
+			if (eci->mCompId == COMP_BROWSER)
+				return ECOreturnProperties(gInstLib, eci, &browserProperties[0], cIBrowserProps_Count);
+			return qfalse;
+		}
 		
-		// query properties
 		case ECM_PROPERTYCANASSIGN:  		
 		case ECM_SETPROPERTY: 				
-		case ECM_GETPROPERTY:				
-		{
+		case ECM_GETPROPERTY: {
+			// access proprerties
 
-			if ( eci->mCompId==COMP_BROWSER) {
+			if(eci->mCompId == COMP_BROWSER) {
 				/* ######## WebLib::WebBrowser* object = (WebLib::WebBrowser*)ECOfindObject( eci, hwnd );
 				if (object && object->hwnd() == hwnd)  
 				{
 					return object->attributeSupport(Msg,wParam,lParam, eci);
 				}*/
 			}
-			return 0L;
-		}
-		
-
-		// query property names
-		case ECM_GETPROPNAME:
-		{
-			if(eci->mCompId == COMP_BROWSER)
-				return ECOreturnProperties(gInstLib, eci, &browserProperties[0], cIBrowserProps_Count);
-			return qfalse;	
+			return qfalse;
 		}
 
-		// ECM_GETEVENTNAME - to support events we have to register event information in the 
-		// same way we register properties
-		case ECM_GETEVENTNAME:
-		{
+		case ECM_GETEVENTNAME: {
+			// query events
 			if(eci->mCompId == COMP_BROWSER)
 				return ReturnEvents(eci);
 			return qfalse;	
 		}
 		
-		// query icon
-		case ECM_GETCOMPICON:
-		{
+		case ECM_GETCOMPICON: {
+			// query icon
 			if(eci->mCompId == COMP_BROWSER) 
 				return ECOreturnIcon(gInstLib, eci, COMP_BROWSER_ICN);
 			return qfalse;
 		}
 
-		// query id
-		case ECM_GETCOMPID:
-		{
+		case ECM_GETCOMPID: {
+			// query comp id
 			if(wParam == 1)
 				return ECOreturnCompID(gInstLib, eci, COMP_BROWSER, cObjType_Basic);
-			return 0L;
+			return qfalse;
 		}	
 
-		// return external flags
- 		case ECM_CONNECT:
-		{
+ 		case ECM_CONNECT: {
+			// return external flags
 			return EXT_FLAG_LOADED | EXT_FLAG_ALWAYS_USABLE | EXT_FLAG_REMAINLOADED;
 		} 
-		case ECM_DISCONNECT:
-		{ 
+		case ECM_DISCONNECT: { 
 			return qtrue;
 		}
-		case ECM_GETCOMPLIBINFO:
-		{
+		case ECM_GETCOMPLIBINFO: {
   			return ECOreturnCompInfo(gInstLib, eci, LIB_RES_NAME, OBJECT_COUNT);
 		}
-
-		case ECM_GETVERSION:
-		{
+		case ECM_GETVERSION: {
 			return ECOreturnVersion(VERSION_MAJOR, VERSION_MINOR);
 		} 
 		
 		//////////////////////// Window Messages  //////////////////////////////
 		
-		// Anforderung zu Zeichnen 
+		/*// Anforderung zu Zeichnen 
 		case WM_PAINT:
 		{
 			if(eci->mCompId == COMP_BROWSER) {
-				/* ######## WebLib::WebBrowser* object = (WebLib::WebBrowser*)ECOfindObject( eci, hwnd );
+				 ######## WebLib::WebBrowser* object = (WebLib::WebBrowser*)ECOfindObject( eci, hwnd );
 				if (object && object->hwnd() == hwnd)  // rmm4999
 				{
 					if ( NULL!=object && object->paint()){
 						return qtrue;
 					}
 					
-				}*/
+				}
 			}
 			return qfalse;
-		}
+		}*/
 
-		case WM_WINDOWPOSCHANGED:
-		{
+		case WM_WINDOWPOSCHANGED: {
+			// the comp changed size, resize the browser component to match.
 			if(eci->mCompId == COMP_BROWSER) {
 				CefInstance *instance = static_cast<CefInstance*>(ECOfindObject(eci, hwnd));
 				if(instance && instance->IsHwnd(hwnd))
@@ -431,43 +421,42 @@ extern "C" qlong OMNISWNDPROC GenericWndProc(HWND hwnd, LPARAM Msg, WPARAM wPara
 			return qtrue;
 		}
 
-		case WM_SIZE:
+		/* case WM_SIZE:
 		{
 			if(eci->mCompId == COMP_BROWSER) {
 				RECT rect; GetClientRect(hwnd, &rect);
 				rect.left = 0;
-				/* ######## WebLib::WebBrowser* object = (WebLib::WebBrowser*)ECOfindObject( eci, hwnd );
+				######## WebLib::WebBrowser* object = (WebLib::WebBrowser*)ECOfindObject( eci, hwnd );
 				if (object && object->hwnd() == hwnd)  // rmm4999
 				{
 					WNDinvalidateRect( hwnd, NULL );
 					return qtrue;
-				}*/
+				}
 			}
 			return qtrue;
-		}
+		}*/
 
-		case WM_DESTROY:
+		/*case WM_DESTROY:
 		{
-			/* ######## if ( eci->mCompId==COMP_BROWSER) {
+			 ######## if ( eci->mCompId==COMP_BROWSER) {
 				WebLib::WebBrowser* object = (WebLib::WebBrowser*)ECOfindObject( eci, hwnd );
 				if (object && object->hwnd() == hwnd)  // rmm4999
 				{
 					return qtrue;
 				}
-			}*/
+			}
 			return qtrue;
-		}
+		}*/
 
 		default:
-			// the pipe listener thread has signalled that there are messages in the queue.
 			if(Msg == CefInstance::PIPE_MESSAGES_AVAILABLE) {
+				// the pipe listener thread has signalled that there are messages in the queue.
 				CefInstance::RefPtr(eci, hwnd)->PopMessages();
 				return qtrue;
 			}
 	 }
 
-	 // As a final result this must ALWAYS be called. It handles all other messages that this component
-	 // decides to ignore.
+	 // defer all unhandled messages to the default handler.
 	 return WNDdefWindowProc(hwnd,Msg,wParam,lParam,eci);
 }
 

@@ -243,6 +243,7 @@ void ClientHandler::InitCommandNameMap() {
 	command_name_map_["execute"] = execute;
 	command_name_map_["navigate"] = navigate;
 	command_name_map_["sendOmnis"] = sendOmnis;
+	command_name_map_["customEvent"] = customEvent;
 	command_name_map_["resize"] = resize;
 	command_name_map_["exit"] = exit;
 }
@@ -254,7 +255,8 @@ void ClientHandler::OnReadCompleted(std::wstring &buffer) {
 	if(command != command_name_map_.end()) {
 		switch(command->second) {
 			case execute:
-			case navigate: {
+			case navigate:
+			case customEvent: {
 				// pass the message to the renderer process of each browser.
 				BrowserList::iterator bit = browser_list_.begin();
 				for (; bit != browser_list_.end(); ++bit)

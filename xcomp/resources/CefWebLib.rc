@@ -34,6 +34,7 @@ BEGIN
 	7012					"$getCompVersion:$getCompVersion(pCompIdent)"
 	7013					"$getCompApiVersion:$getCompApiVersion(pCompIdent)"
 	7014					"$sentCompAction:$sentCompAction(pCompIdent,pTyp,pParam1,pParam2,pParam3,pParam4,pParam5,pParam6,pParam7,pParam8,pParam9)"
+	7015					"$sendCustomEvent:$sendCustomEvent(pName,pValue)"
 	
 	// Events
 	7500					"CloseModule:CloseModule"
@@ -192,6 +193,9 @@ BEGIN
 	8380					"param9:Param9"
 
 	8390					"compId:compId"
+
+	8400					"name:Name"
+	8401					"value:Value"
 
 	// Entry method name
 	31000					"GenericWndProc"

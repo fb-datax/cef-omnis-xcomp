@@ -118,6 +118,7 @@ class ClientHandler : public CefClient,
 		execute,
 		navigate,
 		sendOmnis,
+		customEvent,
 		resize,
 		exit
 	};

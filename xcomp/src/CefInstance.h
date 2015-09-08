@@ -114,6 +114,7 @@ enum Enum {
 	ofGetCompData,
 	ofSetCompData,
 	ofSendActionToComp,
+	ofSendCustomEvent,
 
 	// -------Obj event methods ------------	
 	evDoCloseModule = 1100,

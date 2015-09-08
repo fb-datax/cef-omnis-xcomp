@@ -5,22 +5,22 @@
 	<title></title>
 	<style type="text/css">
 		body {
-		background-color:#F7F7F7;
-		margin:auto;
-		text-align:center;
+			background-color:#F7F7F7;
+			margin:auto;
+			text-align:center;
 		}
 		h1 {
-		color:black;
-		font-family:'Quicksand', sans-serif;
-		font-size:40px;
+			color:black;
+			font-family:'Quicksand', sans-serif;
+			font-size:40px;
 		}
 		#content {
-		top:-20px;
-		width:650px;
-		height:500px;
-		background-color:#F7F7F7;
-		margin:auto;
-		text-align:left;
+			top:-20px;
+			width:650px;
+			height:500px;
+			background-color:#F7F7F7;
+			margin:auto;
+			text-align:left;
 		}
 	</style>
 	<script type="text/javascript" src="jquery.min.js"></script>
@@ -41,25 +41,31 @@
 		<div>
 			<input type="text" id="msg" value="Hello O$!!!">
 			<button id="showmsg">
-			  	Show message
+			  	<code>omnis.showMsg('Info', msg)</code>
 			</button>
 		</div>
 		<div>
 			<button id="closemodule">
-				Close module
+				<code>omnis.closeModule()</code>
 			</button>
 		</div>
 		<div>
 			<button id="customevent">
-				Custom event
-			</button> (generates a trace log message).
+				<code>omnis.customEvent('myCustomEvent', Math.PI)</code>
+			</button> (generates a trace log message and a response from Omnis).
 		</div>
+		<div id="response"></div>
 	</div>
 
 	<script>
 		$(document).ready(function() {
 			//$("#userpath").val(weblib.userPath);
 			//$("#basePath").val(weblib.basePath);
+
+			// set a callback for the custom event name 'customResponse'.
+			omnis.setEventCallback('customResponse', function(message) {
+				$('<div/>').text('Response: ' + message).appendTo('#response');
+			});
 		});
 
 		$("#showmsg").click(function() {

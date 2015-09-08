@@ -567,10 +567,8 @@ qbool CefInstance::CallMethod(EXTCompInfo *eci) {
 			break;
 		}
 		case ofSendActionToComp: {
-
 			EXTParamInfo* pCompId = ECOfindParamNum(eci,1);
 			if (pCompId) {
-				EXTParamInfo* pCompId = ECOfindParamNum(eci,1);
 				EXTfldval fvalCompId ((qfldval)pCompId->mData);
 				std::string compId = OmnisTools::GetStringFromEXTFldVal(fvalCompId);
 
@@ -617,6 +615,23 @@ qbool CefInstance::CallMethod(EXTCompInfo *eci) {
 				// ### rtnVal.setLong(WebBrowser::sendActionToComp(compId,type,param1,param2,param3,param4,param5,param6,param7,param8,param9));
 				rtnCode = qtrue;
 				hasRtnVal = qtrue;	
+			}
+			break;
+		}
+		case ofSendCustomEvent: {
+			EXTParamInfo *name_i = ECOfindParamNum(eci, 1);
+			if (name_i) {
+				std::string message = OmnisTools::GetStringFromEXTFldVal(
+					EXTfldval((qfldval)name_i->mData)
+				);
+				EXTParamInfo *value_i = ECOfindParamNum(eci, 2);
+				if (value_i) {
+					message += ":";
+					message += OmnisTools::GetStringFromEXTFldVal(
+						EXTfldval((qfldval)value_i->mData)
+					);
+				}
+				WriteMessage(L"customEvent", std::wstring(CA2W(message.c_str())));
 			}
 			break;
 		}
