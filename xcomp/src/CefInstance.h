@@ -65,6 +65,7 @@ protected:
 	void sendOnConsoleMessageAdded(const std::string &arg);
 	void sendOnFrameLoadingFailed(const std::string &arg);
 	void sendOnAddressBarChanged(const std::string &arg);
+	void sendOnCustomCompAction(const std::string &arg);
 
 	HWND hwnd_;
 	HANDLE listener_thread_;
@@ -88,7 +89,8 @@ protected:
 		loadError,
 		showMsg,
 		closeModule,
-		gotFocus
+		gotFocus,
+		customEvent
 	};
 	typedef std::map<std::string, CommandName> CommandNameMap;
 	CommandNameMap command_name_map_;
@@ -98,6 +100,49 @@ protected:
 	int reference_count_;
 };
 
+enum Enum {
+	// -------Obj methods ------------	
+	ofnavigateToUrl = 1000,
+	ofHistoryGoBack,
+	ofHistoryGoForward,
+	ofInitWebView,
+	ofFocus,
+	ofUnFocus,
+	ofShutDownWebView,
+	ofCancelDownload,
+	ofStartDownload,
+	ofGetCompData,
+	ofSetCompData,
+	ofSendActionToComp,
+
+	// -------Obj event methods ------------	
+	evDoCloseModule = 1100,
+	evDoShowMessage,
+
+	// -------Obj event methods for webview listener ------------	
+	evOnConsoleMessageAdded = 1110,
+	evOnDocumentReady,
+	evOnFrameLoadingFailed,
+	evOnTitleChange,
+	evOnAddressBarChanged,
+	evOnOpenNewWindow,
+	evOnDownloadRequest,
+	evOnDownloadUpdate,
+	evOnDownloadFinish,
+	evOnJsInitFailed,
+	evOnCustomCompAction,
+	evOnCompInit,
+	evOnGotFocus,
+
+
+	// -------Static methods ------------	
+
+	// -------Properties	------------	
+	pBasePath = 4000,
+	pUserPath
+};
+
+/*
 // Method ids
 const qlong 
 	// -------Obj Methods ------------	
@@ -109,17 +154,14 @@ const qlong
 	ofUnFocus = 1005,
 	ofShutDownWebView = 1006,
 	ofCancelDownload = 1007,
-	ofStartDownload = 1008,
-	
+	ofStartDownload = 1008,	
 	ofGetCompData = 1009,
 	ofSetCompData = 1010,
 	ofSendActionToComp = 1014,
 
 	// -------Obj Event Methods ------------	
-	evDoCloseModule = 1100,
-	
-	evDoShowMessage = 1102,
-	
+	evDoCloseModule = 1100,	
+	evDoShowMessage = 1102,	
 	
 	// -------Obj Event der Web View Listener ------------	
 	evOnConsoleMessageAdded = 1110,
@@ -143,4 +185,4 @@ const qlong
 	pBasePath	= 4000,
 	pUserPath	= 4001
 	
-;
+;*/

@@ -248,8 +248,34 @@ void CefInstance::sendOnAddressBarChanged(const std::string &arg) {
 	EXTfldval url;
 	GetEXTFldValFromString(url, arg.c_str());
 	ECOaddParam(eci.get(), &url, 0, 0, 0, 1, 0);
-	ECOsendCompEvent(hwnd_, eci.get(), evOnAddressBarChanged, qtrue); 
-	ECOmemoryDeletion(eci.get()); 
+	ECOsendCompEvent(hwnd_, eci.get(), evOnAddressBarChanged, qtrue);
+	ECOmemoryDeletion(eci.get());
+}
+
+void CefInstance::sendOnCustomCompAction(const std::string &arg) {
+	// the argument should be an array in JSON format where the
+	// first element is the mandatory event name.
+	JSONDocument doc;
+	doc.Parse(arg.c_str());
+	if(doc.IsArray() && doc.Size() > 0) {
+		std::auto_ptr<EXTCompInfo> eci(new EXTCompInfo());
+		eci->mParamFirst = 0;
+		// set unused compId parameter.
+		EXTfldval val;
+		GetEXTFldValFromString(val, "id");
+		ECOaddParam(eci.get(), &val, 0, 0, 0, 1, 0);
+		for(int i = 0; i<doc.Size(); ++i) {
+			if (doc[i].IsString()) {
+				EXTfldval val;
+				GetEXTFldValFromString(val, doc[i].GetString());
+				ECOaddParam(eci.get(), &val, 0, 0, 0, i + 2, 0);
+			}
+		}
+		ECOsendCompEvent(hwnd_, eci.get(), evOnCustomCompAction, qtrue);
+		ECOmemoryDeletion(eci.get());
+	}
+	else
+		TraceLog(TARGET_NAME ": Bad customEvent message.");
 }
 
 CefInstance::~CefInstance() {
@@ -608,6 +634,7 @@ void CefInstance::InitCommandNameMap() {
 	command_name_map_["showMsg"] = showMsg;
 	command_name_map_["closeModule"] = closeModule;
 	command_name_map_["gotFocus"] = gotFocus;
+	command_name_map_["customEvent"] = customEvent;
 }
 
 void CefInstance::PopMessages() {
@@ -658,47 +685,13 @@ void CefInstance::PopMessages() {
 					break;
 				}
 				case gotFocus: {
-					HWND frame = hwnd_;
-					//SetFocus(frame);
-					//SendMessage(frame, WM_PARENTNOTIFY, WM_LBUTTONDOWN, 0);
-					frame = GetParent(frame);
-					frame = GetParent(frame);
-					frame = GetParent(frame);
-					frame = GetParent(frame); // <-- this is the bordered window within Omnis
-					HWND omnis = GetParent(frame);
-					ECOsendEvent(hwnd_, evOnGotFocus);
-					
-					//SetWindowPos(frame, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-					//SetWindowPos(frame, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-					
-					//PostMessage(frame, WM_LBUTTONDOWN, MK_LBUTTON, 0x00050005);
-					//PostMessage(frame, WM_LBUTTONUP, MK_LBUTTON, 0x00050005);
-
-					// ### How do we activate frame since it's a child of Omnis? ###
-					//SendMessage(frame, WM_PARENTNOTIFY, WM_LBUTTONDOWN, (1211 << 16) | 8);
-					//SendMessage(frame, WM_SYSKEYDOWN, 0x12, 0x20380001);
-
-					//SendMessage(frame, WM_MOUSEACTIVATE, (WPARAM) omnis, (513 << 16) | 2);
-					/*WINDOWPOS pos = {0};
-					pos.hwnd = frame;
-					pos.hwndInsertAfter = HWND_TOP;
-					pos.flags = SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE;
-					SendMessage(frame, WM_WINDOWPOSCHANGING, 0, (LPARAM) &pos);*/
-					//ECOsendEvent(frame, ECE_FORMTOTOP);
-					//HWND active = (HWND) SendMessage(omnis, WM_MDIGETACTIVE, 0, 0);
-					//SendMessage(active, WM_MDIACTIVATE, (WPARAM) frame, 0);
-					//SendMessage(omnis, WM_SETFOCUS, (WPARAM) frame, 0);
-					//SendMessage(omnis, WM_KILLFOCUS, (WPARAM) frame, 0);
-
-					//SetWindowPos(frame, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-					//SetActiveWindow(frame);
-					//SetForegroundWindow(frame);
-					//SetFocus(frame);
-					//SetWindowPos(frame, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-					//WNDsetWindowPos(frame, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-					//WNDbringWindowToTop(frame);
-					//WNDshowWindow(frame, SW_HIDE);
-					//WNDshowWindow(frame, SW_SHOW);
+					//HWND focus = GetFocus();
+					//ECOsendEvent(hwnd_, evOnGotFocus);
+					//SetFocus(focus);
+					break;
+				}
+				case customEvent: {
+					sendOnCustomCompAction(arg);
 					break;
 				}
 			}

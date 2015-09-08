@@ -58,6 +58,12 @@ void RendererApp::OnWebKitInitialized() {
 		"    native function sendOmnis();"
 		"    return sendOmnis('closeModule', '');"
 		"  };"
+		"  omnis.customEvent = function(name) {"
+		"    native function sendOmnis();"
+		"    var args = Array.prototype.slice.call(arguments, 1);"
+		"    args = [String(name)].concat(args.map(String));"
+		"    return sendOmnis('customEvent', JSON.stringify(args));"
+		"  };"
 		"})();";
 	CefRegisterExtension("v8/omnis", code, new SendOmnisHandler());
 }

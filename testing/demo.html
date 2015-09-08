@@ -41,13 +41,18 @@
 		<div>
 			<input type="text" id="msg" value="Hello O$!!!">
 			<button id="showmsg">
-			  	Show Message
+			  	Show message
 			</button>
 		</div>
 		<div>
 			<button id="closemodule">
-				Close Module
+				Close module
 			</button>
+		</div>
+		<div>
+			<button id="customevent">
+				Custom event
+			</button> (generates a trace log message).
 		</div>
 	</div>
 
@@ -63,6 +68,9 @@
 		});
 		$("#closemodule").click(function() {
 			omnis.closeModule();
+		});
+		$("#customevent").click(function() {
+			omnis.customEvent('myCustomEvent', Math.PI);
 		});
 	</script>
 </body>
