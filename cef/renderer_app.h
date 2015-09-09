@@ -95,14 +95,12 @@ class RendererApp : public CefApp,
 	// the command name map allows for an efficient string switch statement.
 	enum CommandName {
 		execute,
-		navigate,
 		customEvent,
 	};
 	typedef std::map<std::string, CommandName> CommandNameMap;
 	CommandNameMap command_name_map_;
 	void InitCommandNameMap() {
 		command_name_map_["execute"] = execute;
-		command_name_map_["navigate"] = navigate;
 		command_name_map_["customEvent"] = customEvent;
 	}
 

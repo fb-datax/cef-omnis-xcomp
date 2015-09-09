@@ -259,12 +259,23 @@ void ClientHandler::OnReadCompleted(std::wstring &buffer) {
 	if(command != command_name_map_.end()) {
 		switch(command->second) {
 			case execute:
-			case navigate:
 			case customEvent: {
 				// pass the message to the renderer process of each browser.
 				BrowserList::iterator bit = browser_list_.begin();
 				for (; bit != browser_list_.end(); ++bit)
 					(*bit)->SendProcessMessage(PID_RENDERER, message);
+				break;
+			}
+			case navigate: {
+				// navigate each browser to the url.
+				CefRefPtr<CefListValue> args = message->GetArgumentList();
+				if (args->GetSize() == 1) {
+					CefString url = args->GetString(0);
+					BrowserList::iterator bit = browser_list_.begin();
+					for (; bit != browser_list_.end(); ++bit)
+						(*bit)->GetMainFrame()->LoadURL(url);
+				} else
+					throw std::runtime_error("The navigate command needs a single string argument.");
 				break;
 			}
 			case resize: {

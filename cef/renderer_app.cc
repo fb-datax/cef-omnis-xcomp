@@ -82,17 +82,6 @@ bool RendererApp::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
 					throw std::runtime_error("The execute command needs a single string argument.");
 				return true;
 			}
-			case navigate: {
-				// navigate to the given URL.
-				CefRefPtr<CefListValue> args = message->GetArgumentList();
-				if (args->GetSize() == 1) {
-					CefString url = args->GetString(0);
-					browser->GetMainFrame()->LoadURL(url);
-				}
-				else
-					throw std::runtime_error("The navigate command needs a single string argument.");
-				return true;
-			}
 			case customEvent: {
 				// invoke the callback function for this event, if any.
 				CefRefPtr<CefListValue> args = message->GetArgumentList();
