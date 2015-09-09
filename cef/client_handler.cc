@@ -233,7 +233,7 @@ void ClientHandler::OnLoadError(CefRefPtr<CefBrowser> browser,
 	writer.EndObject();
 	PostPipeMessage(L"loadError", s.GetString());
 
-	// Display a load error message.
+	// display a load error message.
 	std::stringstream ss;
 	ss << "<html><body bgcolor=\"white\">"
 		"<h2>Failed to load URL " << std::string(failedUrl) <<

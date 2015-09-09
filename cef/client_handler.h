@@ -17,7 +17,7 @@ class ClientHandler : public CefClient,
 	ClientHandler(HWND hwnd, const std::string &pipe_name);
 	~ClientHandler();
 
-	// Provide access to the single global instance of this object.
+	// provide access to the single global instance of this object.
 	static ClientHandler* GetInstance();
 
 	// CefClient methods:
@@ -65,24 +65,17 @@ class ClientHandler : public CefClient,
 								int line) OVERRIDE;
 
 	// CefFocusHandler methods:
-	virtual void OnTakeFocus(CefRefPtr<CefBrowser> browser,
+	/*virtual void OnTakeFocus(CefRefPtr<CefBrowser> browser,
 							bool next) OVERRIDE {
-		//MessageBox(NULL, L"OnTakeFocus", L"Stop", MB_OK);
 		PostPipeMessage(L"CEF onTakeFocus", L"");
 	}
 	virtual bool OnSetFocus(CefRefPtr<CefBrowser> browser,
 							FocusSource source) OVERRIDE {
-		//MessageBox(NULL, L"OnSetFocus", L"Stop", MB_OK);
 		PostPipeMessage(L"CEF onSetFocus", L"");
 		return false;
-	}
+	}*/
 	virtual void OnGotFocus(CefRefPtr<CefBrowser> browser) OVERRIDE {
-		//MessageBox(NULL, L"OnGotFocus", L"Stop", MB_OK);
-		//CEF_REQUIRE_UI_THREAD();
-		// notify the XCOMP that we're ready.
-		//PostPipeMessage(L"ready", L"");
-		//BringWindowToTop(hwnd_);
-		PostPipeMessage(L"CEF onGotFocus", L"");
+		//PostPipeMessage(L"CEF onGotFocus", L"");
 		PostPipeMessage(L"gotFocus", L"");
 	}
 
@@ -101,7 +94,6 @@ class ClientHandler : public CefClient,
 
 	 // PipeOperationHandler methods:
 	virtual void OnConnectCompleted() OVERRIDE {
-		//MessageBox(NULL, L"Connect", L"Stop", MB_OK);
 		message_pipe_->QueueRead();
 	}
 	virtual void OnConnectFailed(DWORD err) OVERRIDE {
@@ -110,7 +102,7 @@ class ClientHandler : public CefClient,
 	virtual void OnReadCompleted(std::wstring &buffer) OVERRIDE;
 	virtual void OnWriteCompleted(std::wstring &buffer) OVERRIDE { }
 
-	// Request that all existing browser windows close.
+	// request that all existing browser windows close.
 	void CloseAllBrowsers(bool force_close);
 
 	bool IsClosing() const { return is_closing_; }
@@ -136,7 +128,7 @@ class ClientHandler : public CefClient,
 	CefRefPtr<MessagePipeClient> message_pipe_;
 	std::string pipe_name_;
 
-	// List of existing browser windows. Only accessed on the CEF UI thread.
+	// list of existing browser windows. Only accessed on the CEF UI thread.
 	typedef std::list<CefRefPtr<CefBrowser> > BrowserList;
 	BrowserList browser_list_;
 
@@ -147,7 +139,7 @@ class ClientHandler : public CefClient,
 					  const CefPoint& inspect_element_at);
 	void CloseDevTools(CefRefPtr<CefBrowser> browser);
 
-	// Include the default reference counting implementation.
+	// include the default reference counting implementation.
 	IMPLEMENT_REFCOUNTING(ClientHandler);
 };
 

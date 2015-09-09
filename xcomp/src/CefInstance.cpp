@@ -652,14 +652,6 @@ void CefInstance::InitCommandNameMap() {
 	command_name_map_["customEvent"] = customEvent;
 }
 
-BOOL CALLBACK AttachChild(HWND hwnd, LPARAM lparam) {
-	return FALSE;
-	DWORD child_thread_id = GetWindowThreadProcessId(hwnd, NULL);
-	if (!AttachThreadInput(child_thread_id, GetCurrentThreadId(), TRUE))
-		throw Win32Error();
-	return TRUE;
-}
-
 void CefInstance::PopMessages() {
 	MessageQueue::Message *message;
 	while(message = message_queue_->Pop()) {
@@ -680,9 +672,6 @@ void CefInstance::PopMessages() {
 			switch(command->second) {
 				case ready: {
 					TraceLog("CEF ready.");
-					HWND hwnd = (HWND) atoi(arg.c_str());
-					AttachChild(hwnd, 0);
-					EnumChildWindows(hwnd, (WNDENUMPROC)&AttachChild, 0);
 					cef_ready_ = true;
 					std::vector<std::wstring>::const_iterator i;
 					for(i = messages_to_write_.begin(); i != messages_to_write_.end(); ++i)
@@ -711,10 +700,7 @@ void CefInstance::PopMessages() {
 					break;
 				}
 				case gotFocus: {
-					//HWND focus = GetFocus();
 					ECOsendEvent(hwnd_, evOnGotFocus);
-					//HWND focus2 = GetFocus();
-					//SetFocus(focus);
 					break;
 				}
 				case customEvent: {

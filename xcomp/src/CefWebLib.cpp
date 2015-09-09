@@ -403,41 +403,18 @@ extern "C" qlong OMNISWNDPROC GenericWndProc(HWND hwnd, LPARAM Msg, WPARAM wPara
 		
 		//////////////////////// Window Messages  //////////////////////////////
 
-		case WM_SETFOCUS:
-		case WM_KILLFOCUS: {
-			bool f = Msg == WM_SETFOCUS;
-			MessageBox(NULL, "focus", "Stop", MB_OK);
-			break;
-		}
 		case WM_FOCUSCHANGED: {
-			int f = wParam;
-			//MessageBox(NULL, "focus", "Stop", MB_OK);
 			if (wParam) {
-				TraceLog("XCOMP FOCUS.");
+				// the xcomp gained focus, we need to notify CEF so focus is passed down to the browser window.
 				if (eci->mCompId == COMP_BROWSER) {
 					CefInstance *instance = static_cast<CefInstance*>(ECOfindObject(eci, hwnd));
 					if (instance && instance->IsHwnd(hwnd))
 						instance->Focus();
+					return qtrue;
 				}
-			} else
-				TraceLog("XCOMP BLUR.");
+			} // else the xcomp lost focus.
 			break;
 		}
-		/*// Anforderung zu Zeichnen 
-		case WM_PAINT:
-		{
-			if(eci->mCompId == COMP_BROWSER) {
-				 ######## WebLib::WebBrowser* object = (WebLib::WebBrowser*)ECOfindObject( eci, hwnd );
-				if (object && object->hwnd() == hwnd)  // rmm4999
-				{
-					if ( NULL!=object && object->paint()){
-						return qtrue;
-					}
-					
-				}
-			}
-			return qfalse;
-		}*/
 
 		case WM_WINDOWPOSCHANGED: {
 			// the comp changed size, resize the browser component to match.
@@ -448,33 +425,6 @@ extern "C" qlong OMNISWNDPROC GenericWndProc(HWND hwnd, LPARAM Msg, WPARAM wPara
 			}
 			return qtrue;
 		}
-
-		/* case WM_SIZE:
-		{
-			if(eci->mCompId == COMP_BROWSER) {
-				RECT rect; GetClientRect(hwnd, &rect);
-				rect.left = 0;
-				######## WebLib::WebBrowser* object = (WebLib::WebBrowser*)ECOfindObject( eci, hwnd );
-				if (object && object->hwnd() == hwnd)  // rmm4999
-				{
-					WNDinvalidateRect( hwnd, NULL );
-					return qtrue;
-				}
-			}
-			return qtrue;
-		}*/
-
-		/*case WM_DESTROY:
-		{
-			 ######## if ( eci->mCompId==COMP_BROWSER) {
-				WebLib::WebBrowser* object = (WebLib::WebBrowser*)ECOfindObject( eci, hwnd );
-				if (object && object->hwnd() == hwnd)  // rmm4999
-				{
-					return qtrue;
-				}
-			}
-			return qtrue;
-		}*/
 
 		default:
 			if(Msg == CefInstance::PIPE_MESSAGES_AVAILABLE) {
