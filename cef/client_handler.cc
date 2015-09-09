@@ -63,7 +63,10 @@ void ClientHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
 	browser_list_.push_back(browser);
 	
 	// notify the XCOMP that we're ready.
-	PostPipeMessage(L"ready", L"");
+	CefWindowHandle hwnd = browser->GetHost()->GetWindowHandle();
+	std::wstringstream ss;
+	ss << std::dec << (int) hwnd;
+	PostPipeMessage(L"ready", ss.str());
 }
 
 bool ClientHandler::OnProcessMessageReceived( CefRefPtr<CefBrowser> browser,
@@ -245,6 +248,7 @@ void ClientHandler::InitCommandNameMap() {
 	command_name_map_["sendOmnis"] = sendOmnis;
 	command_name_map_["customEvent"] = customEvent;
 	command_name_map_["resize"] = resize;
+	command_name_map_["focus"] = focus;
 	command_name_map_["exit"] = exit;
 }
 
@@ -273,6 +277,12 @@ void ClientHandler::OnReadCompleted(std::wstring &buffer) {
 							SWP_ASYNCWINDOWPOS | SWP_NOACTIVATE | SWP_NOZORDER);
 					}
 				}
+				break;
+			}
+			case focus: {
+				BrowserList::iterator bit = browser_list_.begin();
+				for (; bit != browser_list_.end(); ++bit)
+					(*bit)->GetHost()->SetFocus(true);
 				break;
 			}
 			case exit: {

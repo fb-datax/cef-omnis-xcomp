@@ -8,6 +8,9 @@
 #include "CefWebLib.h"
 #include "CefInstance.h"
 #include "Win32Error.h"
+#include "OmnisTools.h"
+
+using namespace OmnisTools;
 
 struct EventId {
 	Enum id_;
@@ -392,9 +395,34 @@ extern "C" qlong OMNISWNDPROC GenericWndProc(HWND hwnd, LPARAM Msg, WPARAM wPara
 		case ECM_GETVERSION: {
 			return ECOreturnVersion(VERSION_MAJOR, VERSION_MINOR);
 		} 
+		case ECM_CANFOCUS:
+		case ECM_CANCLICK:{
+			// the component can click and receive the focus if it is enabled
+			return wParam;
+		}
 		
 		//////////////////////// Window Messages  //////////////////////////////
-		
+
+		case WM_SETFOCUS:
+		case WM_KILLFOCUS: {
+			bool f = Msg == WM_SETFOCUS;
+			MessageBox(NULL, "focus", "Stop", MB_OK);
+			break;
+		}
+		case WM_FOCUSCHANGED: {
+			int f = wParam;
+			//MessageBox(NULL, "focus", "Stop", MB_OK);
+			if (wParam) {
+				TraceLog("XCOMP FOCUS.");
+				if (eci->mCompId == COMP_BROWSER) {
+					CefInstance *instance = static_cast<CefInstance*>(ECOfindObject(eci, hwnd));
+					if (instance && instance->IsHwnd(hwnd))
+						instance->Focus();
+				}
+			} else
+				TraceLog("XCOMP BLUR.");
+			break;
+		}
 		/*// Anforderung zu Zeichnen 
 		case WM_PAINT:
 		{

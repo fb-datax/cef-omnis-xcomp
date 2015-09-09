@@ -22,6 +22,7 @@ public:
 	qbool CallMethod(EXTCompInfo *eci);
 	void PopMessages();
 	void Resize();
+	void Focus();
 	
 	void AddRef() { ++reference_count_; }
 	void SubRef() { if(!--reference_count_) delete this; }

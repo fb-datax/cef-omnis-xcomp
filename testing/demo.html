@@ -5,22 +5,25 @@
 	<title></title>
 	<style type="text/css">
 		body {
-			background-color:#F7F7F7;
-			margin:auto;
-			text-align:center;
+			background-color: #F7F7F7;
+			margin: auto;
+			text-align: center;
 		}
 		h1 {
-			color:black;
-			font-family:'Quicksand', sans-serif;
-			font-size:40px;
+			color: black;
+			font-family: 'Quicksand', sans-serif;
+			font-size: 40px;
 		}
 		#content {
-			top:-20px;
-			width:650px;
-			height:500px;
-			background-color:#F7F7F7;
-			margin:auto;
-			text-align:left;
+			top: -20px;
+			width: 750px;
+			height: 500px;
+			background-color: #F7F7F7;
+			margin: auto;
+			text-align: left;
+		}
+		#response {
+			margin-top: 1em;
 		}
 	</style>
 	<script type="text/javascript" src="jquery.min.js"></script>
@@ -54,18 +57,28 @@
 				<code>omnis.customEvent('myCustomEvent', Math.PI)</code>
 			</button> (generates a trace log message and a response from Omnis).
 		</div>
-		<div id="response"></div>
+		<div id="response"/>
 	</div>
 
 	<script>
+		var appendText = function(text) {
+			$('<div/>').text(text).appendTo('#response');
+		};
+
 		$(document).ready(function() {
 			//$("#userpath").val(weblib.userPath);
 			//$("#basePath").val(weblib.basePath);
 
 			// set a callback for the custom event name 'customResponse'.
+			var count = 0;
 			omnis.setEventCallback('customResponse', function(message) {
-				$('<div/>').text('Response: ' + message).appendTo('#response');
+				appendText('Response: ' + message);
+				if(++count === 5) {
+					omnis.clearEventCallback('customResponse');
+					appendText('Stopped listening after ' + count + ' responses.');
+				}
 			});
+			appendText('Started listening for responses...');
 		});
 
 		$("#showmsg").click(function() {

@@ -14,69 +14,9 @@
 #include "include/base/cef_bind.h"
 
 RendererApp::RendererApp() :
-	omnis_handler_(new OmnisHandler())
+omnis_handler_(new OmnisHandler())
 {
 	InitCommandNameMap();
-}
-
-bool RendererApp::OmnisHandler::Execute(const CefString& name,
-										CefRefPtr<CefV8Value> object,
-										const CefV8ValueList& arguments,
-										CefRefPtr<CefV8Value>& retval,
-										CefString& exception) {
-	if(name == "sendOmnis") {
-		if (arguments.size() == 2 &&
-			arguments[0]->IsString() &&
-			arguments[1]->IsString()) {
-			// send the message to the Omnis xcomp.
-			CefRefPtr<CefBrowser> browser = CefV8Context::GetCurrentContext()->GetBrowser();
-			CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create("sendOmnis");
-			message->GetArgumentList()->SetString(0, arguments[0]->GetStringValue());
-			message->GetArgumentList()->SetString(1, arguments[1]->GetStringValue());
-			browser->SendProcessMessage(PID_BROWSER, message);
-			return true;
-		}
-	} else if(name == "setEventCallback") {
-		if (arguments.size() == 2 &&
-			arguments[0]->IsString() &&
-			arguments[1]->IsFunction()) {
-			// register the callback function for this event name.
-			CefString event_name = arguments[0]->GetStringValue();
-			CefRefPtr<CefV8Context> context = CefV8Context::GetCurrentContext();
-			int browser_id = context->GetBrowser()->GetIdentifier();
-			event_callbacks_.insert(
-				std::make_pair(
-					std::make_pair(event_name, browser_id),
-					std::make_pair(context, arguments[1]))
-				);
-			return true;
-		}
-	}
-	return false;
-}
-
-bool RendererApp::OmnisHandler::CustomEvent(CefRefPtr<CefBrowser> browser, const std::wstring& name, const std::wstring& value) {
-	int browser_id = browser->GetIdentifier();
-	EventCallbackMap::const_iterator it = event_callbacks_.find(
-		std::make_pair(name, browser_id));
-	if (it != event_callbacks_.end()) {
-		// keep a local reference to the objects since the callback may remove itself.
-		CefRefPtr<CefV8Context> context = it->second.first;
-		CefRefPtr<CefV8Value> callback = it->second.second;
-
-		// enter the context and call the callback.
-		context->Enter();
-		CefRefPtr<CefV8Value> ret_val;
-		/*CefRefPtr<CefV8Value> globalObj = context->GetGlobal();
-		CefRefPtr<CefV8Value> parse =
-		globalObj->GetValue("JSON")->GetValue("parse");*/
-		CefV8ValueList args;
-		args.push_back(CefV8Value::CreateString(value));
-		ret_val = callback->ExecuteFunction(NULL, args);
-		context->Exit();
-		return true;
-	}
-	return false;
 }
 
 void RendererApp::OnWebKitInitialized() {
@@ -109,8 +49,20 @@ void RendererApp::OnWebKitInitialized() {
 		"        throw new TypeError('Second argument must be callback function.'); "
 		"    return setEventCallback(name, cb);"
 		"  };"
+		"  omnis.clearEventCallback = function(name) {"
+		"    native function clearEventCallback();"
+		"    if(typeof name !== 'string')"
+		"        throw new TypeError('First argument must be string event name.'); "
+		"    return clearEventCallback(name);"
+		"  };"
 		"})();";
 	CefRegisterExtension("v8/omnis", code, omnis_handler_);
+}
+
+void RendererApp::OnContextReleased(CefRefPtr<CefBrowser> browser,
+									CefRefPtr<CefFrame> frame,
+									CefRefPtr<CefV8Context> context) {
+	omnis_handler_->ReleaseContext(context);
 }
 
 bool RendererApp::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
@@ -164,4 +116,111 @@ bool RendererApp::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
 		}
 	}
 	return false;
+}
+
+
+RendererApp::OmnisHandler::OmnisHandler() {
+	InitCommandNameMap();
+}
+
+void RendererApp::OmnisHandler::InitCommandNameMap() {
+	command_name_map_["sendOmnis"] = sendOmnis;
+	command_name_map_["setEventCallback"] = setEventCallback;
+	command_name_map_["clearEventCallback"] = clearEventCallback;
+}
+
+bool RendererApp::OmnisHandler::Execute(const CefString& name,
+										CefRefPtr<CefV8Value> object,
+										const CefV8ValueList& arguments,
+										CefRefPtr<CefV8Value>& retval,
+										CefString& exception) {
+	CommandNameMap::const_iterator command = command_name_map_.find(name);
+	if (command != command_name_map_.end()) {
+		switch (command->second) {
+			case sendOmnis: {
+				if (arguments.size() == 2 &&
+					arguments[0]->IsString() &&
+					arguments[1]->IsString()) {
+					// send the message to the Omnis xcomp.
+					CefRefPtr<CefBrowser> browser = CefV8Context::GetCurrentContext()->GetBrowser();
+					CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create("sendOmnis");
+					message->GetArgumentList()->SetString(0, arguments[0]->GetStringValue());
+					message->GetArgumentList()->SetString(1, arguments[1]->GetStringValue());
+					browser->SendProcessMessage(PID_BROWSER, message);
+					return true;
+				}
+				break;
+			}
+			case setEventCallback: {
+				if (arguments.size() == 2 &&
+					arguments[0]->IsString() &&
+					arguments[1]->IsFunction()) {
+					// register the callback function for this event name.
+					CefString event_name = arguments[0]->GetStringValue();
+					CefRefPtr<CefV8Context> context = CefV8Context::GetCurrentContext();
+					int browser_id = context->GetBrowser()->GetIdentifier();
+					event_callbacks_.insert(
+						std::make_pair(
+						std::make_pair(event_name, browser_id),
+						std::make_pair(context, arguments[1]))
+						);
+					return true;
+				}
+				break;
+			}
+			case clearEventCallback: {
+				if (arguments.size() == 1 &&
+					arguments[0]->IsString()) {
+					// unregister the callback function for this event name.
+					CefString event_name = arguments[0]->GetStringValue();
+					CefRefPtr<CefV8Context> context = CefV8Context::GetCurrentContext();
+					int browser_id = context->GetBrowser()->GetIdentifier();
+					EventCallbackMap::iterator it =
+						event_callbacks_.find(std::make_pair(event_name, browser_id));
+					if (it != event_callbacks_.end())
+						event_callbacks_.erase(it);
+					return true;
+				}
+				break;
+			}
+		}
+	}
+	return false;
+}
+
+bool RendererApp::OmnisHandler::CustomEvent(CefRefPtr<CefBrowser> browser, const std::wstring& name, const std::wstring& value) {
+	int browser_id = browser->GetIdentifier();
+	EventCallbackMap::const_iterator it = event_callbacks_.find(
+		std::make_pair(name, browser_id));
+	if (it != event_callbacks_.end()) {
+		// keep a local reference to the objects since the callback may remove itself.
+		CefRefPtr<CefV8Context> context = it->second.first;
+		CefRefPtr<CefV8Value> callback = it->second.second;
+
+		// enter the context and call the callback.
+		context->Enter();
+		CefRefPtr<CefV8Value> ret_val;
+		/*CefRefPtr<CefV8Value> globalObj = context->GetGlobal();
+		CefRefPtr<CefV8Value> parse =
+		globalObj->GetValue("JSON")->GetValue("parse");*/
+		CefV8ValueList args;
+		args.push_back(CefV8Value::CreateString(value));
+		ret_val = callback->ExecuteFunction(NULL, args);
+		context->Exit();
+		return true;
+	}
+	return false;
+}
+
+void RendererApp::OmnisHandler::ReleaseContext(CefRefPtr<CefV8Context> context) {
+	// remove references to any event callback functions.
+	if (!event_callbacks_.empty()) {
+		EventCallbackMap::iterator it = event_callbacks_.begin();
+		for (; it != event_callbacks_.end();) {
+			if (it->second.first->IsSame(context))
+				event_callbacks_.erase(it++);
+			else
+				++it;
+		}
+	}
 }

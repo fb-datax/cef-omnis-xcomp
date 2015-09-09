@@ -65,21 +65,24 @@ class ClientHandler : public CefClient,
 								int line) OVERRIDE;
 
 	// CefFocusHandler methods:
-	/*virtual void OnTakeFocus(CefRefPtr<CefBrowser> browser,
+	virtual void OnTakeFocus(CefRefPtr<CefBrowser> browser,
 							bool next) OVERRIDE {
-		MessageBox(NULL, L"OnTakeFocus", L"Stop", MB_OK);
+		//MessageBox(NULL, L"OnTakeFocus", L"Stop", MB_OK);
+		PostPipeMessage(L"CEF onTakeFocus", L"");
 	}
 	virtual bool OnSetFocus(CefRefPtr<CefBrowser> browser,
 							FocusSource source) OVERRIDE {
-		MessageBox(NULL, L"OnSetFocus", L"Stop", MB_OK);
+		//MessageBox(NULL, L"OnSetFocus", L"Stop", MB_OK);
+		PostPipeMessage(L"CEF onSetFocus", L"");
 		return false;
-	}*/
+	}
 	virtual void OnGotFocus(CefRefPtr<CefBrowser> browser) OVERRIDE {
 		//MessageBox(NULL, L"OnGotFocus", L"Stop", MB_OK);
 		//CEF_REQUIRE_UI_THREAD();
 		// notify the XCOMP that we're ready.
 		//PostPipeMessage(L"ready", L"");
 		//BringWindowToTop(hwnd_);
+		PostPipeMessage(L"CEF onGotFocus", L"");
 		PostPipeMessage(L"gotFocus", L"");
 	}
 
@@ -120,6 +123,7 @@ class ClientHandler : public CefClient,
 		sendOmnis,
 		customEvent,
 		resize,
+		focus,
 		exit
 	};
 	typedef std::map<std::string, CommandName> CommandNameMap;
@@ -140,7 +144,7 @@ class ClientHandler : public CefClient,
 
 	void RegisterDevToolsClass();
 	void ShowDevTools(CefRefPtr<CefBrowser> browser,
-					const CefPoint& inspect_element_at);
+					  const CefPoint& inspect_element_at);
 	void CloseDevTools(CefRefPtr<CefBrowser> browser);
 
 	// Include the default reference counting implementation.

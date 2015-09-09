@@ -41,9 +41,7 @@ class RendererApp : public CefApp,
 	}
 	virtual void OnContextReleased(CefRefPtr<CefBrowser> browser,
 								CefRefPtr<CefFrame> frame,
-								CefRefPtr<CefV8Context> context) OVERRIDE { 
-		//MessageBox(NULL, L"OnContextReleased", L"Stop", MB_OK);
-	}
+								CefRefPtr<CefV8Context> context) OVERRIDE;
 	virtual void OnUncaughtException(CefRefPtr<CefBrowser> browser,
 									CefRefPtr<CefFrame> frame,
 									CefRefPtr<CefV8Context> context,
@@ -64,18 +62,29 @@ class RendererApp : public CefApp,
 
 	 class OmnisHandler : public CefV8Handler {
 	 public:
+		 OmnisHandler();
 		 virtual bool Execute(const CefString& name,
 			 CefRefPtr<CefV8Value> object,
 			 const CefV8ValueList& arguments,
 			 CefRefPtr<CefV8Value>& retval,
 			 CefString& exception) OVERRIDE;
 		 bool CustomEvent(CefRefPtr<CefBrowser> browser, const std::wstring& name, const std::wstring& value);
+		 void ReleaseContext(CefRefPtr<CefV8Context> context);
 	 protected:
 		 // custom message callbacks.
 		 typedef std::map<std::pair<std::wstring, int>,
 			 std::pair<CefRefPtr<CefV8Context>, CefRefPtr<CefV8Value> > >
 			 EventCallbackMap;
 		 EventCallbackMap event_callbacks_;
+
+		 enum CommandName {
+			 sendOmnis,
+			 setEventCallback,
+			 clearEventCallback
+		 };
+		 typedef std::map<std::string, CommandName> CommandNameMap;
+		 CommandNameMap command_name_map_;
+		 void InitCommandNameMap();
 
 		 // Provide the reference counting implementation for this class.
 		 IMPLEMENT_REFCOUNTING(OmnisHandler);
