@@ -69,6 +69,8 @@ CefInstance::CefInstance(HWND hwnd) :
     pSa_->nLength = sizeof(*pSa_);
     pSa_->lpSecurityDescriptor = pSd;
     pSa_->bInheritHandle = FALSE;
+
+	InitWebView();
 }
 
 void CefInstance::InitWebView() {
@@ -280,6 +282,8 @@ void CefInstance::sendOnCustomCompAction(const std::string &arg) {
 }
 
 CefInstance::~CefInstance() {
+	ShutDownWebView();
+
 	if(read_lpo_) {
 		CloseHandle(read_lpo_->hEvent);
 		GlobalFree(read_lpo_);
@@ -453,20 +457,6 @@ qbool CefInstance::CallMethod(EXTCompInfo *eci) {
 	qbool hasRtnVal		=	qfalse;
 
 	switch(ECOgetId(eci)) {
-		case ofInitWebView: {
-			InitWebView();
-			rtnCode = qtrue;
-			hasRtnVal = qtrue;
-			break;
-		}
-
-		case ofShutDownWebView: {
-			ShutDownWebView();
-			rtnCode = qtrue;
-			hasRtnVal = qtrue;
-			break;
-		}
-
 		case ofnavigateToUrl: {
 			EXTParamInfo* paramInfo = ECOfindParamNum(eci,1);
 			if (paramInfo) {
@@ -525,18 +515,6 @@ qbool CefInstance::CallMethod(EXTCompInfo *eci) {
 			rtnCode = qtrue;
 			hasRtnVal = qtrue;
 			ExecuteJavaScript(L"window.history.forward();");
-			break;
-		}
-		case ofFocus: {
-			rtnCode = qtrue;
-			hasRtnVal = qtrue;
-			// ### rtnVal.setLong(WebBrowser::focusWebView());
-			break;
-		}
-		case ofUnFocus: {
-			rtnCode = qtrue;
-			hasRtnVal = qtrue;
-			// ### rtnVal.setLong(WebBrowser::unFocusWebView());
 			break;
 		}
 		case ofGetCompData: {
@@ -648,7 +626,6 @@ qbool CefInstance::SetProperty(EXTCompInfo *eci) {
 		EXTfldval fval((qfldval)param->mData);
 		switch (ECOgetId(eci)) {
 			case pContextMenus: {
-				qshort v = fval.getBool();
 				bool val = fval.getBool() > 1;
 				if (context_menus_ != val) {
 					context_menus_ = val;
@@ -702,7 +679,6 @@ void CefInstance::PopMessages() {
 		if(command != command_name_map_.end()) {
 			switch(command->second) {
 				case ready: {
-					TraceLog("CEF ready.");
 					cef_ready_ = true;
 					std::vector<std::wstring>::const_iterator i;
 					for(i = messages_to_write_.begin(); i != messages_to_write_.end(); ++i)

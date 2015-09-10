@@ -72,6 +72,7 @@
 			// set a callback for the custom event name 'customResponse'.
 			var count = 0;
 			omnis.setEventCallback('customResponse', function(message) {
+				console.log('Received "%s" from Omnis!', message);
 				appendText('Response: ' + message);
 				if(++count === 5) {
 					omnis.clearEventCallback('customResponse');

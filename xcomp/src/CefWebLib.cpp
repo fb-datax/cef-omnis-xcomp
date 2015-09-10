@@ -192,22 +192,6 @@ qbool ReturnMethods(EXTCompInfo *eci) {
 		AddMethodEvent(events, id);
 	}
 	{
-		EventId id = { ofInitWebView, 7003 };
-		AddMethodEvent(events, id);
-	}
-	{
-		EventId id = { ofFocus, 7004 };
-		AddMethodEvent(events, id);
-	}
-	{
-		EventId id = { ofUnFocus, 7005 };
-		AddMethodEvent(events, id);
-	}
-	{
-		EventId id = { ofShutDownWebView, 7006 };
-		AddMethodEvent(events, id);
-	}
-	{
 		EventId id = { ofCancelDownload, 7007 };
 		ECOparam params[] = {
 			8180, fftInteger, 0, 0,			// pDownloadId
