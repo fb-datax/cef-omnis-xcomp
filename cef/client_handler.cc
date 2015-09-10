@@ -32,6 +32,7 @@ ClientHandler* g_instance = NULL;
 
 ClientHandler::ClientHandler(HWND hwnd, const std::string &pipe_name) : 
 	is_closing_(false),
+	context_menus_(true),
 	hwnd_(hwnd),
 	pipe_name_(pipe_name) {
 	DCHECK(!g_instance);
@@ -92,9 +93,10 @@ void ClientHandler::OnBeforeContextMenu(
     CefRefPtr<CefContextMenuParams> params,
     CefRefPtr<CefMenuModel> model) {
 	CEF_REQUIRE_UI_THREAD();
-
-	if((params->GetTypeFlags() & (CM_TYPEFLAG_PAGE | CM_TYPEFLAG_FRAME)) != 0) {
-		// sdd a separator if the menu already has items.
+	if (!context_menus_)
+		model->Clear();
+	else if((params->GetTypeFlags() & (CM_TYPEFLAG_PAGE | CM_TYPEFLAG_FRAME)) != 0) {
+		// add a separator if the menu already has items.
 		if(model->GetCount() > 0)
 			model->AddSeparator();
 
@@ -247,6 +249,7 @@ void ClientHandler::InitCommandNameMap() {
 	command_name_map_["navigate"] = navigate;
 	command_name_map_["sendOmnis"] = sendOmnis;
 	command_name_map_["customEvent"] = customEvent;
+	command_name_map_["contextMenus"] = contextMenus;
 	command_name_map_["resize"] = resize;
 	command_name_map_["focus"] = focus;
 	command_name_map_["exit"] = exit;
@@ -264,6 +267,12 @@ void ClientHandler::OnReadCompleted(std::wstring &buffer) {
 				BrowserList::iterator bit = browser_list_.begin();
 				for (; bit != browser_list_.end(); ++bit)
 					(*bit)->SendProcessMessage(PID_RENDERER, message);
+				break;
+			}
+			case contextMenus: {
+				CefRefPtr<CefListValue> args = message->GetArgumentList();
+				if (args->GetSize() == 1)
+					context_menus_ = (args->GetString(0) == L"1");
 				break;
 			}
 			case navigate: {

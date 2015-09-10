@@ -278,7 +278,8 @@ ECOproperty browserProperties[6] =
 { 
 //  propid				resourceid,	datatype,		propflags	propFlags2, enumStart, 	enumEnd
 	pBasePath,			4000, 		fftCharacter, 	0,			0, 			0, 			0,
-	pUserPath,			4001, 		fftCharacter, 	0,			0, 			0, 			0
+	pUserPath,			4001, 		fftCharacter, 	0,			0, 			0, 			0,
+	pContextMenus,		4002, 		fftBoolean, 	0,			0, 			0, 			0,
 };
 
 #define cSBrowserMethod_Count (0)
@@ -346,17 +347,23 @@ extern "C" qlong OMNISWNDPROC GenericWndProc(HWND hwnd, LPARAM Msg, WPARAM wPara
 			return qfalse;
 		}
 		
-		case ECM_PROPERTYCANASSIGN:  		
-		case ECM_SETPROPERTY: 				
-		case ECM_GETPROPERTY: {
-			// access proprerties
+		case ECM_PROPERTYCANASSIGN:
+			// can assign all our properties.
+			return qtrue;
 
-			if(eci->mCompId == COMP_BROWSER) {
-				/* ######## WebLib::WebBrowser* object = (WebLib::WebBrowser*)ECOfindObject( eci, hwnd );
-				if (object && object->hwnd() == hwnd)  
-				{
-					return object->attributeSupport(Msg,wParam,lParam, eci);
-				}*/
+		case ECM_SETPROPERTY: {
+			if (eci->mCompId == COMP_BROWSER) {
+				CefInstance *instance = static_cast<CefInstance*>(ECOfindObject(eci, hwnd));
+				if (instance && instance->IsHwnd(hwnd))
+					return instance->SetProperty(eci);
+			}
+			return qfalse;
+		}
+		case ECM_GETPROPERTY: {
+			if (eci->mCompId == COMP_BROWSER) {
+				CefInstance *instance = static_cast<CefInstance*>(ECOfindObject(eci, hwnd));
+				if (instance && instance->IsHwnd(hwnd))
+					return instance->GetProperty(eci);
 			}
 			return qfalse;
 		}

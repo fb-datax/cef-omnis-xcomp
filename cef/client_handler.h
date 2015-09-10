@@ -114,6 +114,7 @@ class ClientHandler : public CefClient,
 		navigate,
 		sendOmnis,
 		customEvent,
+		contextMenus,
 		resize,
 		focus,
 		exit
@@ -133,6 +134,7 @@ class ClientHandler : public CefClient,
 	BrowserList browser_list_;
 
 	bool is_closing_;
+	bool context_menus_;
 
 	void RegisterDevToolsClass();
 	void ShowDevTools(CefRefPtr<CefBrowser> browser,

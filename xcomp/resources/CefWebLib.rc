@@ -15,6 +15,7 @@ BEGIN
 	// Properties 
 	4000					"$basePath:Basepath for Plugins, ..."
 	4001					"$userPath:path for User settings,..."
+	4002					"$contextMenus:Flag to enable/disable right-click context menus. Default: enabled.,..."
 	
 	// Static methods
 	

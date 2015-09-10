@@ -20,6 +20,8 @@ public:
 	~CefInstance();
 	bool IsHwnd(HWND hwnd) { return hwnd_ == hwnd; }
 	qbool CallMethod(EXTCompInfo *eci);
+	qbool SetProperty(EXTCompInfo *eci);
+	qbool GetProperty(EXTCompInfo *eci);
 	void PopMessages();
 	void Resize();
 	void Focus();
@@ -79,6 +81,7 @@ protected:
 	std::string::size_type read_offset_;
 
 	bool cef_ready_;
+	bool context_menus_;
 	std::vector<std::wstring> messages_to_write_;
 	std::auto_ptr<MessageQueue> message_queue_;
 	
@@ -141,7 +144,8 @@ enum Enum {
 
 	// -------Properties	------------	
 	pBasePath = 4000,
-	pUserPath
+	pUserPath,
+	pContextMenus
 };
 
 /*

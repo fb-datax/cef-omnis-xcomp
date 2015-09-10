@@ -20,6 +20,7 @@ CefInstance::CefInstance(HWND hwnd) :
 	pipe_(INVALID_HANDLE_VALUE),
 	read_offset_(0),
 	cef_ready_(false),
+	context_menus_(true),
 	message_queue_(new MessageQueue()),
 	reference_count_(0)
 {
@@ -171,7 +172,7 @@ void CefInstance::sendDoShowMessage(const std::string &arg) {
 	if(doc.IsArray()) {
 		std::auto_ptr<EXTCompInfo> eci(new EXTCompInfo());
 		eci->mParamFirst = 0;
-		for(int i=0; i<doc.Size(); ++i) {
+		for(size_t i=0; i<doc.Size(); ++i) {
 			if(doc[i].IsString()) {
 				EXTfldval val;
 				GetEXTFldValFromString(val, doc[i].GetString());
@@ -264,7 +265,7 @@ void CefInstance::sendOnCustomCompAction(const std::string &arg) {
 		EXTfldval val;
 		GetEXTFldValFromString(val, "id");
 		ECOaddParam(eci.get(), &val, 0, 0, 0, 1, 0);
-		for(int i = 0; i<doc.Size(); ++i) {
+		for(size_t i = 0; i<doc.Size(); ++i) {
 			if (doc[i].IsString()) {
 				EXTfldval val;
 				GetEXTFldValFromString(val, doc[i].GetString());
@@ -639,6 +640,36 @@ qbool CefInstance::CallMethod(EXTCompInfo *eci) {
 	if(hasRtnVal)
 		ECOaddParam(eci, &rtnVal);
 	return rtnCode;
+}
+
+qbool CefInstance::SetProperty(EXTCompInfo *eci) {
+	EXTParamInfo *param = ECOfindParamNum(eci, 1);
+	if (param) {
+		EXTfldval fval((qfldval)param->mData);
+		switch (ECOgetId(eci)) {
+			case pContextMenus: {
+				qshort v = fval.getBool();
+				bool val = fval.getBool() > 1;
+				if (context_menus_ != val) {
+					context_menus_ = val;
+					WriteMessage(L"contextMenus", val ? L"1" : L"0");
+				}
+				return qtrue;
+			}
+		}
+	}
+	return qfalse;
+}
+
+qbool CefInstance::GetProperty(EXTCompInfo *eci) {
+	EXTfldval fval;
+	switch (ECOgetId(eci)) {
+		case pContextMenus: {
+			fval.setBool(context_menus_);
+			return qtrue;
+		}
+	}
+	return qfalse;
 }
 
 void CefInstance::InitCommandNameMap() {
