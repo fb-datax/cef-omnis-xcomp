@@ -64,7 +64,11 @@ namespace OmnisTools {
 	void GetEXTFldValFromInt(EXTfldval& fVal, int);
 	void GetEXTFldValFromInt64(EXTfldval& fVal, __int64);
 	void GetEXTFldValFromBool(EXTfldval& fVal, bool b);
-	
+
+	// strxxx helpers
+	str15 InitStr15(const char*);
+	str31 InitStr31(const char*);
+	str80 InitStr80(const char*);
 	str255 InitStr255(const char*);
 
 	// Allg Helpers

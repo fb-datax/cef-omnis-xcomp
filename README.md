@@ -23,35 +23,119 @@ Note: Visual Studio must be run as administrator before opening `cef-omnis-xcomp
 
 The following interface is available from within Omnis on the XCOMP.
 
+#### Properties
+
+##### `$contextMenus`
+
+A boolean flag to control whether right-click context menus are enabled (defaults to `true`).
+
 #### Methods
 
 ##### `$navigateToUrl(cURL)`
 
 Navigate to the given URL. `file://` URLs are supported.
 
-#### `$historyBack()`, `$historyForward()`
+##### `$historyBack()`, `$historyForward()`
 
 Equivalent to hitting the browser back or forward button respectively.
 
-##### `$sendCustomEvent(pName,pValue)`
+##### `$sendCustomEvent(pName, pValue)`
 
-Send a custom event to a javascript callback function which must have been registered under the same name. For example:
-```javascript
-omnis.setEventCallback('customResponse', function(message) {
-    console.log('Received "%s" from Omnis!', message);
-});
-```
+Send a custom event to a javascript callback function which must have been registered under the same name with `omnis.setEventCallback` (see below).
 For more details see the "Event Demo" in `demo.lbs`.
 
 #### Events
 
-##### `ShowMsg(pType, pParam1, pParam2, pParam3)` <a name="ShowMsg"></a>
+##### `CloseModule()`
 
+Request the module to be closed. The event should be handled with:
+```
+On evCloseModule
+  Do $cinst.$close()
+```
+
+##### `CustomEvent(name[, param1, param2, ..., param9])`
+
+A custom event from javascript (see `omnis.customEvent()` below). For example:
+```
+On evCustomEvent
+  Switch pName
+    Case 'myCustomEvent'
+      Send to trace log {[con('Received myCustomEvent. param = ',pParam1)]}
+      Do $cfield.$sendCustomEvent('customResponse','Received myCustomEvent in Omnis.')
+      Break to end of switch
+  End Switch
+```
+
+##### `FrameLoadingFailed(pErrorCode, pErrorMsg, pUrl)`
+
+The given URL failed to load with the given error.
+
+##### `AddressBarChanged(pUrl)`
+
+The given URL was navigated to.
+
+##### `GotFocus()`
+
+The browser took the keyboard focus. The event should be handled with:
+```
+Queue set current field {[$cinst]}
+```
 
 ### Javascript API
 
 The following interface is available in javascript on the global `omnis` object.
 
-##### `omnis.showMsg(type, param1, param2, param3)`
+##### `omnis.showMsg(message[, bell, type])`
 
-This sends the [`ShowMsg`](#ShowMsg) event to Omnis.
+Show a message box dialog in Omnis studio.
+
+* `message` - the message string to display
+* `bell` - determines whether the system bell will sound (defaults to `true`)
+* `type` - must be one of:
+  * `omnis.MSGBOX_OK`
+  * `omnis.MSGBOX_YESNO`
+  * `omnis.MSGBOX_NOYES`
+  * `omnis.MSGBOXICON_OK` (the default)
+  * `omnis.MSGBOXICON_YESNO`
+  * `omnis.MSGBOXICON_NOYES`
+  * `omnis.MSGBOXCANCEL_YESNO`
+  * `omnis.MSGBOXCANCEL_NOYES`
+
+##### `omnis.closeModule()`
+
+Generates a [`CloseModule`](#markdown-header-closemodule) event.
+
+##### `omnis.customEvent(name[, ...])`
+
+Generates a `CustomEvent` event with the given name and parameters. Up to 9 parameters may be provided.
+Example:
+```javascript
+omnis.customEvent('myCustomEvent', Math.PI);
+```
+
+##### `omnis.setEventCallback(name, callback)`
+
+Register the given callback function for custom events from Omnis with the given name. When Omnis calls `$sendCustomEvent` with this name, the callback will be invoked with a message string argument. Example:
+```javascript
+// set a callback for the custom event name 'customResponse'.
+var count = 0;
+omnis.setEventCallback('customResponse', function(message) {
+    console.log('Received "%s" from Omnis!', message);
+});
+```
+
+##### `omnis.clearEventCallback(name)`
+
+Unregister the event callback function for the given custom event name.
+
+
+
+
+
+
+
+
+
+
+

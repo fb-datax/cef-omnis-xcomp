@@ -42,31 +42,11 @@ template<size_t count> void AddMethodEvent(std::vector<ECOmethodEvent> &evs, con
 qbool ReturnEvents(EXTCompInfo* eci) {
 	std::vector<ECOmethodEvent> events;
 	{	
-		EventId id = {evDoCloseModule, 7500};
+		EventId id = {evCloseModule, 7500};
 		AddMethodEvent(events, id);
 	}
 	{
-		EventId id = {evDoShowMessage, 7502};
-		ECOparam params[] = {
-			// resid	datatype		flags   flags2+
-			8220,	fftCharacter,		0,		0,			// pType
-			8221,	fftCharacter,		0,		0,			// pParam1
-			8222,	fftCharacter,		0,		0,			// pParam2
-			8223,	fftCharacter,		0,		0,			// pParam3
-		};
-		AddMethodEvent(events, id, params);
-	}
-	{
-		EventId id = {evOnConsoleMessageAdded, 7503};
-		ECOparam params[] = {
-			8150, 	fftCharacter,		0, 		0,			// pConsoleMessage
-			8151,	fftInteger,			0,		0,			// pLineNumber
-			8152,	fftCharacter,		0,		0,			// pSource
-		};
-		AddMethodEvent(events, id, params);
-	}
-	{
-		EventId id = {evOnDocumentReady, 7504};
+		EventId id = {evDocumentReady, 7504};
 		ECOparam params[] = {
 			8101,	fftCharacter,	0,		0,				// pUrl
 			8102,	fftCharacter,	0,		0,				// pScheme
@@ -80,7 +60,7 @@ qbool ReturnEvents(EXTCompInfo* eci) {
 		AddMethodEvent(events, id, params);
 	}
 	{
-		EventId id = {evOnFrameLoadingFailed, 7505};
+		EventId id = {evFrameLoadingFailed, 7505};
 		ECOparam params[] = {
 			8120, 	fftInteger,		0, 		0,				// pErrorCode
 			8121,	fftCharacter,	0,		0,				// pErrorMsg
@@ -89,21 +69,21 @@ qbool ReturnEvents(EXTCompInfo* eci) {
 		AddMethodEvent(events, id, params);
 	}
 	{
-		EventId id = {evOnTitleChange, 7506};
+		EventId id = {evTitleChange, 7506};
 		ECOparam params[] = {
 			8130, 	fftCharacter,	0, 		0,				// pNewTitle
 		};
 		AddMethodEvent(events, id, params);
 	}
 	{
-		EventId id = {evOnAddressBarChanged, 7507};
+		EventId id = {evAddressBarChanged, 7507};
 		ECOparam params[] = {
-			8140, 	fftCharacter,	0, 		0,				// pNewUrl
+			8101, 	fftCharacter,	0, 		0,				// pUrl
 		};
 		AddMethodEvent(events, id, params);
 	}
 	{
-		EventId id = {evOnOpenNewWindow, 7508};
+		EventId id = {evOpenNewWindow, 7508};
 		ECOparam params[] = {
 			8160, 	fftCharacter,		0, 		0,			// pUrl
 			8161,	fftCharacter,		0,		0,			// pTarget
@@ -111,7 +91,7 @@ qbool ReturnEvents(EXTCompInfo* eci) {
 		AddMethodEvent(events, id, params);
 	}
 	{
-		EventId id = {evOnDownloadRequest, 7509};
+		EventId id = {evDownloadRequest, 7509};
 		ECOparam params[] = {
 			8170,	fftInteger,			0,		0,			// pDownloadId
 			8171, 	fftCharacter,		0, 		0,			// pUrl
@@ -121,7 +101,7 @@ qbool ReturnEvents(EXTCompInfo* eci) {
 		AddMethodEvent(events, id, params);
 	}
 	{
-		EventId id = {evOnDownloadUpdate, 7510};
+		EventId id = {evDownloadUpdate, 7510};
 		ECOparam params[] = {
 			8200,	fftInteger,			0,		0,			// pDownloadId
 			8201,	fftInteger,			0,		0,			// pTotalBytes
@@ -131,7 +111,7 @@ qbool ReturnEvents(EXTCompInfo* eci) {
 		AddMethodEvent(events, id, params);
 	}
 	{
-		EventId id = {evOnDownloadFinish, 7511};
+		EventId id = {evDownloadFinish, 7511};
 		ECOparam params[] = {
 			8210,	fftInteger,			0,		0,			// pDownloadId
 			8211,	fftCharacter,		0,		0,			// pUrl
@@ -140,15 +120,14 @@ qbool ReturnEvents(EXTCompInfo* eci) {
 		AddMethodEvent(events, id, params);
 	}
 	{
-		EventId id = {evOnJsInitFailed, 7513};
+		EventId id = {evJsInitFailed, 7513};
 		AddMethodEvent(events, id);
 	}
 	{
-		EventId id = {evOnCustomCompAction, 7514};
+		EventId id = {evCustomEvent, 7514 };
 		ECOparam params[] = {
-			8370, fftCharacter, 0, 0,			// pCompId
-			8371, fftCharacter, 0, 0,			// pType
-			8372, fftCharacter, 0, 0,			// pParam2
+			8371, fftCharacter, 0, 0,			// pName
+			8372, fftCharacter, 0, 0,			// pParam1
 			8373, fftCharacter, 0, 0,			// pParam2
 			8374, fftCharacter, 0, 0,			// pParam3
 			8375, fftCharacter, 0, 0,			// pParam4
@@ -161,14 +140,14 @@ qbool ReturnEvents(EXTCompInfo* eci) {
 		AddMethodEvent(events, id, params);
 	}
 	{
-		EventId id = {evOnCompInit, 7515};
+		EventId id = {evCompInit, 7515};
 		ECOparam params[] = {
 			8390,	fftCharacter,		0,		0,			// pCompId
 		};
 		AddMethodEvent(events, id, params);
 	}
 	{
-		EventId id = {evOnGotFocus, 7516};
+		EventId id = {evGotFocus, 7516};
 		AddMethodEvent(events, id);
 	}
 	return ECOreturnEvents(gInstLib, eci, &events[0], events.size());
@@ -283,7 +262,7 @@ extern "C" qlong OMNISWNDPROC GenericWndProc(HWND hwnd, LPARAM Msg, WPARAM wPara
 		
 		case ECM_OBJCONSTRUCT: {
 			// create a new CEF instance 
-			if ( eci->mCompId==COMP_BROWSER) {
+			if (eci->mCompId == COMP_BROWSER) {
 				CefInstance *instance = new CefInstance(hwnd);
 				instance->AddRef();
 				ECOinsertObject(eci, hwnd, static_cast<void*>(instance));

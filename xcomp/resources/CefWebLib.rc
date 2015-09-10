@@ -35,9 +35,6 @@ BEGIN
 	
 	// Events
 	7500					"CloseModule:CloseModule"
-	
-	7502					"ShowMsg:ShowMsg"
-	7503					"ConsoleMessage:ConsoleMessage"
 	7504					"DocumentReady:DocumentReady"
 	7505					"FrameLoadingFailed:FrameLoadingFailed"
 	7506					"TitleChanged:TitleChanged"
@@ -48,7 +45,7 @@ BEGIN
 	7511					"DownloadFinished:DownloadFinished"
 	
 	7513					"JsInitFailed:JsInitFailed"
-	7514					"CompCustAction:CompCustAction"
+	7514					"CustomEvent:CustomEvent"
 	7515					"CompInit:CompInit"
 	7516					"GotFocus:GotFocus"
 
@@ -178,7 +175,7 @@ BEGIN
 	8360					"param9:Param9"
 
 	8370					"compId:compId"
-	8371					"type:Type"
+	8371					"name:Name"
 	8372					"param1:Param1"
 	8373					"param2:Param2"
 	8374					"param3:Param3"
