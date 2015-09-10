@@ -119,7 +119,6 @@ omnis.customEvent('myCustomEvent', Math.PI);
 Register the given callback function for custom events from Omnis with the given name. When Omnis calls `$sendCustomEvent` with this name, the callback will be invoked with a message string argument. Example:
 ```javascript
 // set a callback for the custom event name 'customResponse'.
-var count = 0;
 omnis.setEventCallback('customResponse', function(message) {
     console.log('Received "%s" from Omnis!', message);
 });
