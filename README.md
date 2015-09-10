@@ -45,7 +45,8 @@ For more details see the "Event Demo" in `demo.lbs`.
 
 #### Events
 
-##### ShowMsg
+##### `ShowMsg(pType, pParam1, pParam2, pParam3)` <a name="ShowMsg"></a>
+
 
 ### Javascript API
 
