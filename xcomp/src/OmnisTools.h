@@ -46,9 +46,6 @@
 #include <map>
 #include <vector>
 
-//#include <Awesomium/Platform.h>
-//#include <Awesomium/WebString.h>
-
 #ifndef OMNIS_TOOLS_HE_
 #define OMNIS_TOOLS_HE_
 

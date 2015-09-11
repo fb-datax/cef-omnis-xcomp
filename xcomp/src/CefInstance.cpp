@@ -175,7 +175,7 @@ void CefInstance::ShutDownWebView() {
 	}
 }
 
-void CefInstance::sendDoShowMessage(const std::string &arg) {
+void CefInstance::ShowMessage(const std::string &arg) {
 	// the argument should be an array in JSON format.
 	JSONDocument doc;
 	doc.Parse(arg.c_str());
@@ -187,22 +187,11 @@ void CefInstance::sendDoShowMessage(const std::string &arg) {
 		if (doc.HasMember("bell"))
 			bell = doc["bell"].GetBool();
 		ECOmessageBox(flags, bell, InitStr255(doc["msg"].GetString()));
-		/*std::auto_ptr<EXTCompInfo> eci(new EXTCompInfo());
-		eci->mParamFirst = 0;
-		for(size_t i=0; i<doc.Size(); ++i) {
-			if(doc[i].IsString()) {
-				EXTfldval val;
-				GetEXTFldValFromString(val, doc[i].GetString());
-				ECOaddParam(eci.get(), &val, 0, 0, 0, i+1, 0);
-			}
-		}
-		ECOsendCompEvent(hwnd_, eci.get(), evDoShowMessage, qtrue);
-		ECOmemoryDeletion(eci.get());*/
 	} else
 		TraceLog(TARGET_NAME ": Bad showMsg message.");
 }
 
-void CefInstance::sendConsoleMessageAdded(const std::string &arg) {
+void CefInstance::ConsoleMessage(const std::string &arg) {
 	// the argument should be an object in JSON format.
 	JSONDocument doc;
 	doc.Parse(arg.c_str());
@@ -220,7 +209,47 @@ void CefInstance::sendConsoleMessageAdded(const std::string &arg) {
 		TraceLog(TARGET_NAME ": Bad console message.");
 }
 
-void CefInstance::sendFrameLoadingFailed(const std::string &arg) {
+void CefInstance::SendLoadingStateChange(const std::string &arg) {
+	// the argument should be an object in JSON format.
+	JSONDocument doc;
+	doc.Parse(arg.c_str());
+	if (!doc.HasParseError() && doc.IsObject()) {
+		std::auto_ptr<EXTCompInfo> eci(new EXTCompInfo());
+		eci->mParamFirst = 0;
+		if (doc.HasMember("isLoading")) {
+			EXTfldval fval;
+			GetEXTFldValFromBool(fval, doc["isLoading"].GetBool());
+			ECOaddParam(eci.get(), &fval, 0, 0, 0, 1, 0);
+		}
+		if (doc.HasMember("canGoBack")) {
+			EXTfldval fval;
+			GetEXTFldValFromBool(fval, doc["canGoBack"].GetBool());
+			ECOaddParam(eci.get(), &fval, 0, 0, 0, 2, 0);
+		}
+		if (doc.HasMember("canGoForward")) {
+			EXTfldval fval;
+			GetEXTFldValFromBool(fval, doc["canGoForward"].GetBool());
+			ECOaddParam(eci.get(), &fval, 0, 0, 0, 3, 0);
+		}
+		ECOsendCompEvent(hwnd_, eci.get(), evLoadingStateChange, qtrue);
+		ECOmemoryDeletion(eci.get());
+	}
+	else
+		TraceLog(TARGET_NAME ": Bad loadingStateChange message.");
+}
+
+void CefInstance::SendLoadEnd(const std::string &arg) {
+	// the argument should be the status code.
+	int status_code = atoi(arg.c_str());
+	std::auto_ptr<EXTCompInfo> eci(new EXTCompInfo());
+	EXTfldval fval;
+	GetEXTFldValFromInt(fval, status_code);
+	ECOaddParam(eci.get(), &fval, 0, 0, 0, 1, 0);
+	ECOsendCompEvent(hwnd_, eci.get(), evLoadEnd, qtrue);
+	ECOmemoryDeletion(eci.get());
+}
+
+void CefInstance::SendLoadError(const std::string &arg) {
 	// the argument should be an object in JSON format.
 	JSONDocument doc;
 	doc.Parse(arg.c_str());
@@ -245,24 +274,33 @@ void CefInstance::sendFrameLoadingFailed(const std::string &arg) {
 		else
 			GetEXTFldValFromString(failed_url, "");
 		ECOaddParam(eci.get(), &failed_url, 0, 0, 0, 3, 0);
-		ECOsendCompEvent(hwnd_, eci.get(), evFrameLoadingFailed, qtrue); 
+		ECOsendCompEvent(hwnd_, eci.get(), evLoadError, qtrue); 
 		ECOmemoryDeletion(eci.get()); 
 	} else
 		TraceLog(TARGET_NAME ": Bad loadError message.");
 }
 
-void CefInstance::sendAddressBarChanged(const std::string &arg) {
+void CefInstance::SendTitleChange(const std::string &arg) {
+	std::auto_ptr<EXTCompInfo> eci(new EXTCompInfo());
+	eci->mParamFirst = 0;
+	EXTfldval title;
+	GetEXTFldValFromString(title, arg.c_str());
+	ECOaddParam(eci.get(), &title, 0, 0, 0, 1, 0);
+	ECOsendCompEvent(hwnd_, eci.get(), evTitleChange, qtrue);
+	ECOmemoryDeletion(eci.get());
+}
+
+void CefInstance::SendAddressChange(const std::string &arg) {
 	std::auto_ptr<EXTCompInfo> eci(new EXTCompInfo());
 	eci->mParamFirst = 0;
 	EXTfldval url;
 	GetEXTFldValFromString(url, arg.c_str());
-	std::string test = OmnisTools::GetStringFromEXTFldVal(url);
 	ECOaddParam(eci.get(), &url, 0, 0, 0, 1, 0);
-	ECOsendCompEvent(hwnd_, eci.get(), evAddressBarChanged, qtrue);
+	ECOsendCompEvent(hwnd_, eci.get(), evAddressChange, qtrue);
 	ECOmemoryDeletion(eci.get());
 }
 
-void CefInstance::sendCustomEvent(const std::string &arg) {
+void CefInstance::SendCustomEvent(const std::string &arg) {
 	// the argument should be an array in JSON format where the
 	// first element is the mandatory event name.
 	JSONDocument doc;
@@ -508,97 +546,17 @@ qbool CefInstance::CallMethod(EXTCompInfo *eci) {
 			break;
 		}
 
-		case ofHistoryGoBack: {
+		case ofHistoryBack: {
 			rtnCode = qtrue;
 			hasRtnVal = qtrue;
 			ExecuteJavaScript(L"window.history.back();");
 			break;
 		}
 
-		case ofHistoryGoForward: {
+		case ofHistoryForward: {
 			rtnCode = qtrue;
 			hasRtnVal = qtrue;
 			ExecuteJavaScript(L"window.history.forward();");
-			break;
-		}
-		case ofGetCompData: {
-			EXTParamInfo* paramInfo = ECOfindParamNum(eci,1);
-			if (paramInfo) {
-				rtnCode = qtrue;
-				hasRtnVal = qtrue;	
-				
-				EXTfldval fval( (qfldval)paramInfo->mData);
-				std::string url = OmnisTools::GetStringFromEXTFldVal(fval);
-				// ### std::string result = WebBrowser::getDataFromComp(url);
-				// ### OmnisTools::GetEXTFldValFromString(rtnVal,result);
-			}
-			break;
-		}
-
-		case ofSetCompData: {
-			EXTParamInfo* pCompId = ECOfindParamNum(eci,1);
-			EXTParamInfo* pData = ECOfindParamNum(eci,2);
-			if (pCompId) {
-				EXTfldval fvalComp((qfldval)pCompId->mData);
-				EXTfldval fvalData((qfldval)pData->mData);
-				std::string comp = OmnisTools::GetStringFromEXTFldVal(fvalComp);
-				std::string data = OmnisTools::GetStringFromEXTFldVal(fvalData);
-				// ### rtnVal.setLong(WebBrowser::setDataForComp(comp,data));
-				rtnCode = qtrue;
-				hasRtnVal = qtrue;	
-			}
-			break;
-		}
-		case ofSendActionToComp: {
-			EXTParamInfo* pCompId = ECOfindParamNum(eci,1);
-			if (pCompId) {
-				EXTfldval fvalCompId ((qfldval)pCompId->mData);
-				std::string compId = OmnisTools::GetStringFromEXTFldVal(fvalCompId);
-
-				EXTParamInfo* pType = ECOfindParamNum(eci,2);
-				EXTfldval fvalType ((qfldval)pType->mData);
-				std::string type = OmnisTools::GetStringFromEXTFldVal(fvalType);
-
-				EXTParamInfo* pParam1 = ECOfindParamNum(eci,3);
-				EXTfldval fvalParam1 ((qfldval)pParam1->mData);
-				std::string param1 = OmnisTools::GetStringFromEXTFldVal(fvalParam1);
-
-				EXTParamInfo* pParam2 = ECOfindParamNum(eci,4);
-				EXTfldval fvalParam2 ((qfldval)pParam2->mData);
-				std::string param2 = OmnisTools::GetStringFromEXTFldVal(fvalParam2);
-
-				EXTParamInfo* pParam3 = ECOfindParamNum(eci,5);
-				EXTfldval fvalParam3 ((qfldval)pParam3->mData);
-				std::string param3 = OmnisTools::GetStringFromEXTFldVal(fvalParam3);
-
-				EXTParamInfo* pParam4 = ECOfindParamNum(eci,6);
-				EXTfldval fvalParam4 ((qfldval)pParam4->mData);
-				std::string param4 = OmnisTools::GetStringFromEXTFldVal(fvalParam4);
-
-				EXTParamInfo* pParam5 = ECOfindParamNum(eci,7);
-				EXTfldval fvalParam5 ((qfldval)pParam5->mData);
-				std::string param5 = OmnisTools::GetStringFromEXTFldVal(fvalParam5);
-
-				EXTParamInfo* pParam6 = ECOfindParamNum(eci,8);
-				EXTfldval fvalParam6 ((qfldval)pParam6->mData);
-				std::string param6 = OmnisTools::GetStringFromEXTFldVal(fvalParam6);
-
-				EXTParamInfo* pParam7 = ECOfindParamNum(eci,9);
-				EXTfldval fvalParam7 ((qfldval)pParam7->mData);
-				std::string param7 = OmnisTools::GetStringFromEXTFldVal(fvalParam7);
-
-				EXTParamInfo* pParam8 = ECOfindParamNum(eci,10);
-				EXTfldval fvalParam8 ((qfldval)pParam8->mData);
-				std::string param8 = OmnisTools::GetStringFromEXTFldVal(fvalParam8);
-
-				EXTParamInfo* pParam9 = ECOfindParamNum(eci,11);
-				EXTfldval fvalParam9 ((qfldval)pParam9->mData);
-				std::string param9 = OmnisTools::GetStringFromEXTFldVal(fvalParam9);
-				
-				// ### rtnVal.setLong(WebBrowser::sendActionToComp(compId,type,param1,param2,param3,param4,param5,param6,param7,param8,param9));
-				rtnCode = qtrue;
-				hasRtnVal = qtrue;	
-			}
 			break;
 		}
 		case ofSendCustomEvent: {
@@ -656,7 +614,11 @@ qbool CefInstance::GetProperty(EXTCompInfo *eci) {
 void CefInstance::InitCommandNameMap() {
 	command_name_map_["ready"] = ready;
 	command_name_map_["console"] = console;
+	command_name_map_["title"] = title;
 	command_name_map_["address"] = address;
+	command_name_map_["loadingStateChange"] = loadingStateChange;
+	command_name_map_["loadStart"] = loadStart;
+	command_name_map_["loadEnd"] = loadEnd;
 	command_name_map_["loadError"] = loadError;
 	command_name_map_["showMsg"] = showMsg;
 	command_name_map_["closeModule"] = closeModule;
@@ -691,23 +653,35 @@ void CefInstance::PopMessages() {
 					break;
 				}
 				case console: {
-					sendConsoleMessageAdded(arg);
+					ConsoleMessage(arg);
+					break;
+				}
+				case title: {
+					SendTitleChange(arg);
 					break;
 				}
 				case address: {
-					sendAddressBarChanged(arg);
+					SendAddressChange(arg);
+					break;
+				}
+				case loadingStateChange: {
+					SendLoadingStateChange(arg);
+					break;
+				}
+				case loadStart: {
+					ECOsendEvent(hwnd_, evLoadStart);
+					break;
+				}
+				case loadEnd: {
+					SendLoadEnd(arg);
 					break;
 				}
 				case loadError: {
-					sendFrameLoadingFailed(arg);
+					SendLoadError(arg);
 					break;
 				}
 				case showMsg: {
-					sendDoShowMessage(arg);
-					break;
-				}
-				case closeModule: {
-					ECOsendEvent(hwnd_, evCloseModule);
+					ShowMessage(arg);
 					break;
 				}
 				case gotFocus: {
@@ -715,7 +689,7 @@ void CefInstance::PopMessages() {
 					break;
 				}
 				case customEvent: {
-					sendCustomEvent(arg);
+					SendCustomEvent(arg);
 					break;
 				}
 			}

@@ -64,11 +64,14 @@ protected:
 		WriteMessage(L"execute", code);
 	}
 	
-	void sendDoShowMessage(const std::string &arg);
-	void sendConsoleMessageAdded(const std::string &arg);
-	void sendFrameLoadingFailed(const std::string &arg);
-	void sendAddressBarChanged(const std::string &arg);
-	void sendCustomEvent(const std::string &arg);
+	void ShowMessage(const std::string &arg);
+	void ConsoleMessage(const std::string &arg);
+	void SendLoadingStateChange(const std::string &arg);
+	void SendLoadEnd(const std::string &arg);
+	void SendLoadError(const std::string &arg);
+	void SendTitleChange(const std::string &arg);
+	void SendAddressChange(const std::string &arg);
+	void SendCustomEvent(const std::string &arg);
 
 	HWND hwnd_;
 	HANDLE listener_thread_;
@@ -89,7 +92,11 @@ protected:
 	enum CommandName {
 		ready,
 		console,
+		title,
 		address,
+		loadingStateChange,
+		loadStart,
+		loadEnd,
 		loadError,
 		showMsg,
 		closeModule,
@@ -107,37 +114,28 @@ protected:
 enum Enum {
 	// -------Obj methods ------------	
 	ofnavigateToUrl = 1000,
-	ofHistoryGoBack,
-	ofHistoryGoForward,
+	ofHistoryBack,
+	ofHistoryForward,
 	ofCancelDownload,
 	ofStartDownload,
-	ofGetCompData,
-	ofSetCompData,
-	ofSendActionToComp,
 	ofSendCustomEvent,
 
-	// -------Obj event methods ------------	
-	evCloseModule = 1100,
-
-	// -------Obj event methods for webview listener ------------	
-	evDocumentReady = 1110,
-	evFrameLoadingFailed,
+	// ------- Obj event methods ------------	
+	evLoadingStateChange = 1100,
+	evLoadStart,
+	evLoadEnd,
+	evLoadError,
 	evTitleChange,
-	evAddressBarChanged,
-	evOpenNewWindow,
+	evAddressChange,
 	evDownloadRequest,
 	evDownloadUpdate,
 	evDownloadFinish,
-	evJsInitFailed,
 	evCustomEvent,
 	evCompInit,
 	evGotFocus,
+	
+	// ------- Static methods ------------	
 
-
-	// -------Static methods ------------	
-
-	// -------Properties	------------	
-	pBasePath = 4000,
-	pUserPath,
-	pContextMenus
+	// ------- Properties ------------	
+	pContextMenus = 4000,
 };

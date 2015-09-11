@@ -49,7 +49,7 @@
 		</div>
 		<div>
 			<button id="closemodule">
-				<code>omnis.closeModule()</code>
+				<code>omnis.customEvent('close')</code>
 			</button>
 		</div>
 		<div>
@@ -87,7 +87,7 @@
 			omnis.showMsg(msg);
 		});
 		$("#closemodule").click(function() {
-			omnis.closeModule();
+			omnis.customEvent('close');
 		});
 		$("#customevent").click(function() {
 			omnis.customEvent('myCustomEvent', Math.PI);

@@ -13,9 +13,7 @@ BEGIN
 	////////// BROWSER ///////////////////
 
 	// Properties 
-	4000					"$basePath:Basepath for Plugins, ..."
-	4001					"$userPath:path for User settings,..."
-	4002					"$contextMenus:Flag to enable/disable right-click context menus. Default: enabled.,..."
+	4000					"$contextMenus:Flag to enable/disable right-click context menus. Default: enabled.,..."
 	
 	// Static methods
 	
@@ -31,14 +29,15 @@ BEGIN
 	7012					"$getCompVersion:$getCompVersion(pCompIdent)"
 	7013					"$getCompApiVersion:$getCompApiVersion(pCompIdent)"
 	7014					"$sentCompAction:$sentCompAction(pCompIdent,pTyp,pParam1,pParam2,pParam3,pParam4,pParam5,pParam6,pParam7,pParam8,pParam9)"
-	7015					"$sendCustomEvent:$sendCustomEvent(pName,pValue)"
+	7015					"$SendCustomEvent:$SendCustomEvent(pName,pValue)"
 	
 	// Events
-	7500					"CloseModule:CloseModule"
-	7504					"DocumentReady:DocumentReady"
-	7505					"FrameLoadingFailed:FrameLoadingFailed"
-	7506					"TitleChanged:TitleChanged"
-	7507					"AddressBarChanged:AddressBarChanged"
+	7500					"LoadingStateChange:LoadingStateChange"
+	7503					"LoadStart:LoadStart"
+	7504					"LoadEnd:LoadEnd"
+	7505					"LoadError:LoadError"
+	7506					"TitleChange:TitleChange"
+	7507					"AddressChange:AddressChange"
 	7508					"OpenNewWindow:OpenNewWindow"
 	7509					"DownloadRequest:DownloadRequest"
 	7510					"DownloadUpdate:DownloadUpdate"
@@ -56,21 +55,15 @@ BEGIN
 	8004					"cURL:URL 2 die geladen werden soll"
 
 	// Event parameters
-	8100					"consoleMessage:Console Msg"
-	8101					"url:Url"
-	8102					"scheme:Scheme"
-	8103					"host:Host"
-	8104					"port:Port"
-	8105					"path:Path"
-	8106					"query:Query"
-	8107					"anchor:Anchor"
-	8108					"filename:Filename"
+	8100					"isLoading:IsLoading"
+	8101					"canGoBack:CanGoBack"
+	8102					"canGoForward:CanGoForward"
 
-	8120					"errorCode:ErrorCode"
+	8120					"statusCode:StatusCode"
 	8121					"errorMsg:ErrorMsg"
 	8122					"url:Url"
 	
-	8130					"newTitle:NewTitle"
+	8130					"title:Title"
 
 	8140					"newUrl:NewUrl"
 

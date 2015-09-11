@@ -85,6 +85,15 @@ class ClientHandler : public CefClient,
 	virtual void OnBeforeClose(CefRefPtr<CefBrowser> browser) OVERRIDE;
 
 	// CefLoadHandler methods:
+	virtual void OnLoadingStateChange(CefRefPtr<CefBrowser> browser,
+									bool isLoading,
+									bool canGoBack,
+									bool canGoForward) OVERRIDE;
+	virtual void OnLoadStart(CefRefPtr<CefBrowser> browser,
+							CefRefPtr<CefFrame> frame) OVERRIDE;
+	virtual void OnLoadEnd(CefRefPtr<CefBrowser> browser,
+							CefRefPtr<CefFrame> frame,
+							int httpStatusCode) OVERRIDE;
 	virtual void OnLoadError(CefRefPtr<CefBrowser> browser,
 							CefRefPtr<CefFrame> frame,
 							ErrorCode errorCode,

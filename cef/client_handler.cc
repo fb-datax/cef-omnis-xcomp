@@ -142,6 +142,7 @@ void ClientHandler::OnTitleChange(CefRefPtr<CefBrowser> browser,
 	CEF_REQUIRE_UI_THREAD();
 	CefWindowHandle hwnd = browser->GetHost()->GetWindowHandle();
 	SetWindowText(hwnd, std::wstring(title).c_str());
+	PostPipeMessage(L"title", title);
 }
 
 void ClientHandler::OnStatusMessage(CefRefPtr<CefBrowser> browser,
@@ -205,6 +206,45 @@ void ClientHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser) {
     // All browser windows have closed. Quit the application message loop.
     CefQuitMessageLoop();
   }
+}
+
+
+void ClientHandler::OnLoadingStateChange(CefRefPtr<CefBrowser> browser,
+										bool isLoading,
+										bool canGoBack,
+										bool canGoForward) {
+	CEF_REQUIRE_UI_THREAD();
+
+	// send JSON message to xcomp.
+	JSONStringBuffer s;
+	JSONWriter writer(s);
+	writer.StartObject();
+	writer.String(L"isLoading");
+	writer.Bool(isLoading);
+	writer.String(L"canGoBack");
+	writer.Bool(canGoBack);
+	writer.String(L"canGoForward");
+	writer.Bool(canGoForward);
+	writer.EndObject();
+	PostPipeMessage(L"loadingStateChange", s.GetString());
+}
+
+void ClientHandler::OnLoadStart(CefRefPtr<CefBrowser> browser,
+								CefRefPtr<CefFrame> frame) {
+	CEF_REQUIRE_UI_THREAD();
+
+	// send message to xcomp.
+	PostPipeMessage(L"loadStart", L"");
+}
+void ClientHandler::OnLoadEnd(CefRefPtr<CefBrowser> browser,
+							CefRefPtr<CefFrame> frame,
+							int httpStatusCode) {
+	CEF_REQUIRE_UI_THREAD();
+
+	// send message to xcomp.
+	std::wstringstream ss;
+	ss << httpStatusCode;
+	PostPipeMessage(L"loadEnd", ss.str());
 }
 
 void ClientHandler::OnLoadError(CefRefPtr<CefBrowser> browser,

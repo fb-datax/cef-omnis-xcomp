@@ -41,62 +41,64 @@ template<size_t count> void AddMethodEvent(std::vector<ECOmethodEvent> &evs, con
 // all literal numbers are string resource ids.
 qbool ReturnEvents(EXTCompInfo* eci) {
 	std::vector<ECOmethodEvent> events;
-	{	
-		EventId id = {evCloseModule, 7500};
-		AddMethodEvent(events, id);
-	}
 	{
-		EventId id = {evDocumentReady, 7504};
+		EventId id = { evLoadingStateChange, 7500 };
 		ECOparam params[] = {
-			8101,	fftCharacter,	0,		0,				// pUrl
-			8102,	fftCharacter,	0,		0,				// pScheme
-			8103,	fftCharacter,	0,		0,				// pHost
-			8104,	fftCharacter,	0,		0,				// pPort
-			8105,	fftCharacter,	0,		0,				// pPath
-			8106,	fftCharacter,	0,		0,				// pQuery
-			8107,	fftCharacter,	0,		0,				// pAnchor
-			8108,	fftCharacter,	0,		0,				// pFilename
+			8100, fftBoolean, 0, 0,				// pIsLoading
+			8101, fftBoolean, 0, 0,				// pCanGoBack
+			8102, fftBoolean, 0, 0,				// pCanGoForward
 		};
 		AddMethodEvent(events, id, params);
 	}
 	{
-		EventId id = {evFrameLoadingFailed, 7505};
+		EventId id = { evLoadStart, 7503 };
+		AddMethodEvent(events, id);
+	}
+	{
+		EventId id = { evLoadEnd, 7504 };
 		ECOparam params[] = {
-			8120, 	fftInteger,		0, 		0,				// pErrorCode
-			8121,	fftCharacter,	0,		0,				// pErrorMsg
-			8122, 	fftCharacter,	0, 		0,				// pUrl
+			8120, fftInteger, 0, 0,				// pStatusCode
+		};
+		AddMethodEvent(events, id, params);
+	}
+	{
+		EventId id = { evLoadError, 7505 };
+		ECOparam params[] = {
+			8120, fftInteger,	0, 0,			// pStatusCode
+			8121, fftCharacter, 0, 0,			// pErrorMsg
+			8122, fftCharacter, 0, 0,			// pUrl
 		};
 		AddMethodEvent(events, id, params);
 	}
 	{
 		EventId id = {evTitleChange, 7506};
 		ECOparam params[] = {
-			8130, 	fftCharacter,	0, 		0,				// pNewTitle
+			8130, 	fftCharacter,	0, 		0,	// pTitle
 		};
 		AddMethodEvent(events, id, params);
 	}
 	{
-		EventId id = {evAddressBarChanged, 7507};
+		EventId id = {evAddressChange, 7507};
 		ECOparam params[] = {
-			8101, 	fftCharacter,	0, 		0,				// pUrl
+			8122, 	fftCharacter,	0, 		0,	// pUrl
 		};
 		AddMethodEvent(events, id, params);
 	}
 	{
 		EventId id = {evOpenNewWindow, 7508};
 		ECOparam params[] = {
-			8160, 	fftCharacter,		0, 		0,			// pUrl
-			8161,	fftCharacter,		0,		0,			// pTarget
+			8160, 	fftCharacter,	0, 		0,	// pUrl
+			8161,	fftCharacter,	0,		0,	// pTarget
 		};
 		AddMethodEvent(events, id, params);
 	}
 	{
 		EventId id = {evDownloadRequest, 7509};
 		ECOparam params[] = {
-			8170,	fftInteger,			0,		0,			// pDownloadId
-			8171, 	fftCharacter,		0, 		0,			// pUrl
-			8172,	fftCharacter,		0,		0,			// pFileName
-			8173,	fftCharacter,		0,		0,			// pMimeType
+			8170,	fftInteger,		0,		0,	// pDownloadId
+			8171, 	fftCharacter,	0, 		0,	// pUrl
+			8172,	fftCharacter,	0,		0,	// pFileName
+			8173,	fftCharacter,	0,		0,	// pMimeType
 		};
 		AddMethodEvent(events, id, params);
 	}
@@ -120,10 +122,6 @@ qbool ReturnEvents(EXTCompInfo* eci) {
 		AddMethodEvent(events, id, params);
 	}
 	{
-		EventId id = {evJsInitFailed, 7513};
-		AddMethodEvent(events, id);
-	}
-	{
 		EventId id = {evCustomEvent, 7514 };
 		ECOparam params[] = {
 			8371, fftCharacter, 0, 0,			// pName
@@ -136,13 +134,6 @@ qbool ReturnEvents(EXTCompInfo* eci) {
 			8378, fftCharacter, 0, 0,			// pParam7
 			8379, fftCharacter, 0, 0,			// pParam8
 			8380, fftCharacter, 0, 0,			// pParam9
-		};
-		AddMethodEvent(events, id, params);
-	}
-	{
-		EventId id = {evCompInit, 7515};
-		ECOparam params[] = {
-			8390,	fftCharacter,		0,		0,			// pCompId
 		};
 		AddMethodEvent(events, id, params);
 	}
@@ -163,11 +154,11 @@ qbool ReturnMethods(EXTCompInfo *eci) {
 		AddMethodEvent(events, id, params);
 	}
 	{
-		EventId id = { ofHistoryGoBack, 7001 };
+		EventId id = { ofHistoryBack, 7001 };
 		AddMethodEvent(events, id);
 	}
 	{
-		EventId id = { ofHistoryGoForward, 7002 };
+		EventId id = { ofHistoryForward, 7002 };
 		AddMethodEvent(events, id);
 	}
 	{
@@ -182,38 +173,6 @@ qbool ReturnMethods(EXTCompInfo *eci) {
 		ECOparam params[] = {
 			8190, fftInteger, 0, 0,			// pDownloadId
 			8191, fftCharacter, 0, 0,			// pFullPath
-		};
-		AddMethodEvent(events, id, params);
-	}
-	{
-		EventId id = { ofGetCompData, 7009 };
-		ECOparam params[] = {
-			8300, fftCharacter, 0, 0,			// pCompId
-		};
-		AddMethodEvent(events, id, params);
-	}
-	{
-		EventId id = { ofSetCompData, 7010 };
-		ECOparam params[] = {
-			8310, fftCharacter, 0, 0,			// pCompId
-			8311, fftCharacter, 0, 0,			// pData
-		};
-		AddMethodEvent(events, id, params);
-	}
-	{
-		EventId id = { ofSendActionToComp, 7014 };
-		ECOparam params[] = {
-			8350, fftCharacter, 0, 0,			// pCompId
-			8351, fftCharacter, 0, 0,			// pType
-			8352, fftCharacter, 0, 0,			// pParam2
-			8353, fftCharacter, 0, 0,			// pParam2
-			8354, fftCharacter, 0, 0,			// pParam3
-			8355, fftCharacter, 0, 0,			// pParam4
-			8356, fftCharacter, 0, 0,			// pParam5
-			8357, fftCharacter, 0, 0,			// pParam6
-			8358, fftCharacter, 0, 0,			// pParam7
-			8359, fftCharacter, 0, 0,			// pParam8
-			8310, fftCharacter, 0, 0,			// pParam9
 		};
 		AddMethodEvent(events, id, params);
 	}
@@ -240,9 +199,7 @@ ECOmethodEvent browserStaticFunctions[1] =
 ECOproperty browserProperties[6] =
 { 
 //  propid				resourceid,	datatype,		propflags	propFlags2, enumStart, 	enumEnd
-	pBasePath,			4000, 		fftCharacter, 	0,			0, 			0, 			0,
-	pUserPath,			4001, 		fftCharacter, 	0,			0, 			0, 			0,
-	pContextMenus,		4002, 		fftBoolean, 	0,			0, 			0, 			0,
+	pContextMenus,		4000, 		fftBoolean, 	0,			0, 			0, 			0,
 };
 
 #define cSBrowserMethod_Count (0)

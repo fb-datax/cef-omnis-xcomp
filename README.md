@@ -46,14 +46,6 @@ For more details see the "Event Demo" in `demo.lbs`.
 
 #### Events
 
-##### `CloseModule()`
-
-Request the module to be closed. The event should be handled with:
-```
-On evCloseModule
-  Do $cinst.$close()
-```
-
 ##### `CustomEvent(name[, param1, param2, ..., param9])`
 
 A custom event from javascript (see `omnis.customEvent()` below). For example:
@@ -64,14 +56,17 @@ On evCustomEvent
       Send to trace log {[con('Received myCustomEvent. param = ',pParam1)]}
       Do $cfield.$sendCustomEvent('customResponse','Received myCustomEvent in Omnis.')
       Break to end of switch
+    Case 'close'
+      Do $cinst.$close()
+      Break to end of switch
   End Switch
 ```
 
-##### `FrameLoadingFailed(pErrorCode, pErrorMsg, pUrl)`
+##### `LoadError(pErrorCode, pErrorMsg, pUrl)`
 
 The given URL failed to load with the given error.
 
-##### `AddressBarChanged(pUrl)`
+##### `AddressChange(pUrl)`
 
 The given URL was navigated to.
 
