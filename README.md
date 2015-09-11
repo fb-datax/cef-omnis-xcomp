@@ -62,9 +62,28 @@ On evCustomEvent
   End Switch
 ```
 
-##### `LoadError(pErrorCode, pErrorMsg, pUrl)`
+##### `LoadingStateChange(pIsLoading, pCanGoBack, pCanGoForward)`
+
+One of the indicated flags has changed:
+* `pIsLoading` - whether the page is currently loading.
+* `pCanGoBack` - whether the browser back history button should be enabled.
+* `pCanGoForward` - whether the browser forward history button should be enabled.
+
+##### `LoadStart()`
+
+The page has started to load.
+
+##### `LoadEnd(pStatusCode)`
+
+The page has finished loading with the given [HTTP status code](http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html).
+
+##### `LoadError(pStatusCode, pErrorMsg, pUrl)`
 
 The given URL failed to load with the given error.
+
+##### `TitleChange(pTitle)`
+
+The browser title has changed.
 
 ##### `AddressChange(pUrl)`
 
