@@ -85,31 +85,15 @@ qbool ReturnEvents(EXTCompInfo* eci) {
 		AddMethodEvent(events, id, params);
 	}
 	{
-		EventId id = {evDownloadRequest, 7509};
-		ECOparam params[] = {
-			8170,	fftInteger,		0,		0,	// pDownloadId
-			8171, 	fftCharacter,	0, 		0,	// pUrl
-			8172,	fftCharacter,	0,		0,	// pFileName
-			8173,	fftCharacter,	0,		0,	// pMimeType
-		};
-		AddMethodEvent(events, id, params);
-	}
-	{
 		EventId id = {evDownloadUpdate, 7510};
 		ECOparam params[] = {
-			8200,	fftInteger,			0,		0,			// pDownloadId
-			8201,	fftInteger,			0,		0,			// pTotalBytes
-			8202,	fftInteger,			0,		0,			// pReceivedBytes
-			8203,	fftInteger,			0,		0,			// pCurrentSpeed
-		};
-		AddMethodEvent(events, id, params);
-	}
-	{
-		EventId id = {evDownloadFinish, 7511};
-		ECOparam params[] = {
-			8210,	fftInteger,			0,		0,			// pDownloadId
-			8211,	fftCharacter,		0,		0,			// pUrl
-			8212,	fftCharacter,		0,		0,			// pSavedPath
+			8200,	fftInteger,			0,		0,			// pId
+			8201,	fftBoolean,			0,		0,			// pIsComplete
+			8202,	fftBoolean,			0,		0,			// pIsCanceled
+			8203,	fftInteger,			0,		0,			// pReceivedBytes
+			8204,	fftInteger,			0,		0,			// pTotalBytes
+			8205,	fftInteger,			0,		0,			// pCurrentSpeed
+			8206,	fftCharacter,		0,		0,			// pFullPath
 		};
 		AddMethodEvent(events, id, params);
 	}

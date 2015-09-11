@@ -82,6 +82,28 @@ On evCustomEvent
 
 > The given URL failed to load with the given error.
 
+**`DownloadUpdate(pId, pIsComplete, pIsCanceled, pReceivedBytes, pTotalBytes, pCurrentSpeed, pFullPath)`**
+
+> The given file is downloading, or has finished downloading.
+>
+* `pId` - the integer download identifier.
+* `pIsComplete` - flag to indicate successful completion.
+* `pIsCanceled` - flag to indicate user cancellation of the download.
+* `pReceivedBytes` - the number of bytes downloaded.
+* `pTotalBytes` - the total number of bytes in the download (if known).
+* `pCurrentSpeed` - a simple speed estimate in bytes/s.
+* `pFullPath` - the full path to the download file.
+> Example:
+```javascript
+On evDownloadUpdate
+  If pIsComplete
+    Send to trace log {[con('Download complete: ', pFullPath)]}
+    OK message Download (Icon,Sound bell) {Download complete: [pFullPath]}
+  Else
+    Send to trace log {[con('Downloading ', pFullPath, ' [',rnd(100*pReceivedBytes/pTotalBytes,1), '%] ', pCurrentSpeed, 'B/s')]}
+  End If
+```
+
 **`TitleChange(pTitle)`**
 
 > The browser title has changed.
@@ -92,7 +114,8 @@ On evCustomEvent
 
 **`GotFocus()`**
 
-> The browser took the keyboard focus. The event should be handled with:```
+> The browser took the keyboard focus. The event should be handled with:
+```
 Queue set current field {[$cinst]}
 ```
 
@@ -119,7 +142,8 @@ The following interface is available in javascript on the global `omnis` object.
 **`omnis.customEvent(name[, ...])`**
 
 > Generates a `CustomEvent` event with the given name and parameters. Up to 9 parameters may be provided.
-Example: ```javascript
+Example:
+```javascript
 omnis.customEvent('myCustomEvent', Math.PI);
 ```
 

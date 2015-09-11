@@ -14,6 +14,33 @@
 #include <map>
 #include "MessageQueue.h"
 
+enum Enum {
+	// -------Obj methods ------------	
+	ofnavigateToUrl = 1000,
+	ofHistoryBack,
+	ofHistoryForward,
+	ofCancelDownload,
+	ofStartDownload,
+	ofSendCustomEvent,
+
+	// ------- Obj event methods ------------	
+	evLoadingStateChange = 1100,
+	evLoadStart,
+	evLoadEnd,
+	evLoadError,
+	evTitleChange,
+	evAddressChange,
+	evDownloadUpdate,
+	evCustomEvent,
+	evCompInit,
+	evGotFocus,
+
+	// ------- Static methods ------------	
+
+	// ------- Properties ------------	
+	pContextMenus = 4000,
+};
+
 class CefInstance {
 public:
 	CefInstance(HWND hwnd);
@@ -64,13 +91,16 @@ protected:
 		WriteMessage(L"execute", code);
 	}
 	
-	void ShowMessage(const std::string &arg);
 	void ConsoleMessage(const std::string &arg);
-	void SendLoadingStateChange(const std::string &arg);
-	void SendLoadEnd(const std::string &arg);
-	void SendLoadError(const std::string &arg);
+	void ShowMessage(const std::string &arg);
 	void SendTitleChange(const std::string &arg);
 	void SendAddressChange(const std::string &arg);
+	void SendLoadingStateChange(const std::string &arg);
+	void SendLoadStart() { ECOsendEvent(hwnd_, evLoadStart);  }
+	void SendLoadEnd(const std::string &arg);
+	void SendLoadError(const std::string &arg);
+	void SendDownloadUpdate(const std::string &arg);
+	void SendGotFocus() { ECOsendEvent(hwnd_, evGotFocus); }
 	void SendCustomEvent(const std::string &arg);
 
 	HWND hwnd_;
@@ -98,6 +128,7 @@ protected:
 		loadStart,
 		loadEnd,
 		loadError,
+		download,
 		showMsg,
 		closeModule,
 		gotFocus,
@@ -109,33 +140,4 @@ protected:
 
 	// we need to be reference-counted to prevent early deletion.
 	int reference_count_;
-};
-
-enum Enum {
-	// -------Obj methods ------------	
-	ofnavigateToUrl = 1000,
-	ofHistoryBack,
-	ofHistoryForward,
-	ofCancelDownload,
-	ofStartDownload,
-	ofSendCustomEvent,
-
-	// ------- Obj event methods ------------	
-	evLoadingStateChange = 1100,
-	evLoadStart,
-	evLoadEnd,
-	evLoadError,
-	evTitleChange,
-	evAddressChange,
-	evDownloadRequest,
-	evDownloadUpdate,
-	evDownloadFinish,
-	evCustomEvent,
-	evCompInit,
-	evGotFocus,
-	
-	// ------- Static methods ------------	
-
-	// ------- Properties ------------	
-	pContextMenus = 4000,
 };

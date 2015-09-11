@@ -38,14 +38,9 @@ BEGIN
 	7505					"LoadError:LoadError"
 	7506					"TitleChange:TitleChange"
 	7507					"AddressChange:AddressChange"
-	7508					"OpenNewWindow:OpenNewWindow"
-	7509					"DownloadRequest:DownloadRequest"
 	7510					"DownloadUpdate:DownloadUpdate"
-	7511					"DownloadFinished:DownloadFinished"
 	
-	7513					"JsInitFailed:JsInitFailed"
 	7514					"CustomEvent:CustomEvent"
-	7515					"CompInit:CompInit"
 	7516					"GotFocus:GotFocus"
 
 	// Parameters
@@ -85,10 +80,13 @@ BEGIN
 	8190					"downloadId:DownloadId"
 	8191					"filePath:FilePath"
 
-	8200					"downloadId:DownloadId"
-	8201					"totalBytes:TotalBytes"
-	8202					"receivedBytes:ReceivedBytes"
-	8203					"currentSpeed:CurrentSpeed"
+	8200					"id:Id"
+	8201					"isComplete:IsComplete"
+	8202					"isCanceled:IsCanceled"
+	8203					"receivedBytes:ReceivedBytes"
+	8204					"totalBytes:TotalBytes"
+	8205					"currentSpeed:CurrentSpeed"
+	8206					"fullPath:FullPath"
 
 	8210					"downloadId:DownloadId"
 	8211					"url:Url"

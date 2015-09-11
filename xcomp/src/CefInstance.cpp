@@ -253,31 +253,81 @@ void CefInstance::SendLoadError(const std::string &arg) {
 	// the argument should be an object in JSON format.
 	JSONDocument doc;
 	doc.Parse(arg.c_str());
-	if(!doc.HasParseError() && doc.IsObject()) {
+	if (!doc.HasParseError() && doc.IsObject()) {
 		std::auto_ptr<EXTCompInfo> eci(new EXTCompInfo());
 		eci->mParamFirst = 0;
 		EXTfldval error_code;
-		if(doc.HasMember("errorCode"))
+		if (doc.HasMember("errorCode"))
 			GetEXTFldValFromInt(error_code, doc["errorCode"].GetInt());
 		else
 			GetEXTFldValFromInt(error_code, 0);
 		ECOaddParam(eci.get(), &error_code, 0, 0, 0, 1, 0);
 		EXTfldval error_text;
-		if(doc.HasMember("errorText"))
+		if (doc.HasMember("errorText"))
 			GetEXTFldValFromString(error_text, doc["errorText"].GetString());
 		else
 			GetEXTFldValFromString(error_text, "");
 		ECOaddParam(eci.get(), &error_text, 0, 0, 0, 2, 0);
 		EXTfldval failed_url;
-		if(doc.HasMember("failedUrl"))
+		if (doc.HasMember("failedUrl"))
 			GetEXTFldValFromString(failed_url, doc["failedUrl"].GetString());
 		else
 			GetEXTFldValFromString(failed_url, "");
 		ECOaddParam(eci.get(), &failed_url, 0, 0, 0, 3, 0);
-		ECOsendCompEvent(hwnd_, eci.get(), evLoadError, qtrue); 
-		ECOmemoryDeletion(eci.get()); 
-	} else
+		ECOsendCompEvent(hwnd_, eci.get(), evLoadError, qtrue);
+		ECOmemoryDeletion(eci.get());
+	}
+	else
 		TraceLog(TARGET_NAME ": Bad loadError message.");
+}
+
+void CefInstance::SendDownloadUpdate(const std::string &arg) {
+	// the argument should be an object in JSON format.
+	JSONDocument doc;
+	doc.Parse(arg.c_str());
+	if (!doc.HasParseError() && doc.IsObject()) {
+		std::auto_ptr<EXTCompInfo> eci(new EXTCompInfo());
+		eci->mParamFirst = 0;
+		if (doc.HasMember("id")) {
+			EXTfldval fval;
+			GetEXTFldValFromInt(fval, doc["id"].GetInt());
+			ECOaddParam(eci.get(), &fval, 0, 0, 0, 1, 0);
+		}
+		if (doc.HasMember("complete")) {
+			EXTfldval fval;
+			GetEXTFldValFromBool(fval, doc["complete"].GetBool());
+			ECOaddParam(eci.get(), &fval, 0, 0, 0, 2, 0);
+		}
+		if (doc.HasMember("canceled")) {
+			EXTfldval fval;
+			GetEXTFldValFromBool(fval, doc["canceled"].GetBool());
+			ECOaddParam(eci.get(), &fval, 0, 0, 0, 3, 0);
+		}
+		if (doc.HasMember("received")) {
+			EXTfldval fval;
+			GetEXTFldValFromInt(fval, doc["received"].GetInt());
+			ECOaddParam(eci.get(), &fval, 0, 0, 0, 4, 0);
+		}
+		if (doc.HasMember("total")) {
+			EXTfldval fval;
+			GetEXTFldValFromInt(fval, doc["total"].GetInt());
+			ECOaddParam(eci.get(), &fval, 0, 0, 0, 5, 0);
+		}
+		if (doc.HasMember("speed")) {
+			EXTfldval fval;
+			GetEXTFldValFromInt(fval, doc["speed"].GetInt());
+			ECOaddParam(eci.get(), &fval, 0, 0, 0, 6, 0);
+		}
+		if (doc.HasMember("path")) {
+			EXTfldval fval;
+			GetEXTFldValFromString(fval, doc["path"].GetString());
+			ECOaddParam(eci.get(), &fval, 0, 0, 0, 7, 0);
+		}
+		ECOsendCompEvent(hwnd_, eci.get(), evDownloadUpdate, qtrue);
+		ECOmemoryDeletion(eci.get());
+	}
+	else
+		TraceLog(TARGET_NAME ": Bad download message.");
 }
 
 void CefInstance::SendTitleChange(const std::string &arg) {
@@ -620,6 +670,7 @@ void CefInstance::InitCommandNameMap() {
 	command_name_map_["loadStart"] = loadStart;
 	command_name_map_["loadEnd"] = loadEnd;
 	command_name_map_["loadError"] = loadError;
+	command_name_map_["download"] = download;
 	command_name_map_["showMsg"] = showMsg;
 	command_name_map_["closeModule"] = closeModule;
 	command_name_map_["gotFocus"] = gotFocus;
@@ -650,48 +701,19 @@ void CefInstance::PopMessages() {
 					for(i = messages_to_write_.begin(); i != messages_to_write_.end(); ++i)
 						WriteMessage(*i);
 					messages_to_write_.clear();
-					break;
+					return;
 				}
-				case console: {
-					ConsoleMessage(arg);
-					break;
-				}
-				case title: {
-					SendTitleChange(arg);
-					break;
-				}
-				case address: {
-					SendAddressChange(arg);
-					break;
-				}
-				case loadingStateChange: {
-					SendLoadingStateChange(arg);
-					break;
-				}
-				case loadStart: {
-					ECOsendEvent(hwnd_, evLoadStart);
-					break;
-				}
-				case loadEnd: {
-					SendLoadEnd(arg);
-					break;
-				}
-				case loadError: {
-					SendLoadError(arg);
-					break;
-				}
-				case showMsg: {
-					ShowMessage(arg);
-					break;
-				}
-				case gotFocus: {
-					ECOsendEvent(hwnd_, evGotFocus);
-					break;
-				}
-				case customEvent: {
-					SendCustomEvent(arg);
-					break;
-				}
+				case console:				return ConsoleMessage(arg);
+				case showMsg:				return ShowMessage(arg);
+				case title:					return SendTitleChange(arg);
+				case address:				return SendAddressChange(arg);
+				case loadingStateChange:	return SendLoadingStateChange(arg);
+				case loadStart:				return SendLoadStart();
+				case loadEnd:				return SendLoadEnd(arg);
+				case loadError:				return SendLoadError(arg);
+				case download:				return SendDownloadUpdate(arg);
+				case gotFocus:				return SendGotFocus();
+				case customEvent:			return SendCustomEvent(arg);
 			}
 		} else {
 			std::stringstream ss;

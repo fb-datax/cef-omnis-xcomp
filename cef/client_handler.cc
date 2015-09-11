@@ -6,7 +6,9 @@
 
 #include <sstream>
 #include <string>
+#include <Shlobj.h>
 
+#include "Win32Error.h"
 #include "devtools_handler.h"
 #include "include/base/cef_bind.h"
 #include "include/cef_app.h"
@@ -173,6 +175,66 @@ bool ClientHandler::OnConsoleMessage(CefRefPtr<CefBrowser> browser,
 	return false;
 }
 
+void ClientHandler::OnBeforeDownload(
+	CefRefPtr<CefBrowser> browser,
+	CefRefPtr<CefDownloadItem> download_item,
+	const CefString& suggested_name,
+	CefRefPtr<CefBeforeDownloadCallback> callback) {
+	CEF_REQUIRE_UI_THREAD();
+
+	// use the user's "Documents" folder as the initial folder.
+	TCHAR docs_path[MAX_PATH];
+	std::string path;
+	if (SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, docs_path)) {
+		path = CefString(docs_path);
+		path += "\\";
+		path += suggested_name;
+	}
+
+	// continue the download and show the "Save As" dialog.
+	callback->Continue(path, true);
+}
+
+void ClientHandler::OnDownloadUpdated(
+	CefRefPtr<CefBrowser> browser,
+	CefRefPtr<CefDownloadItem> download_item,
+	CefRefPtr<CefDownloadItemCallback> callback) {
+	CEF_REQUIRE_UI_THREAD();
+
+	if (download_item->IsValid()) {
+		JSONStringBuffer s;
+		JSONWriter writer(s);
+		writer.StartObject();
+		writer.String(L"id");
+		writer.Int(download_item->GetId());
+		writer.String(L"complete");
+		writer.Bool(download_item->IsComplete());
+		writer.String(L"canceled");
+		writer.Bool(download_item->IsCanceled());
+		writer.String(L"received");
+		writer.Int(download_item->GetReceivedBytes());
+		writer.String(L"total");
+		writer.Int(download_item->GetTotalBytes());
+		writer.String(L"speed");
+		writer.Int64(download_item->GetCurrentSpeed());
+		CefString path = download_item->GetFullPath();
+		if (path.c_str()) {
+			writer.String(L"path");
+			writer.String(path.c_str());
+		}
+		writer.EndObject();
+		PostPipeMessage("download", s.GetString());
+	}
+
+	/*if (download_item->IsComplete())
+		PostPipeMessage(L"showMsg", L"{\"msg\":\"Complete\"}");
+	{
+		test_runner::Alert(
+			browser,
+			"File \"" + download_item->GetFullPath().ToString() +
+			"\" downloaded successfully.");
+	}*/
+}
 
 bool ClientHandler::DoClose(CefRefPtr<CefBrowser> browser) {
   CEF_REQUIRE_UI_THREAD();

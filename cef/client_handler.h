@@ -8,7 +8,8 @@
 
 class ClientHandler : public CefClient,
                       public CefContextMenuHandler,
-                      public CefDisplayHandler,
+					  public CefDisplayHandler,
+					  public CefDownloadHandler,
 					  public CefFocusHandler,
                       public CefLifeSpanHandler,
                       public CefLoadHandler,
@@ -25,6 +26,9 @@ class ClientHandler : public CefClient,
 		return this;
 	}
 	virtual CefRefPtr<CefDisplayHandler> GetDisplayHandler() OVERRIDE {
+		return this;
+	}
+	CefRefPtr<CefDownloadHandler> GetDownloadHandler() OVERRIDE{
 		return this;
 	}
 	virtual CefRefPtr<CefFocusHandler> GetFocusHandler() OVERRIDE {
@@ -63,6 +67,15 @@ class ClientHandler : public CefClient,
 								const CefString& message,
 								const CefString& source,
 								int line) OVERRIDE;
+
+	// CefDownloadHandler methods
+	void OnBeforeDownload(CefRefPtr<CefBrowser> browser,
+						CefRefPtr<CefDownloadItem> download_item,
+						const CefString& suggested_name,
+						CefRefPtr<CefBeforeDownloadCallback> callback) OVERRIDE;
+	void OnDownloadUpdated(CefRefPtr<CefBrowser> browser,
+						CefRefPtr<CefDownloadItem> download_item,
+						CefRefPtr<CefDownloadItemCallback> callback) OVERRIDE;
 
 	// CefFocusHandler methods:
 	/*virtual void OnTakeFocus(CefRefPtr<CefBrowser> browser,
