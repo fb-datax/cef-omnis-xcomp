@@ -25,36 +25,36 @@ The following interface is available from within Omnis on the XCOMP.
 
 #### Properties
 
-##### `$contextMenus`
+**`$contextMenus`**
 
-A boolean flag to control whether right-click context menus are enabled (defaults to `true`).
+> A boolean flag to control whether right-click context menus are enabled (defaults to `true`).
 
 #### Methods
 
-##### `$navigateToUrl(cURL)`
+**`$navigateToUrl(cURL)`**
 
-Navigate to the given URL. `file://` URLs are supported.
+> Navigate to the given URL. `file://` URLs are supported.
 
-##### `$historyBack()`, `$historyForward()`
+**`$historyBack()`**, **`$historyForward()`**
 
-Equivalent to hitting the browser back or forward button respectively.
+> Equivalent to hitting the browser back or forward button respectively.
 
-##### `$sendCustomEvent(pName, pValue)`
+**`$sendCustomEvent(pName, pValue)`**
 
-Send a custom event to a javascript callback function which must have been registered under the same name with `omnis.setEventCallback` (see below).
+> Send a custom event to a javascript callback function which must have been registered under the same name with `omnis.setEventCallback` (see below).
 For more details see the "Event Demo" in `demo.lbs`.
 
 #### Events
 
-##### `CustomEvent(name[, param1, param2, ..., param9])`
+**`CustomEvent(pName[, pParam1, pParam2, ..., pParam9])`**
 
-A custom event from javascript (see `omnis.customEvent()` below). For example:
+> A custom event from javascript (see `omnis.customEvent()` below). For example:
 ```
 On evCustomEvent
   Switch pName
     Case 'myCustomEvent'
-      Send to trace log {[con('Received myCustomEvent. param = ',pParam1)]}
-      Do $cfield.$sendCustomEvent('customResponse','Received myCustomEvent in Omnis.')
+      Send to trace log {[con('Received myCustomEvent. param = ', pParam1)]}
+      Do $cfield.$sendCustomEvent('customResponse', 'Received myCustomEvent in Omnis.')
       Break to end of switch
     Case 'close'
       Do $cinst.$close()
@@ -62,36 +62,37 @@ On evCustomEvent
   End Switch
 ```
 
-##### `LoadingStateChange(pIsLoading, pCanGoBack, pCanGoForward)`
+**`LoadingStateChange(pIsLoading, pCanGoBack, pCanGoForward)`**
 
-One of the indicated flags has changed:
+> One of the indicated flags has changed:
+> 
 * `pIsLoading` - whether the page is currently loading.
 * `pCanGoBack` - whether the browser back history button should be enabled.
 * `pCanGoForward` - whether the browser forward history button should be enabled.
 
-##### `LoadStart()`
+**`LoadStart()`**
 
-The page has started to load.
+> The page has started to load.
 
-##### `LoadEnd(pStatusCode)`
+**`LoadEnd(pStatusCode)`**
 
-The page has finished loading with the given [HTTP status code](http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html).
+> The page has finished loading with the given [HTTP status code](http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html).
 
-##### `LoadError(pStatusCode, pErrorMsg, pUrl)`
+**`LoadError(pStatusCode, pErrorMsg, pUrl)`**
 
-The given URL failed to load with the given error.
+> The given URL failed to load with the given error.
 
-##### `TitleChange(pTitle)`
+**`TitleChange(pTitle)`**
 
-The browser title has changed.
+> The browser title has changed.
 
-##### `AddressChange(pUrl)`
+**`AddressChange(pUrl)`**
 
-The given URL was navigated to.
+> The given URL was navigated to.
 
-##### `GotFocus()`
+**`GotFocus()`**
 
-The browser took the keyboard focus. The event should be handled with:
+> The browser took the keyboard focus. The event should be handled with:
 ```
 Queue set current field {[$cinst]}
 ```
@@ -100,10 +101,10 @@ Queue set current field {[$cinst]}
 
 The following interface is available in javascript on the global `omnis` object.
 
-##### `omnis.showMsg(message[, bell, type])`
+**`omnis.showMsg(message[, bell, type])`**
 
-Show a message box dialog in Omnis studio.
-
+> Show a message box dialog in Omnis studio.
+> 
 * `message` - the message string to display
 * `bell` - determines whether the system bell will sound (defaults to `true`)
 * `type` - must be one of:
@@ -116,21 +117,17 @@ Show a message box dialog in Omnis studio.
   * `omnis.MSGBOXCANCEL_YESNO`
   * `omnis.MSGBOXCANCEL_NOYES`
 
-##### `omnis.closeModule()`
+**`omnis.customEvent(name[, ...])`**
 
-Generates a [`CloseModule`](#markdown-header-closemodule) event.
-
-##### `omnis.customEvent(name[, ...])`
-
-Generates a `CustomEvent` event with the given name and parameters. Up to 9 parameters may be provided.
+> Generates a `CustomEvent` event with the given name and parameters. Up to 9 parameters may be provided.
 Example:
 ```javascript
 omnis.customEvent('myCustomEvent', Math.PI);
 ```
 
-##### `omnis.setEventCallback(name, callback)`
+**`omnis.setEventCallback(name, callback)`**
 
-Register the given callback function for custom events from Omnis with the given name. When Omnis calls `$sendCustomEvent` with this name, the callback will be invoked with a message string argument. Example:
+> Register the given callback function for custom events from Omnis with the given name. When Omnis calls `$sendCustomEvent` with this name, the callback will be invoked with a message string argument. Example:
 ```javascript
 // set a callback for the custom event name 'customResponse'.
 omnis.setEventCallback('customResponse', function(message) {
@@ -138,10 +135,9 @@ omnis.setEventCallback('customResponse', function(message) {
 });
 ```
 
-##### `omnis.clearEventCallback(name)`
+**`omnis.clearEventCallback(name)`**
 
-Unregister the event callback function for the given custom event name.
-
+> Unregister the event callback function for the given custom event name.
 
 
 

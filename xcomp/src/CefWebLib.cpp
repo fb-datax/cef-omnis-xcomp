@@ -85,14 +85,6 @@ qbool ReturnEvents(EXTCompInfo* eci) {
 		AddMethodEvent(events, id, params);
 	}
 	{
-		EventId id = {evOpenNewWindow, 7508};
-		ECOparam params[] = {
-			8160, 	fftCharacter,	0, 		0,	// pUrl
-			8161,	fftCharacter,	0,		0,	// pTarget
-		};
-		AddMethodEvent(events, id, params);
-	}
-	{
 		EventId id = {evDownloadRequest, 7509};
 		ECOparam params[] = {
 			8170,	fftInteger,		0,		0,	// pDownloadId
