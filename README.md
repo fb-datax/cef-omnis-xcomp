@@ -92,8 +92,7 @@ On evCustomEvent
 
 **`GotFocus()`**
 
-> The browser took the keyboard focus. The event should be handled with:
-```
+> The browser took the keyboard focus. The event should be handled with:```
 Queue set current field {[$cinst]}
 ```
 
@@ -120,8 +119,7 @@ The following interface is available in javascript on the global `omnis` object.
 **`omnis.customEvent(name[, ...])`**
 
 > Generates a `CustomEvent` event with the given name and parameters. Up to 9 parameters may be provided.
-Example:
-```javascript
+Example: ```javascript
 omnis.customEvent('myCustomEvent', Math.PI);
 ```
 
