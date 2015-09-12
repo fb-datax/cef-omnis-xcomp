@@ -13,7 +13,7 @@
 using namespace OmnisTools;
 
 struct EventId {
-	Enum id_;
+	Identifier id_;
 	qlong resource_id_;
 };
 
@@ -123,7 +123,7 @@ qbool ReturnEvents(EXTCompInfo* eci) {
 qbool ReturnMethods(EXTCompInfo *eci) {
 	std::vector<ECOmethodEvent> events;
 	{
-		EventId id = { ofnavigateToUrl, 7000 };
+		EventId id = { ofNavigateToUrl, 7000 };
 		ECOparam params[] = {
 			8000, fftCharacter, 0, 0,				// pURL
 		};
@@ -136,21 +136,6 @@ qbool ReturnMethods(EXTCompInfo *eci) {
 	{
 		EventId id = { ofHistoryForward, 7002 };
 		AddMethodEvent(events, id);
-	}
-	{
-		EventId id = { ofCancelDownload, 7007 };
-		ECOparam params[] = {
-			8180, fftInteger, 0, 0,			// pDownloadId
-		};
-		AddMethodEvent(events, id, params);
-	}
-	{
-		EventId id = { ofStartDownload, 7008 };
-		ECOparam params[] = {
-			8190, fftInteger, 0, 0,			// pDownloadId
-			8191, fftCharacter, 0, 0,			// pFullPath
-		};
-		AddMethodEvent(events, id, params);
 	}
 	{
 		EventId id = { ofSendCustomEvent, 7015 };
@@ -174,8 +159,9 @@ ECOmethodEvent browserStaticFunctions[1] =
 
 ECOproperty browserProperties[6] =
 { 
-//  propid				resourceid,	datatype,		propflags	propFlags2, enumStart, 	enumEnd
+//  propid						resourceid,	datatype,		propflags	propFlags2, enumStart, 	enumEnd
 	pContextMenus,		4000, 		fftBoolean, 	0,			0, 			0, 			0,
+	pTraceLogConsole,	4001,		fftBoolean,		0,			0,			0,			0,
 };
 
 #define cSBrowserMethod_Count (0)

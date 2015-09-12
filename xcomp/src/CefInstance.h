@@ -14,16 +14,14 @@
 #include <map>
 #include "MessageQueue.h"
 
-enum Enum {
-	// -------Obj methods ------------	
-	ofnavigateToUrl = 1000,
+enum Identifier {
+	// ------- methods ----------
+	ofNavigateToUrl = 1000,
 	ofHistoryBack,
 	ofHistoryForward,
-	ofCancelDownload,
-	ofStartDownload,
 	ofSendCustomEvent,
 
-	// ------- Obj event methods ------------	
+	// ------- events ----------
 	evLoadingStateChange = 1100,
 	evLoadStart,
 	evLoadEnd,
@@ -32,13 +30,11 @@ enum Enum {
 	evAddressChange,
 	evDownloadUpdate,
 	evCustomEvent,
-	evCompInit,
 	evGotFocus,
 
-	// ------- Static methods ------------	
-
-	// ------- Properties ------------	
+	// ------- properties ---------
 	pContextMenus = 4000,
+	pTraceLogConsole,
 };
 
 class CefInstance {
@@ -115,6 +111,7 @@ protected:
 
 	bool cef_ready_;
 	bool context_menus_;
+	bool trace_log_console_;
 	std::vector<std::wstring> messages_to_write_;
 	std::auto_ptr<MessageQueue> message_queue_;
 	
@@ -130,6 +127,7 @@ protected:
 		loadError,
 		download,
 		showMsg,
+		traceLog,
 		closeModule,
 		gotFocus,
 		customEvent

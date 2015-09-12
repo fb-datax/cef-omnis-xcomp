@@ -27,11 +27,15 @@ The following interface is available from within Omnis on the XCOMP.
 
 **`$contextMenus`**
 
-> A boolean flag to control whether right-click context menus are enabled (defaults to `true`).
+> A flag to control whether right-click context menus are enabled (defaults to `true`).
+
+**`$traceLogConsole`**
+
+> A flag to control whether javascript `console.log` messages are written to the Omnis trace log (defaults to `true`).
 
 #### Methods
 
-**`$navigateToUrl(cURL)`**
+**`$navigateToUrl(pUrl)`**
 
 > Navigate to the given URL. `file://` URLs are supported.
 
@@ -138,6 +142,13 @@ The following interface is available in javascript on the global `omnis` object.
   * `omnis.MSGBOXICON_NOYES`
   * `omnis.MSGBOXCANCEL_YESNO`
   * `omnis.MSGBOXCANCEL_NOYES`
+
+**`omnis.traceLog(message)`**
+
+> Write the given message to the tracelog. If multiple arguments are provided they are joined with spaces. Example:
+```javascript
+omnis.traceLog('pi =', Math.PI);
+```
 
 **`omnis.customEvent(name[, ...])`**
 

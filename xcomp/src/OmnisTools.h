@@ -69,9 +69,13 @@ namespace OmnisTools {
 	str255 InitStr255(const char*);
 
 	// Allg Helpers
-	qchar* GetQCharFromString( const std::string readString, qlong &retLength );
+	qchar* GetQCharFromString(const std::string readString, qlong &retLength);
 	void TraceLog(const std::string &msg);
 	void TraceLog(const std::wstring &msg);
+
+	// the debug versions only log in debug mode.
+	void DebugTraceLog(const std::string &msg);
+	void DebugTraceLog(const std::wstring &msg);
 }
 
 #endif // OMNIS_TOOLS_HE_

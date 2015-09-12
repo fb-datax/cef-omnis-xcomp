@@ -21,6 +21,7 @@ CefInstance::CefInstance(HWND hwnd) :
 	read_offset_(0),
 	cef_ready_(false),
 	context_menus_(true),
+	trace_log_console_(true),
 	message_queue_(new MessageQueue()),
 	reference_count_(0)
 {
@@ -188,25 +189,28 @@ void CefInstance::ShowMessage(const std::string &arg) {
 			bell = doc["bell"].GetBool();
 		ECOmessageBox(flags, bell, InitStr255(doc["msg"].GetString()));
 	} else
-		TraceLog(TARGET_NAME ": Bad showMsg message.");
+		DebugTraceLog(TARGET_NAME ": Bad showMsg message.");
 }
 
 void CefInstance::ConsoleMessage(const std::string &arg) {
-	// the argument should be an object in JSON format.
-	JSONDocument doc;
-	doc.Parse(arg.c_str());
-	if(!doc.HasParseError() && doc.IsObject()) {
-		std::stringstream ss;
-		ss << doc["message"].GetString();
-		ss << " [";
-		if (doc.HasMember("source"))
-			ss << doc["source"].GetString();
+	if (trace_log_console_) {
+		// the argument should be an object in JSON format.
+		JSONDocument doc;
+		doc.Parse(arg.c_str());
+		if (!doc.HasParseError() && doc.IsObject()) {
+			std::stringstream ss;
+			ss << doc["message"].GetString();
+			ss << " [";
+			if (doc.HasMember("source"))
+				ss << doc["source"].GetString();
+			else
+				ss << "unknown";
+			ss << ":" << doc["line"].GetInt() << "]";
+			TraceLog(ss.str());
+		}
 		else
-			ss << "unknown";
-		ss << ":" << doc["line"].GetInt() << "]";
-		TraceLog(ss.str());
-	} else
-		TraceLog(TARGET_NAME ": Bad console message.");
+			DebugTraceLog(TARGET_NAME ": Bad console message.");
+	}
 }
 
 void CefInstance::SendLoadingStateChange(const std::string &arg) {
@@ -235,7 +239,7 @@ void CefInstance::SendLoadingStateChange(const std::string &arg) {
 		ECOmemoryDeletion(eci.get());
 	}
 	else
-		TraceLog(TARGET_NAME ": Bad loadingStateChange message.");
+		DebugTraceLog(TARGET_NAME ": Bad loadingStateChange message.");
 }
 
 void CefInstance::SendLoadEnd(const std::string &arg) {
@@ -278,7 +282,7 @@ void CefInstance::SendLoadError(const std::string &arg) {
 		ECOmemoryDeletion(eci.get());
 	}
 	else
-		TraceLog(TARGET_NAME ": Bad loadError message.");
+		DebugTraceLog(TARGET_NAME ": Bad loadError message.");
 }
 
 void CefInstance::SendDownloadUpdate(const std::string &arg) {
@@ -327,7 +331,7 @@ void CefInstance::SendDownloadUpdate(const std::string &arg) {
 		ECOmemoryDeletion(eci.get());
 	}
 	else
-		TraceLog(TARGET_NAME ": Bad download message.");
+		DebugTraceLog(TARGET_NAME ": Bad download message.");
 }
 
 void CefInstance::SendTitleChange(const std::string &arg) {
@@ -370,7 +374,7 @@ void CefInstance::SendCustomEvent(const std::string &arg) {
 		ECOmemoryDeletion(eci.get());
 	}
 	else
-		TraceLog(TARGET_NAME ": Bad customEvent message.");
+		DebugTraceLog(TARGET_NAME ": Bad customEvent message.");
 }
 
 CefInstance::~CefInstance() {
@@ -549,7 +553,7 @@ qbool CefInstance::CallMethod(EXTCompInfo *eci) {
 	qbool hasRtnVal		=	qfalse;
 
 	switch(ECOgetId(eci)) {
-		case ofnavigateToUrl: {
+		case ofNavigateToUrl: {
 			EXTParamInfo* paramInfo = ECOfindParamNum(eci,1);
 			if (paramInfo) {
 				rtnCode = qtrue;
@@ -558,51 +562,15 @@ qbool CefInstance::CallMethod(EXTCompInfo *eci) {
 				std::string url_a = OmnisTools::GetStringFromEXTFldVal(fval);
 				std::wstring url = CA2W(url_a.c_str());
 				WriteMessage(L"navigate", url);
-				//std::wstringstream code;
-				//code << "window.location.href='" << url << "';";
-				//ExecuteJavaScript(code.str());
 			}
 			break;
 		}
-		
-		case ofCancelDownload: {
-			EXTParamInfo* paramInfo = ECOfindParamNum(eci,1);
-			if (paramInfo) {
-				rtnCode = qtrue;
-				hasRtnVal = qtrue;	
-				EXTfldval fval( (qfldval)paramInfo->mData);
-				int downloadId = OmnisTools::GetIntFromEXTFldVal(fval);
-				// ### rtnVal.setLong(WebBrowser::cancelDownload(downloadId));
-			}
-			break;
-		}
-
-		case ofStartDownload: {
-			EXTParamInfo* pDownloadId = ECOfindParamNum(eci,1);
-			EXTParamInfo* pPathParam = ECOfindParamNum(eci,2);
-			
-			rtnCode = qtrue;
-			hasRtnVal = qtrue;	
-			
-			EXTfldval fvalDownloadId((qfldval)pDownloadId->mData);
-			int downloadId = OmnisTools::GetIntFromEXTFldVal(fvalDownloadId);
-
-			EXTfldval fvalPath((qfldval)pPathParam->mData);
-			std::string path = OmnisTools::GetStringFromEXTFldVal(fvalPath);
-
-
-			// ### rtnVal.setLong(WebBrowser::startDownload(downloadId,path));
-			
-			break;
-		}
-
 		case ofHistoryBack: {
 			rtnCode = qtrue;
 			hasRtnVal = qtrue;
 			ExecuteJavaScript(L"window.history.back();");
 			break;
 		}
-
 		case ofHistoryForward: {
 			rtnCode = qtrue;
 			hasRtnVal = qtrue;
@@ -645,6 +613,11 @@ qbool CefInstance::SetProperty(EXTCompInfo *eci) {
 				}
 				return qtrue;
 			}
+			case pTraceLogConsole: {
+				bool val = fval.getBool() > 1;
+				trace_log_console_ = val;
+				return qtrue;
+			}
 		}
 	}
 	return qfalse;
@@ -655,6 +628,10 @@ qbool CefInstance::GetProperty(EXTCompInfo *eci) {
 	switch (ECOgetId(eci)) {
 		case pContextMenus: {
 			fval.setBool(context_menus_);
+			return qtrue;
+		}
+		case pTraceLogConsole: {
+			fval.setBool(trace_log_console_);
 			return qtrue;
 		}
 	}
@@ -672,6 +649,7 @@ void CefInstance::InitCommandNameMap() {
 	command_name_map_["loadError"] = loadError;
 	command_name_map_["download"] = download;
 	command_name_map_["showMsg"] = showMsg;
+	command_name_map_["traceLog"] = traceLog;
 	command_name_map_["closeModule"] = closeModule;
 	command_name_map_["gotFocus"] = gotFocus;
 	command_name_map_["customEvent"] = customEvent;
@@ -705,6 +683,7 @@ void CefInstance::PopMessages() {
 				}
 				case console:				return ConsoleMessage(arg);
 				case showMsg:				return ShowMessage(arg);
+				case traceLog:				return TraceLog(arg);
 				case title:					return SendTitleChange(arg);
 				case address:				return SendAddressChange(arg);
 				case loadingStateChange:	return SendLoadingStateChange(arg);
@@ -720,7 +699,7 @@ void CefInstance::PopMessages() {
 			ss << "Unknown CEF message: " << message_name;
 			if(!arg.empty())
 				ss << ":" << arg;
-			TraceLog(ss.str());
+			DebugTraceLog(ss.str());
 		}
 	}
 }

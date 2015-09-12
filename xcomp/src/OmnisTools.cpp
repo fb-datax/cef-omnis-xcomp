@@ -317,15 +317,25 @@ str255 OmnisTools::InitStr255(const char* in) {
 #endif
 
 void OmnisTools::TraceLog(const std::string &msg) {
-	#if defined(IS_DEBUG)
-		str255 logString = InitStr255(msg.c_str());
-		ECOaddTraceLine(&logString);
-	#endif
+	str255 logString = InitStr255(msg.c_str());
+	ECOaddTraceLine(&logString);
 }
 
 void OmnisTools::TraceLog(const std::wstring &msg) {
-	#if defined(IS_DEBUG)		
-		str255 logString = InitStr255(CW2A(msg.c_str()));
-		ECOaddTraceLine(&logString);
-	#endif
+	str255 logString = InitStr255(CW2A(msg.c_str()));
+	ECOaddTraceLine(&logString);
+}
+
+void OmnisTools::DebugTraceLog(const std::string &msg) {
+#if defined(IS_DEBUG)
+	str255 logString = InitStr255(msg.c_str());
+	ECOaddTraceLine(&logString);
+#endif
+}
+
+void OmnisTools::DebugTraceLog(const std::wstring &msg) {
+#if defined(IS_DEBUG)		
+	str255 logString = InitStr255(CW2A(msg.c_str()));
+	ECOaddTraceLine(&logString);
+#endif
 }

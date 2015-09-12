@@ -13,23 +13,16 @@ BEGIN
 	////////// BROWSER ///////////////////
 
 	// Properties 
-	4000					"$contextMenus:Flag to enable/disable right-click context menus. Default: enabled.,..."
+	4000					"$contextMenus:Flag to enable/disable right-click context menus. Default: enabled."
+	4001					"$traceLogConsole:Flag to enable/disable trace-logging of javascript console messages. Default: enabled."
 	
 	// Static methods
 	
 	// Object methods
-	7000					"$navigateToUrl:$navigateToUrl(cURL)"
+	7000					"$navigateToUrl:$navigateToUrl(pUrl)"
 	7001					"$historyBack:$historyBack()"
 	7002					"$historyForward:$historyForward()"
-	7007					"$cancelDownload:$cancelDownload()"
-	7008					"$startDownload:$startDownload()"
-	7009					"$getCompData:$getCompData(pCompIdent)"
-	7010					"$setCompData:$setCompData(pCompIdent,pData)"
-	7011					"$isCompValid:$isCompValid(pCompIdent)"
-	7012					"$getCompVersion:$getCompVersion(pCompIdent)"
-	7013					"$getCompApiVersion:$getCompApiVersion(pCompIdent)"
-	7014					"$sentCompAction:$sentCompAction(pCompIdent,pTyp,pParam1,pParam2,pParam3,pParam4,pParam5,pParam6,pParam7,pParam8,pParam9)"
-	7015					"$SendCustomEvent:$SendCustomEvent(pName,pValue)"
+	7015					"$sendCustomEvent:$sendCustomEvent(pName,pValue)"
 	
 	// Events
 	7500					"LoadingStateChange:LoadingStateChange"
@@ -44,10 +37,7 @@ BEGIN
 	7516					"GotFocus:GotFocus"
 
 	// Parameters
-	8000					"cURL:URL die geladen werden soll"
-	8001					"cBasePath:basispfad fuer Einstellungen, Session, Cache, Plugins,..."
-	8002					"cWhat:art des Events"
-	8004					"cURL:URL 2 die geladen werden soll"
+	8000					"pUrl:The URL to navigate to."
 
 	// Event parameters
 	8100					"isLoading:IsLoading"
