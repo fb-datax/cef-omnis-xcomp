@@ -52,7 +52,7 @@ For more details see the "Event Demo" in `demo.lbs`.
 
 **`CustomEvent(pName[, pParam1, pParam2, ..., pParam9])`**
 
-> A custom event from javascript (see `omnis.customEvent()` below). For example:
+> A custom event from javascript (see `omnis.customEvent()` below). Example:
 ```
 On evCustomEvent
   Switch pName
@@ -97,6 +97,7 @@ On evCustomEvent
 * `pTotalBytes` - the total number of bytes in the download (if known).
 * `pCurrentSpeed` - a simple speed estimate in bytes/s.
 * `pFullPath` - the full path to the download file.
+
 > Example:
 ```javascript
 On evDownloadUpdate
