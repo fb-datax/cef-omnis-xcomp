@@ -14,14 +14,44 @@
 #include <map>
 #include "MessageQueue.h"
 
+enum Enum {
+	// -------Obj methods ------------	
+	ofnavigateToUrl = 1000,
+	ofHistoryBack,
+	ofHistoryForward,
+	ofCancelDownload,
+	ofStartDownload,
+	ofSendCustomEvent,
+
+	// ------- Obj event methods ------------	
+	evLoadingStateChange = 1100,
+	evLoadStart,
+	evLoadEnd,
+	evLoadError,
+	evTitleChange,
+	evAddressChange,
+	evDownloadUpdate,
+	evCustomEvent,
+	evCompInit,
+	evGotFocus,
+
+	// ------- Static methods ------------	
+
+	// ------- Properties ------------	
+	pContextMenus = 4000,
+};
+
 class CefInstance {
 public:
 	CefInstance(HWND hwnd);
 	~CefInstance();
 	bool IsHwnd(HWND hwnd) { return hwnd_ == hwnd; }
 	qbool CallMethod(EXTCompInfo *eci);
+	qbool SetProperty(EXTCompInfo *eci);
+	qbool GetProperty(EXTCompInfo *eci);
 	void PopMessages();
 	void Resize();
+	void Focus();
 	
 	void AddRef() { ++reference_count_; }
 	void SubRef() { if(!--reference_count_) delete this; }
@@ -61,10 +91,17 @@ protected:
 		WriteMessage(L"execute", code);
 	}
 	
-	void sendDoShowMessage(const std::string &arg);
-	void sendOnConsoleMessageAdded(const std::string &arg);
-	void sendOnFrameLoadingFailed(const std::string &arg);
-	void sendOnAddressBarChanged(const std::string &arg);
+	void ConsoleMessage(const std::string &arg);
+	void ShowMessage(const std::string &arg);
+	void SendTitleChange(const std::string &arg);
+	void SendAddressChange(const std::string &arg);
+	void SendLoadingStateChange(const std::string &arg);
+	void SendLoadStart() { ECOsendEvent(hwnd_, evLoadStart);  }
+	void SendLoadEnd(const std::string &arg);
+	void SendLoadError(const std::string &arg);
+	void SendDownloadUpdate(const std::string &arg);
+	void SendGotFocus() { ECOsendEvent(hwnd_, evGotFocus); }
+	void SendCustomEvent(const std::string &arg);
 
 	HWND hwnd_;
 	HANDLE listener_thread_;
@@ -77,6 +114,7 @@ protected:
 	std::string::size_type read_offset_;
 
 	bool cef_ready_;
+	bool context_menus_;
 	std::vector<std::wstring> messages_to_write_;
 	std::auto_ptr<MessageQueue> message_queue_;
 	
@@ -84,11 +122,17 @@ protected:
 	enum CommandName {
 		ready,
 		console,
+		title,
 		address,
+		loadingStateChange,
+		loadStart,
+		loadEnd,
 		loadError,
+		download,
 		showMsg,
 		closeModule,
-		gotFocus
+		gotFocus,
+		customEvent
 	};
 	typedef std::map<std::string, CommandName> CommandNameMap;
 	CommandNameMap command_name_map_;
@@ -97,50 +141,3 @@ protected:
 	// we need to be reference-counted to prevent early deletion.
 	int reference_count_;
 };
-
-// Method ids
-const qlong 
-	// -------Obj Methods ------------	
-	ofnavigateToUrl = 1000,
-	ofHistoryGoBack = 1001,
-	ofHistoryGoForward = 1002,
-	ofInitWebView = 1003,
-	ofFocus = 1004,
-	ofUnFocus = 1005,
-	ofShutDownWebView = 1006,
-	ofCancelDownload = 1007,
-	ofStartDownload = 1008,
-	
-	ofGetCompData = 1009,
-	ofSetCompData = 1010,
-	ofSendActionToComp = 1014,
-
-	// -------Obj Event Methods ------------	
-	evDoCloseModule = 1100,
-	
-	evDoShowMessage = 1102,
-	
-	
-	// -------Obj Event der Web View Listener ------------	
-	evOnConsoleMessageAdded = 1110,
-	evOnDocumentReady = 1111,
-	evOnFrameLoadingFailed = 1112,
-	evOnTitleChange = 1113,
-	evOnAddressBarChanged = 1114,
-	evOnOpenNewWindow = 1115,
-	evOnDownloadRequest = 1116,
-	evOnDownloadUpdate = 1117,
-	evOnDownloadFinish = 1118,
-	evOnJsInitFailed = 1120,
-	evOnCustomCompAction = 1121,
-	evOnCompInit = 1122,
-	evOnGotFocus = 1123,
-	
-
-	// -------Static Methods ------------	
-
-	// -------Properties	------------	
-	pBasePath	= 4000,
-	pUserPath	= 4001
-	
-;

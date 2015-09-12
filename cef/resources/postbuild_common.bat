@@ -15,6 +15,8 @@ xcopy /f /r /y /d "%CEF_ROOT%\Resources\cef_100_percent.pak" "%CEFWEBLIB_ROOT%"
 if %errorlevel% neq 0 goto :cmEnd
 xcopy /f /r /y /d "%CEF_ROOT%\Resources\cef_200_percent.pak" "%CEFWEBLIB_ROOT%"
 if %errorlevel% neq 0 goto :cmEnd
+xcopy /f /r /y /d "%CEF_ROOT%\Resources\cef_extensions.pak" "%CEFWEBLIB_ROOT%"
+if %errorlevel% neq 0 goto :cmEnd
 xcopy /f /r /y /d "%CEF_ROOT%\Resources\devtools_resources.pak" "%CEFWEBLIB_ROOT%"
 if %errorlevel% neq 0 goto :cmEnd
 xcopy /f /r /y /d "%CEF_ROOT%\Resources\icudtl.dat" "%CEFWEBLIB_ROOT%"

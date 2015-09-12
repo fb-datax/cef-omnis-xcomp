@@ -8,7 +8,8 @@
 
 class ClientHandler : public CefClient,
                       public CefContextMenuHandler,
-                      public CefDisplayHandler,
+					  public CefDisplayHandler,
+					  public CefDownloadHandler,
 					  public CefFocusHandler,
                       public CefLifeSpanHandler,
                       public CefLoadHandler,
@@ -17,7 +18,7 @@ class ClientHandler : public CefClient,
 	ClientHandler(HWND hwnd, const std::string &pipe_name);
 	~ClientHandler();
 
-	// Provide access to the single global instance of this object.
+	// provide access to the single global instance of this object.
 	static ClientHandler* GetInstance();
 
 	// CefClient methods:
@@ -25,6 +26,9 @@ class ClientHandler : public CefClient,
 		return this;
 	}
 	virtual CefRefPtr<CefDisplayHandler> GetDisplayHandler() OVERRIDE {
+		return this;
+	}
+	CefRefPtr<CefDownloadHandler> GetDownloadHandler() OVERRIDE{
 		return this;
 	}
 	virtual CefRefPtr<CefFocusHandler> GetFocusHandler() OVERRIDE {
@@ -64,22 +68,27 @@ class ClientHandler : public CefClient,
 								const CefString& source,
 								int line) OVERRIDE;
 
+	// CefDownloadHandler methods
+	void OnBeforeDownload(CefRefPtr<CefBrowser> browser,
+						CefRefPtr<CefDownloadItem> download_item,
+						const CefString& suggested_name,
+						CefRefPtr<CefBeforeDownloadCallback> callback) OVERRIDE;
+	void OnDownloadUpdated(CefRefPtr<CefBrowser> browser,
+						CefRefPtr<CefDownloadItem> download_item,
+						CefRefPtr<CefDownloadItemCallback> callback) OVERRIDE;
+
 	// CefFocusHandler methods:
 	/*virtual void OnTakeFocus(CefRefPtr<CefBrowser> browser,
 							bool next) OVERRIDE {
-		MessageBox(NULL, L"OnTakeFocus", L"Stop", MB_OK);
+		PostPipeMessage(L"CEF onTakeFocus", L"");
 	}
 	virtual bool OnSetFocus(CefRefPtr<CefBrowser> browser,
 							FocusSource source) OVERRIDE {
-		MessageBox(NULL, L"OnSetFocus", L"Stop", MB_OK);
+		PostPipeMessage(L"CEF onSetFocus", L"");
 		return false;
 	}*/
 	virtual void OnGotFocus(CefRefPtr<CefBrowser> browser) OVERRIDE {
-		//MessageBox(NULL, L"OnGotFocus", L"Stop", MB_OK);
-		//CEF_REQUIRE_UI_THREAD();
-		// notify the XCOMP that we're ready.
-		//PostPipeMessage(L"ready", L"");
-		//BringWindowToTop(hwnd_);
+		//PostPipeMessage(L"CEF onGotFocus", L"");
 		PostPipeMessage(L"gotFocus", L"");
 	}
 
@@ -89,6 +98,15 @@ class ClientHandler : public CefClient,
 	virtual void OnBeforeClose(CefRefPtr<CefBrowser> browser) OVERRIDE;
 
 	// CefLoadHandler methods:
+	virtual void OnLoadingStateChange(CefRefPtr<CefBrowser> browser,
+									bool isLoading,
+									bool canGoBack,
+									bool canGoForward) OVERRIDE;
+	virtual void OnLoadStart(CefRefPtr<CefBrowser> browser,
+							CefRefPtr<CefFrame> frame) OVERRIDE;
+	virtual void OnLoadEnd(CefRefPtr<CefBrowser> browser,
+							CefRefPtr<CefFrame> frame,
+							int httpStatusCode) OVERRIDE;
 	virtual void OnLoadError(CefRefPtr<CefBrowser> browser,
 							CefRefPtr<CefFrame> frame,
 							ErrorCode errorCode,
@@ -98,7 +116,6 @@ class ClientHandler : public CefClient,
 
 	 // PipeOperationHandler methods:
 	virtual void OnConnectCompleted() OVERRIDE {
-		//MessageBox(NULL, L"Connect", L"Stop", MB_OK);
 		message_pipe_->QueueRead();
 	}
 	virtual void OnConnectFailed(DWORD err) OVERRIDE {
@@ -107,7 +124,7 @@ class ClientHandler : public CefClient,
 	virtual void OnReadCompleted(std::wstring &buffer) OVERRIDE;
 	virtual void OnWriteCompleted(std::wstring &buffer) OVERRIDE { }
 
-	// Request that all existing browser windows close.
+	// request that all existing browser windows close.
 	void CloseAllBrowsers(bool force_close);
 
 	bool IsClosing() const { return is_closing_; }
@@ -118,7 +135,10 @@ class ClientHandler : public CefClient,
 		execute,
 		navigate,
 		sendOmnis,
+		customEvent,
+		contextMenus,
 		resize,
+		focus,
 		exit
 	};
 	typedef std::map<std::string, CommandName> CommandNameMap;
@@ -131,18 +151,19 @@ class ClientHandler : public CefClient,
 	CefRefPtr<MessagePipeClient> message_pipe_;
 	std::string pipe_name_;
 
-	// List of existing browser windows. Only accessed on the CEF UI thread.
+	// list of existing browser windows. Only accessed on the CEF UI thread.
 	typedef std::list<CefRefPtr<CefBrowser> > BrowserList;
 	BrowserList browser_list_;
 
 	bool is_closing_;
+	bool context_menus_;
 
 	void RegisterDevToolsClass();
 	void ShowDevTools(CefRefPtr<CefBrowser> browser,
-					const CefPoint& inspect_element_at);
+					  const CefPoint& inspect_element_at);
 	void CloseDevTools(CefRefPtr<CefBrowser> browser);
 
-	// Include the default reference counting implementation.
+	// include the default reference counting implementation.
 	IMPLEMENT_REFCOUNTING(ClientHandler);
 };
 

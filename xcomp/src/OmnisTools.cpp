@@ -253,6 +253,53 @@ void OmnisTools::GetEXTFldValFromInt64(EXTfldval& fVal, __int64 i) {
 }
 
 
+// Get a str15 object for a character constant (No string if it doesn't correspond to the conditions)
+#ifdef isunicode
+str15 OmnisTools::InitStr15(const char* in){
+	str15 theString;
+	qshort length = strlen(in);
+	if (length > 0 && length <= 15) {
+		theString.setUtf8((qbyte*) in, strlen(in));
+	}
+	return theString;
+}
+#else
+str15 OmnisTools::InitStr15(const char* in){
+	return str15(in);
+}
+#endif
+
+// Get a str31 object for a character constant (No string if it doesn't correspond to the conditions)
+#ifdef isunicode
+str31 OmnisTools::InitStr31(const char* in){
+	str31 theString;
+	qshort length = strlen(in);
+	if (length > 0 && length <= 31) {
+		theString.setUtf8((qbyte*)in, strlen(in));
+	}
+	return theString;
+}
+#else
+str31 OmnisTools::InitStr31(const char* in){
+	return str31(in);
+}
+#endif
+
+// Get a str80 object for a character constant (No string if it doesn't correspond to the conditions)
+#ifdef isunicode
+str80 OmnisTools::InitStr80(const char* in){
+	str80 theString;
+	qshort length = strlen(in);
+	if (length > 0 && length <= 80) {
+		theString.setUtf8((qbyte*)in, strlen(in));
+	}
+	return theString;
+}
+#else
+str80 OmnisTools::InitStr80(const char* in){
+	return str80(in);}
+#endif
+
 // Get a str255 object for a character constant (No string if it doesn't correspond to the conditions)
 #ifdef isunicode
 str255 OmnisTools::InitStr255(const char* in) {

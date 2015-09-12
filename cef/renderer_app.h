@@ -41,9 +41,7 @@ class RendererApp : public CefApp,
 	}
 	virtual void OnContextReleased(CefRefPtr<CefBrowser> browser,
 								CefRefPtr<CefFrame> frame,
-								CefRefPtr<CefV8Context> context) OVERRIDE { 
-		//MessageBox(NULL, L"OnContextReleased", L"Stop", MB_OK);
-	}
+								CefRefPtr<CefV8Context> context) OVERRIDE;
 	virtual void OnUncaughtException(CefRefPtr<CefBrowser> browser,
 									CefRefPtr<CefFrame> frame,
 									CefRefPtr<CefV8Context> context,
@@ -62,16 +60,48 @@ class RendererApp : public CefApp,
 
  private:
 
+	 class OmnisHandler : public CefV8Handler {
+	 public:
+		 OmnisHandler();
+		 virtual bool Execute(const CefString& name,
+			 CefRefPtr<CefV8Value> object,
+			 const CefV8ValueList& arguments,
+			 CefRefPtr<CefV8Value>& retval,
+			 CefString& exception) OVERRIDE;
+		 bool CustomEvent(CefRefPtr<CefBrowser> browser, const std::wstring& name, const std::wstring& value);
+		 void ReleaseContext(CefRefPtr<CefV8Context> context);
+	 protected:
+		 // custom message callbacks.
+		 typedef std::map<std::pair<std::wstring, int>,
+			 std::pair<CefRefPtr<CefV8Context>, CefRefPtr<CefV8Value> > >
+			 EventCallbackMap;
+		 EventCallbackMap event_callbacks_;
+
+		 enum CommandName {
+			 sendOmnis,
+			 setEventCallback,
+			 clearEventCallback
+		 };
+		 typedef std::map<std::string, CommandName> CommandNameMap;
+		 CommandNameMap command_name_map_;
+		 void InitCommandNameMap();
+
+		 // Provide the reference counting implementation for this class.
+		 IMPLEMENT_REFCOUNTING(OmnisHandler);
+	 };
+
+	 CefRefPtr<OmnisHandler> omnis_handler_;
+
 	// the command name map allows for an efficient string switch statement.
 	enum CommandName {
 		execute,
-		navigate
+		customEvent,
 	};
 	typedef std::map<std::string, CommandName> CommandNameMap;
 	CommandNameMap command_name_map_;
 	void InitCommandNameMap() {
 		command_name_map_["execute"] = execute;
-		command_name_map_["navigate"] = navigate;
+		command_name_map_["customEvent"] = customEvent;
 	}
 
 	// Include the default reference counting implementation.

@@ -13,8 +13,6 @@ xcopy /f /r /y /d "%CEF_ROOT%\Release\d3dcompiler_43.dll" "%CEFWEBLIB_ROOT%"
 if %errorlevel% neq 0 goto :cmEnd
 xcopy /f /r /y /d "%CEF_ROOT%\Release\d3dcompiler_47.dll" "%CEFWEBLIB_ROOT%"
 if %errorlevel% neq 0 goto :cmEnd
-xcopy /f /r /y /d "%CEF_ROOT%\Release\ffmpegsumo.dll" "%CEFWEBLIB_ROOT%"
-if %errorlevel% neq 0 goto :cmEnd
 xcopy /f /r /y /d "%CEF_ROOT%\Release\libcef.dll" "%CEFWEBLIB_ROOT%"
 if %errorlevel% neq 0 goto :cmEnd
 xcopy /f /r /y /d "%CEF_ROOT%\Release\libEGL.dll" "%CEFWEBLIB_ROOT%"
@@ -24,6 +22,8 @@ if %errorlevel% neq 0 goto :cmEnd
 xcopy /f /r /y /d "%CEF_ROOT%\Release\natives_blob.bin" "%CEFWEBLIB_ROOT%"
 if %errorlevel% neq 0 goto :cmEnd
 xcopy /f /r /y /d "%CEF_ROOT%\Release\snapshot_blob.bin" "%CEFWEBLIB_ROOT%"
+if %errorlevel% neq 0 goto :cmEnd
+xcopy /f /r /y /d "%CEF_ROOT%\Release\widevinecdmadapter.dll" "%CEFWEBLIB_ROOT%"
 if %errorlevel% neq 0 goto :cmEnd
 xcopy /f /r /y /d "%CEF_ROOT%\Release\wow_helper.exe" "%CEFWEBLIB_ROOT%"
 if %errorlevel% neq 0 goto :cmEnd

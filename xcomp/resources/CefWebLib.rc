@@ -13,8 +13,7 @@ BEGIN
 	////////// BROWSER ///////////////////
 
 	// Properties 
-	4000					"$basePath:Basepath for Plugins, ..."
-	4001					"$userPath:path for User settings,..."
+	4000					"$contextMenus:Flag to enable/disable right-click context menus. Default: enabled.,..."
 	
 	// Static methods
 	
@@ -22,10 +21,6 @@ BEGIN
 	7000					"$navigateToUrl:$navigateToUrl(cURL)"
 	7001					"$historyBack:$historyBack()"
 	7002					"$historyForward:$historyForward()"
-	7003					"$initWebView:$initWebView()"
-	7004					"$focusWebView:$focusWebView()"
-	7005					"$unFocusWebView:$unFocusWebView()"
-	7006					"$shutDownWebView:$shutDownWebView()"
 	7007					"$cancelDownload:$cancelDownload()"
 	7008					"$startDownload:$startDownload()"
 	7009					"$getCompData:$getCompData(pCompIdent)"
@@ -34,24 +29,18 @@ BEGIN
 	7012					"$getCompVersion:$getCompVersion(pCompIdent)"
 	7013					"$getCompApiVersion:$getCompApiVersion(pCompIdent)"
 	7014					"$sentCompAction:$sentCompAction(pCompIdent,pTyp,pParam1,pParam2,pParam3,pParam4,pParam5,pParam6,pParam7,pParam8,pParam9)"
+	7015					"$SendCustomEvent:$SendCustomEvent(pName,pValue)"
 	
 	// Events
-	7500					"CloseModule:CloseModule"
-	
-	7502					"ShowMsg:ShowMsg"
-	7503					"ConsoleMessage:ConsoleMessage"
-	7504					"DocumentReady:DocumentReady"
-	7505					"FrameLoadingFailed:FrameLoadingFailed"
-	7506					"TitleChanged:TitleChanged"
-	7507					"AddressBarChanged:AddressBarChanged"
-	7508					"OpenNewWindow:OpenNewWindow"
-	7509					"DownloadRequest:DownloadRequest"
+	7500					"LoadingStateChange:LoadingStateChange"
+	7503					"LoadStart:LoadStart"
+	7504					"LoadEnd:LoadEnd"
+	7505					"LoadError:LoadError"
+	7506					"TitleChange:TitleChange"
+	7507					"AddressChange:AddressChange"
 	7510					"DownloadUpdate:DownloadUpdate"
-	7511					"DownloadFinished:DownloadFinished"
 	
-	7513					"JsInitFailed:JsInitFailed"
-	7514					"CompCustAction:CompCustAction"
-	7515					"CompInit:CompInit"
+	7514					"CustomEvent:CustomEvent"
 	7516					"GotFocus:GotFocus"
 
 	// Parameters
@@ -61,21 +50,15 @@ BEGIN
 	8004					"cURL:URL 2 die geladen werden soll"
 
 	// Event parameters
-	8100					"consoleMessage:Console Msg"
-	8101					"url:Url"
-	8102					"scheme:Scheme"
-	8103					"host:Host"
-	8104					"port:Port"
-	8105					"path:Path"
-	8106					"query:Query"
-	8107					"anchor:Anchor"
-	8108					"filename:Filename"
+	8100					"isLoading:IsLoading"
+	8101					"canGoBack:CanGoBack"
+	8102					"canGoForward:CanGoForward"
 
-	8120					"errorCode:ErrorCode"
+	8120					"statusCode:StatusCode"
 	8121					"errorMsg:ErrorMsg"
 	8122					"url:Url"
 	
-	8130					"newTitle:NewTitle"
+	8130					"title:Title"
 
 	8140					"newUrl:NewUrl"
 
@@ -97,10 +80,13 @@ BEGIN
 	8190					"downloadId:DownloadId"
 	8191					"filePath:FilePath"
 
-	8200					"downloadId:DownloadId"
-	8201					"totalBytes:TotalBytes"
-	8202					"receivedBytes:ReceivedBytes"
-	8203					"currentSpeed:CurrentSpeed"
+	8200					"id:Id"
+	8201					"isComplete:IsComplete"
+	8202					"isCanceled:IsCanceled"
+	8203					"receivedBytes:ReceivedBytes"
+	8204					"totalBytes:TotalBytes"
+	8205					"currentSpeed:CurrentSpeed"
+	8206					"fullPath:FullPath"
 
 	8210					"downloadId:DownloadId"
 	8211					"url:Url"
@@ -180,7 +166,7 @@ BEGIN
 	8360					"param9:Param9"
 
 	8370					"compId:compId"
-	8371					"type:Type"
+	8371					"name:Name"
 	8372					"param1:Param1"
 	8373					"param2:Param2"
 	8374					"param3:Param3"
@@ -192,6 +178,9 @@ BEGIN
 	8380					"param9:Param9"
 
 	8390					"compId:compId"
+
+	8400					"name:Name"
+	8401					"value:Value"
 
 	// Entry method name
 	31000					"GenericWndProc"

@@ -6,7 +6,9 @@
 
 #include <sstream>
 #include <string>
+#include <Shlobj.h>
 
+#include "Win32Error.h"
 #include "devtools_handler.h"
 #include "include/base/cef_bind.h"
 #include "include/cef_app.h"
@@ -32,6 +34,7 @@ ClientHandler* g_instance = NULL;
 
 ClientHandler::ClientHandler(HWND hwnd, const std::string &pipe_name) : 
 	is_closing_(false),
+	context_menus_(true),
 	hwnd_(hwnd),
 	pipe_name_(pipe_name) {
 	DCHECK(!g_instance);
@@ -63,7 +66,10 @@ void ClientHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
 	browser_list_.push_back(browser);
 	
 	// notify the XCOMP that we're ready.
-	PostPipeMessage(L"ready", L"");
+	CefWindowHandle hwnd = browser->GetHost()->GetWindowHandle();
+	std::wstringstream ss;
+	ss << std::dec << (int) hwnd;
+	PostPipeMessage(L"ready", ss.str());
 }
 
 bool ClientHandler::OnProcessMessageReceived( CefRefPtr<CefBrowser> browser,
@@ -89,9 +95,10 @@ void ClientHandler::OnBeforeContextMenu(
     CefRefPtr<CefContextMenuParams> params,
     CefRefPtr<CefMenuModel> model) {
 	CEF_REQUIRE_UI_THREAD();
-
-	if((params->GetTypeFlags() & (CM_TYPEFLAG_PAGE | CM_TYPEFLAG_FRAME)) != 0) {
-		// sdd a separator if the menu already has items.
+	if (!context_menus_)
+		model->Clear();
+	else if((params->GetTypeFlags() & (CM_TYPEFLAG_PAGE | CM_TYPEFLAG_FRAME)) != 0) {
+		// add a separator if the menu already has items.
 		if(model->GetCount() > 0)
 			model->AddSeparator();
 
@@ -137,6 +144,7 @@ void ClientHandler::OnTitleChange(CefRefPtr<CefBrowser> browser,
 	CEF_REQUIRE_UI_THREAD();
 	CefWindowHandle hwnd = browser->GetHost()->GetWindowHandle();
 	SetWindowText(hwnd, std::wstring(title).c_str());
+	PostPipeMessage(L"title", title);
 }
 
 void ClientHandler::OnStatusMessage(CefRefPtr<CefBrowser> browser,
@@ -167,6 +175,66 @@ bool ClientHandler::OnConsoleMessage(CefRefPtr<CefBrowser> browser,
 	return false;
 }
 
+void ClientHandler::OnBeforeDownload(
+	CefRefPtr<CefBrowser> browser,
+	CefRefPtr<CefDownloadItem> download_item,
+	const CefString& suggested_name,
+	CefRefPtr<CefBeforeDownloadCallback> callback) {
+	CEF_REQUIRE_UI_THREAD();
+
+	// use the user's "Documents" folder as the initial folder.
+	TCHAR docs_path[MAX_PATH];
+	std::string path;
+	if (SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, docs_path)) {
+		path = CefString(docs_path);
+		path += "\\";
+		path += suggested_name;
+	}
+
+	// continue the download and show the "Save As" dialog.
+	callback->Continue(path, true);
+}
+
+void ClientHandler::OnDownloadUpdated(
+	CefRefPtr<CefBrowser> browser,
+	CefRefPtr<CefDownloadItem> download_item,
+	CefRefPtr<CefDownloadItemCallback> callback) {
+	CEF_REQUIRE_UI_THREAD();
+
+	if (download_item->IsValid()) {
+		JSONStringBuffer s;
+		JSONWriter writer(s);
+		writer.StartObject();
+		writer.String(L"id");
+		writer.Int(download_item->GetId());
+		writer.String(L"complete");
+		writer.Bool(download_item->IsComplete());
+		writer.String(L"canceled");
+		writer.Bool(download_item->IsCanceled());
+		writer.String(L"received");
+		writer.Int(download_item->GetReceivedBytes());
+		writer.String(L"total");
+		writer.Int(download_item->GetTotalBytes());
+		writer.String(L"speed");
+		writer.Int64(download_item->GetCurrentSpeed());
+		CefString path = download_item->GetFullPath();
+		if (path.c_str()) {
+			writer.String(L"path");
+			writer.String(path.c_str());
+		}
+		writer.EndObject();
+		PostPipeMessage("download", s.GetString());
+	}
+
+	/*if (download_item->IsComplete())
+		PostPipeMessage(L"showMsg", L"{\"msg\":\"Complete\"}");
+	{
+		test_runner::Alert(
+			browser,
+			"File \"" + download_item->GetFullPath().ToString() +
+			"\" downloaded successfully.");
+	}*/
+}
 
 bool ClientHandler::DoClose(CefRefPtr<CefBrowser> browser) {
   CEF_REQUIRE_UI_THREAD();
@@ -202,6 +270,45 @@ void ClientHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser) {
   }
 }
 
+
+void ClientHandler::OnLoadingStateChange(CefRefPtr<CefBrowser> browser,
+										bool isLoading,
+										bool canGoBack,
+										bool canGoForward) {
+	CEF_REQUIRE_UI_THREAD();
+
+	// send JSON message to xcomp.
+	JSONStringBuffer s;
+	JSONWriter writer(s);
+	writer.StartObject();
+	writer.String(L"isLoading");
+	writer.Bool(isLoading);
+	writer.String(L"canGoBack");
+	writer.Bool(canGoBack);
+	writer.String(L"canGoForward");
+	writer.Bool(canGoForward);
+	writer.EndObject();
+	PostPipeMessage(L"loadingStateChange", s.GetString());
+}
+
+void ClientHandler::OnLoadStart(CefRefPtr<CefBrowser> browser,
+								CefRefPtr<CefFrame> frame) {
+	CEF_REQUIRE_UI_THREAD();
+
+	// send message to xcomp.
+	PostPipeMessage(L"loadStart", L"");
+}
+void ClientHandler::OnLoadEnd(CefRefPtr<CefBrowser> browser,
+							CefRefPtr<CefFrame> frame,
+							int httpStatusCode) {
+	CEF_REQUIRE_UI_THREAD();
+
+	// send message to xcomp.
+	std::wstringstream ss;
+	ss << httpStatusCode;
+	PostPipeMessage(L"loadEnd", ss.str());
+}
+
 void ClientHandler::OnLoadError(CefRefPtr<CefBrowser> browser,
                                 CefRefPtr<CefFrame> frame,
                                 ErrorCode errorCode,
@@ -230,7 +337,7 @@ void ClientHandler::OnLoadError(CefRefPtr<CefBrowser> browser,
 	writer.EndObject();
 	PostPipeMessage(L"loadError", s.GetString());
 
-	// Display a load error message.
+	// display a load error message.
 	std::stringstream ss;
 	ss << "<html><body bgcolor=\"white\">"
 		"<h2>Failed to load URL " << std::string(failedUrl) <<
@@ -243,7 +350,10 @@ void ClientHandler::InitCommandNameMap() {
 	command_name_map_["execute"] = execute;
 	command_name_map_["navigate"] = navigate;
 	command_name_map_["sendOmnis"] = sendOmnis;
+	command_name_map_["customEvent"] = customEvent;
+	command_name_map_["contextMenus"] = contextMenus;
 	command_name_map_["resize"] = resize;
+	command_name_map_["focus"] = focus;
 	command_name_map_["exit"] = exit;
 }
 
@@ -254,11 +364,29 @@ void ClientHandler::OnReadCompleted(std::wstring &buffer) {
 	if(command != command_name_map_.end()) {
 		switch(command->second) {
 			case execute:
-			case navigate: {
+			case customEvent: {
 				// pass the message to the renderer process of each browser.
 				BrowserList::iterator bit = browser_list_.begin();
 				for (; bit != browser_list_.end(); ++bit)
 					(*bit)->SendProcessMessage(PID_RENDERER, message);
+				break;
+			}
+			case contextMenus: {
+				CefRefPtr<CefListValue> args = message->GetArgumentList();
+				if (args->GetSize() == 1)
+					context_menus_ = (args->GetString(0) == L"1");
+				break;
+			}
+			case navigate: {
+				// navigate each browser to the url.
+				CefRefPtr<CefListValue> args = message->GetArgumentList();
+				if (args->GetSize() == 1) {
+					CefString url = args->GetString(0);
+					BrowserList::iterator bit = browser_list_.begin();
+					for (; bit != browser_list_.end(); ++bit)
+						(*bit)->GetMainFrame()->LoadURL(url);
+				} else
+					throw std::runtime_error("The navigate command needs a single string argument.");
 				break;
 			}
 			case resize: {
@@ -271,6 +399,12 @@ void ClientHandler::OnReadCompleted(std::wstring &buffer) {
 							SWP_ASYNCWINDOWPOS | SWP_NOACTIVATE | SWP_NOZORDER);
 					}
 				}
+				break;
+			}
+			case focus: {
+				BrowserList::iterator bit = browser_list_.begin();
+				for (; bit != browser_list_.end(); ++bit)
+					(*bit)->GetHost()->SetFocus(true);
 				break;
 			}
 			case exit: {
