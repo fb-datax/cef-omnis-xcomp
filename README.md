@@ -8,14 +8,20 @@ Chromium Embedded Framework (CEF3) running inside O$ 4.3.X
 + Visual Studio 2013 (Express)
 + Omnis Externals SDK for O$ 4.3.X
 + [CEF3 for Windows 32-bit](https://cefbuilds.com) branch 2454 based on Chromium 45
++ [CMake](http://cmake.org/)
 
 ### Installation
 
 + Unpack the CEF downloads.
 + Set environment variables:
-  * `CEF_ROOT` =  `c:\path\to\cef_binary_3.2454.1320.g807de3c_windows32` or similar
-  * `OMNIS_XCOMP_ROOT` = `C:\Program Files (x86)\TigerLogic\OS4321\xcomp` or similar
-  * `OMNIS_SDK_ROOT` = `C:\path\to\EXTCOMP_Source_Win32_4.3.2` or similar
+    * `CEF_ROOT` =  `c:\path\to\cef_binary_3.2454.1320.g807de3c_windows32` or similar
+    * `OMNIS_XCOMP_ROOT` = `C:\Program Files (x86)\TigerLogic\OS4321\xcomp` or similar
+    * `OMNIS_SDK_ROOT` = `C:\path\to\EXTCOMP_Source_Win32_4.3.2` or similar
++ Build the CEF wrapper:
+    * Install [CMake](http://cmake.org/) if necessary.
+    * Open a command prompt and enter `cd %CEF_ROOT% && cmake -G "Visual Studio 12" .`
+    * Open the generated `%CEF_ROOT%\cef.sln` solution in Visual Studio 2013.
+    * Build for both Release and Debug configurations. Either build the entire solution, or just right-click build the `libcef_dll_wrapper` project.
 
 Note: Visual Studio must be run as administrator before opening `cef-omnis-xcomp.sln`. This is so that the post-build events can install into `OMNIS_XCOMP_ROOT`.
 
@@ -135,14 +141,14 @@ The following interface is available in javascript on the global `omnis` object.
 * `message` - the message string to display
 * `bell` - determines whether the system bell will sound (defaults to `true`)
 * `type` - must be one of:
-  * `omnis.MSGBOX_OK`
-  * `omnis.MSGBOX_YESNO`
-  * `omnis.MSGBOX_NOYES`
-  * `omnis.MSGBOXICON_OK` (the default)
-  * `omnis.MSGBOXICON_YESNO`
-  * `omnis.MSGBOXICON_NOYES`
-  * `omnis.MSGBOXCANCEL_YESNO`
-  * `omnis.MSGBOXCANCEL_NOYES`
+    * `omnis.MSGBOX_OK`
+    * `omnis.MSGBOX_YESNO`
+    * `omnis.MSGBOX_NOYES`
+    * `omnis.MSGBOXICON_OK` (the default)
+    * `omnis.MSGBOXICON_YESNO`
+    * `omnis.MSGBOXICON_NOYES`
+    * `omnis.MSGBOXCANCEL_YESNO`
+    * `omnis.MSGBOXCANCEL_NOYES`
 
 **`omnis.traceLog(message)`**
 
