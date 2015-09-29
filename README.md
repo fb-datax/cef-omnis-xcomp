@@ -14,7 +14,7 @@ Chromium Embedded Framework (CEF3) running inside O$ 4.3.X
 
 + Unpack the CEF downloads.
 + Set environment variables:
-    * `CEF_ROOT` =  `c:\path\to\cef_binary_3.2454.1320.g807de3c_windows32` or similar
+    * `CEF_ROOT` =  `c:\path\to\cef_binary_3.2454.1320.g807de3c_windows32` or similar. This must be the directory containing `README.txt`.
     * `OMNIS_XCOMP_ROOT` = `C:\Program Files (x86)\TigerLogic\OS4321\xcomp` or similar
     * `OMNIS_SDK_ROOT` = `C:\path\to\EXTCOMP_Source_Win32_4.3.2` or similar
 + Build the CEF wrapper:
