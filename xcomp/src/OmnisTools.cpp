@@ -41,8 +41,8 @@
 #include <iterator>
 #include <map>
 #include <vector>
-#include <atlbase.h>
-#include <atlconv.h>
+//#include <atlbase.h>
+//#include <atlconv.h>
 
 // Set an existing EXTfldval object from a std::string
 #ifdef isunicode
@@ -322,7 +322,8 @@ void OmnisTools::TraceLog(const std::string &msg) {
 }
 
 void OmnisTools::TraceLog(const std::wstring &msg) {
-	str255 logString = InitStr255(CW2A(msg.c_str()));
+	//str255 logString = InitStr255(CW2A(msg.c_str()));
+	str255 logString = InitStr255(std::string(msg.begin(), msg.end()).c_str());
 	ECOaddTraceLine(&logString);
 }
 

@@ -3,8 +3,8 @@
 #include "OmnisTools.h"
 #include <sstream>
 #include <sddl.h>
-#include <atlbase.h>
-#include <atlconv.h>
+//#include <atlbase.h>
+//#include <atlconv.h>
 #include "rapidjson\document.h"
 
 using namespace OmnisTools;
@@ -477,7 +477,8 @@ void CefInstance::ReadComplete(DWORD bytes_read) {
 		GrowReadBuffer();
 	// convert the wstring message to to string for 
 	// non-unicode xcomp.
-	std::string message(CW2A(read_buffer_.c_str()));
+	//std::string message(CW2A(read_buffer_.c_str()));
+	std::string message(read_buffer_.begin(), read_buffer_.end());
 	read_offset_ = 0;
 
 	// add a message to the queue and signal the main thread.
@@ -560,7 +561,8 @@ qbool CefInstance::CallMethod(EXTCompInfo *eci) {
 				hasRtnVal = qtrue;	
 				EXTfldval fval( (qfldval)paramInfo->mData);
 				std::string url_a = OmnisTools::GetStringFromEXTFldVal(fval);
-				std::wstring url = CA2W(url_a.c_str());
+				//std::wstring url = CA2W(url_a.c_str());
+				std::wstring url(url_a.begin(), url_a.end());
 				WriteMessage(L"navigate", url);
 			}
 			break;
@@ -590,7 +592,8 @@ qbool CefInstance::CallMethod(EXTCompInfo *eci) {
 						EXTfldval((qfldval)value_i->mData)
 					);
 				}
-				WriteMessage(L"customEvent", std::wstring(CA2W(message.c_str())));
+				//WriteMessage(L"customEvent", std::wstring(CA2W(message.c_str())));
+				WriteMessage(L"customEvent", std::wstring(message.begin(), message.end()));
 			}
 			break;
 		}
