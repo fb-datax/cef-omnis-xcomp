@@ -35,6 +35,7 @@ enum Identifier {
 	// ------- properties ---------
 	pContextMenus = 4000,
 	pTraceLogConsole,
+	pCachePath,
 };
 
 class CefInstance {
@@ -112,6 +113,7 @@ protected:
 	bool cef_ready_;
 	bool context_menus_;
 	bool trace_log_console_;
+	std::string cache_path_;
 	std::vector<std::wstring> messages_to_write_;
 	std::auto_ptr<MessageQueue> message_queue_;
 	

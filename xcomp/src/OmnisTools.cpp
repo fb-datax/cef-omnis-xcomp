@@ -336,7 +336,8 @@ void OmnisTools::DebugTraceLog(const std::string &msg) {
 
 void OmnisTools::DebugTraceLog(const std::wstring &msg) {
 #if defined(IS_DEBUG)		
-	str255 logString = InitStr255(CW2A(msg.c_str()));
+	//str255 logString = InitStr255(CW2A(msg.c_str()));
+	str255 logString = InitStr255(std::string(msg.begin(), msg.end()).c_str());
 	ECOaddTraceLine(&logString);
 #endif
 }

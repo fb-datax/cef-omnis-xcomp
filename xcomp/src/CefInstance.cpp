@@ -15,7 +15,7 @@ UINT CefInstance::PIPE_MESSAGES_AVAILABLE = 0;
 
 CefInstance::CefInstance(HWND hwnd) :
 	hwnd_(hwnd),
-	listener_thread_(INVALID_HANDLE_VALUE),
+	listener_thread_(NULL),
 	job_(NULL),
 	pipe_(INVALID_HANDLE_VALUE),
 	read_offset_(0),
@@ -70,12 +70,10 @@ CefInstance::CefInstance(HWND hwnd) :
     pSa_->nLength = sizeof(*pSa_);
     pSa_->lpSecurityDescriptor = pSd;
     pSa_->bInheritHandle = FALSE;
-
-	InitWebView();
 }
 
 void CefInstance::InitWebView() {
-	if(listener_thread_ != INVALID_HANDLE_VALUE || pipe_ != INVALID_HANDLE_VALUE || job_)
+	if(listener_thread_ != NULL || pipe_ != INVALID_HANDLE_VALUE || job_)
 		throw std::runtime_error("WebView already initialized.");
 
 	if(!CreatePipe())
@@ -103,6 +101,8 @@ void CefInstance::InitWebView() {
 		<< " --allow-universal-access-from-files"
 		<< " --url=file:///" // this is needed to allow navigation to file urls.
 		<< " --pipe-name=" << pipe_name_;
+	if (!cache_path_.empty())
+		cmd_line << " --cache-path=\"" << cache_path_ << "\"";
 	job_ = CreateJobObject(NULL, NULL);
 	if(!job_)
 		throw Win32Error();
@@ -154,7 +154,7 @@ void CefInstance::InitWebView() {
 void CefInstance::ShutDownWebView() {
 	// shutting down. we tell CEF to close all browsers, close the pipe and wait for
 	// the listener thread to exit.
-	if(listener_thread_ == INVALID_HANDLE_VALUE || pipe_ == INVALID_HANDLE_VALUE)
+	if(listener_thread_ == NULL || pipe_ == INVALID_HANDLE_VALUE)
 		throw std::runtime_error("WebView not initialized.");
 	try {
 		WriteMessage(L"exit", L"");
@@ -558,7 +558,9 @@ qbool CefInstance::CallMethod(EXTCompInfo *eci) {
 			EXTParamInfo* paramInfo = ECOfindParamNum(eci,1);
 			if (paramInfo) {
 				rtnCode = qtrue;
-				hasRtnVal = qtrue;	
+				hasRtnVal = qtrue;
+				if (!listener_thread_)
+					InitWebView();
 				EXTfldval fval( (qfldval)paramInfo->mData);
 				std::string url_a = OmnisTools::GetStringFromEXTFldVal(fval);
 				//std::wstring url = CA2W(url_a.c_str());
@@ -621,6 +623,18 @@ qbool CefInstance::SetProperty(EXTCompInfo *eci) {
 				trace_log_console_ = val;
 				return qtrue;
 			}
+			case pCachePath: {
+				if(!listener_thread_) {
+					cache_path_ = GetStringFromEXTFldVal(fval);
+					// path must not contain a double-quote.
+					if (cache_path_.find('"') != std::string::npos) {
+						DebugTraceLog("Warning: cache_path property must not contain double-quote. Ignoring.");
+						cache_path_.clear();
+					}
+				} else
+					DebugTraceLog("Warning: cache_path property must be set before first call to navigateToUrl. Ignoring.");
+				return qtrue;
+			}
 		}
 	}
 	return qfalse;
@@ -635,6 +649,10 @@ qbool CefInstance::GetProperty(EXTCompInfo *eci) {
 		}
 		case pTraceLogConsole: {
 			fval.setBool(trace_log_console_);
+			return qtrue;
+		}
+		case pCachePath: {
+			GetEXTFldValFromString(fval, cache_path_);
 			return qtrue;
 		}
 	}

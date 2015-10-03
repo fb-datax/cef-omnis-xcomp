@@ -66,8 +66,8 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
 	// if this is a sub-process, executes the appropriate logic.
 	int exit_code = CefExecuteProcess(main_args, app.get(), sandbox_info);
 	if (exit_code >= 0) {
-	// The sub-process has completed so return here.
-	return exit_code;
+		// The sub-process has completed so return here.
+		return exit_code;
 	}
 
 	// Specify CEF global settings here.
@@ -76,6 +76,10 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
 	#if !defined(CEF_USE_SANDBOX)
 	settings.no_sandbox = true;
 	#endif
+
+	CefString cache_path = command_line->GetSwitchValue("cache-path");
+	if (!cache_path.empty())
+		CefString(&settings.cache_path).FromString(cache_path);
 
 	// Initialize CEF.
 	CefInitialize(main_args, settings, app.get(), sandbox_info);

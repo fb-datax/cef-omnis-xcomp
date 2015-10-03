@@ -39,6 +39,10 @@ The following interface is available from within Omnis on the XCOMP.
 
 > A flag to control whether javascript `console.log` messages are written to the Omnis trace log (defaults to `true`).
 
+**`$cachePath`**
+
+> The location where cache data will be stored on disk. If empty then browsers will be created in *incognito mode* where in-memory caches are used for storage and no data is persisted to disk. HTML5 databases such as localStorage will only persist across sessions if a cache path is specified. <br>**Must be set only before the first call to navigateToUrl**.
+
 #### Methods
 
 **`$navigateToUrl(pUrl)`**

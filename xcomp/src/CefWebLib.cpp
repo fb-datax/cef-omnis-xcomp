@@ -123,22 +123,22 @@ qbool ReturnEvents(EXTCompInfo* eci) {
 qbool ReturnMethods(EXTCompInfo *eci) {
 	std::vector<ECOmethodEvent> events;
 	{
-		EventId id = { ofNavigateToUrl, 7000 };
+		EventId id = { ofNavigateToUrl, 7001 };
 		ECOparam params[] = {
 			8000, fftCharacter, 0, 0,				// pURL
 		};
 		AddMethodEvent(events, id, params);
 	}
 	{
-		EventId id = { ofHistoryBack, 7001 };
+		EventId id = { ofHistoryBack, 7002 };
 		AddMethodEvent(events, id);
 	}
 	{
-		EventId id = { ofHistoryForward, 7002 };
+		EventId id = { ofHistoryForward, 7003 };
 		AddMethodEvent(events, id);
 	}
 	{
-		EventId id = { ofSendCustomEvent, 7015 };
+		EventId id = { ofSendCustomEvent, 7004 };
 		ECOparam params[] = {
 			8400, fftCharacter, 0, 0,			// pName
 			8401, fftCharacter, 0, 0,			// pValue
@@ -159,9 +159,10 @@ ECOmethodEvent browserStaticFunctions[1] =
 
 ECOproperty browserProperties[6] =
 { 
-//  propid						resourceid,	datatype,		propflags	propFlags2, enumStart, 	enumEnd
+//  propid				resourceid,	datatype,		propflags	propFlags2, enumStart, 	enumEnd
 	pContextMenus,		4000, 		fftBoolean, 	0,			0, 			0, 			0,
 	pTraceLogConsole,	4001,		fftBoolean,		0,			0,			0,			0,
+	pCachePath,			4002,		fftCharacter,	0,			0,			0,			0,
 };
 
 #define cSBrowserMethod_Count (0)

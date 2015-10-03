@@ -15,14 +15,15 @@ BEGIN
 	// Properties 
 	4000					"$contextMenus:Flag to enable/disable right-click context menus. Default: enabled."
 	4001					"$traceLogConsole:Flag to enable/disable trace-logging of javascript console messages. Default: enabled."
+	4002					"$cachePath:The location where cache data will be stored on disk. If empty then browsers will be created in incognito mode where in-memory caches are used for storage and no data is persisted to disk. HTML5 databases such as localStorage will only persist across sessions if a cache path is specified. Must be set only before the first call to navigateToUrl."
 	
 	// Static methods
 	
 	// Object methods
-	7000					"$navigateToUrl:$navigateToUrl(pUrl)"
-	7001					"$historyBack:$historyBack()"
-	7002					"$historyForward:$historyForward()"
-	7015					"$sendCustomEvent:$sendCustomEvent(pName,pValue)"
+	7001					"$navigateToUrl:$navigateToUrl(pUrl)"
+	7002					"$historyBack:$historyBack()"
+	7003					"$historyForward:$historyForward()"
+	7004					"$sendCustomEvent:$sendCustomEvent(pName,pValue)"
 	
 	// Events
 	7500					"LoadingStateChange:LoadingStateChange"
