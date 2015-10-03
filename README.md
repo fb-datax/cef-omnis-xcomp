@@ -41,7 +41,7 @@ The following interface is available from within Omnis on the XCOMP.
 
 **`$cachePath`**
 
-> The location where cache data will be stored on disk. If empty then browsers will be created in *incognito mode* where in-memory caches are used for storage and no data is persisted to disk. HTML5 databases such as localStorage will only persist across sessions if a cache path is specified. <br>**Must be set only before the first call to navigateToUrl**.
+> The location where cache data will be stored on disk. If empty then browsers will be created in *incognito mode* where in-memory caches are used for storage and no data is persisted to disk. HTML5 databases such as localStorage will only persist across sessions if a cache path is specified. **Must be set only before the first call to navigateToUrl**.
 
 #### Methods
 
