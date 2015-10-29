@@ -85,7 +85,7 @@
       <Culture>0x0809</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>omnis.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>omnis.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>..\build\release\$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\include\lib;$(AWESOMIUM_ROOT)\build\lib;$(OMNIS_SDK_ROOT)\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -139,7 +139,7 @@
       <Culture>0x0809</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>omnis.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>omnis.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
       <OutputFile>..\build\debug\$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>

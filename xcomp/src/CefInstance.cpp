@@ -5,6 +5,7 @@
 #include <sddl.h>
 //#include <atlbase.h>
 //#include <atlconv.h>
+#include "Shlwapi.h"
 #include "rapidjson\document.h"
 
 using namespace OmnisTools;
@@ -101,8 +102,13 @@ void CefInstance::InitWebView() {
 		<< " --allow-universal-access-from-files"
 		<< " --url=file:///" // this is needed to allow navigation to file urls.
 		<< " --pipe-name=" << pipe_name_;
-	if (!cache_path_.empty())
-		cmd_line << " --cache-path=\"" << cache_path_ << "\"";
+	if (!cache_path_.empty()) {
+		// the path must be canonicalized to remove . and .. navigations.
+		std::string path;
+		path.resize(MAX_PATH);
+		PathCanonicalizeA(&path[0], cache_path_.c_str());
+		cmd_line << " --cache-path=\"" << path.c_str() << "\"";
+	}
 	job_ = CreateJobObject(NULL, NULL);
 	if(!job_)
 		throw Win32Error();
